@@ -21,7 +21,7 @@
 
 LoadWindow::LoadWindow() {
     //this->setWindowFlags( Qt::CustomizeWindowHint );
-    setWindowTitle(Game::AppName+" "+Game::AppVersion+" Route Editor");
+    setWindowTitle(Game::AppName+" Route Editor - "+Game::AppVersion);
     this->setFixedSize(600, 700);
     QImage* myImage = new QImage();
     myImage->load(QString("tsre_appdata/")+Game::AppDataVersion+"/load.png");

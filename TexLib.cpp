@@ -112,6 +112,7 @@ int TexLib::addTex(QString pathid, bool reload) {
             pathid = pathid.left(pathid.length() - 3)+"dds";
         }
         //qDebug() << "Using DDS";
+        qDebug() << " dds sub: " << pathid.toLower();
     }
     
     int texId = 0;

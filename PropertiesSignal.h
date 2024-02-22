@@ -27,6 +27,9 @@ public:
     void updateObj(GameObj* obj);
 
 public slots:
+    // EFO added two
+    void enableCustomDetailLevelEnabled(int val);  
+    void customDetailLevelEdited(QString val);    
     void flipSignal();
     void showSubObjList();
     void checkboxAnimEdited(int val);

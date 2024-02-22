@@ -1,8 +1,4 @@
-# if defined(UNDER_CE)
-#  include <winbase.h>
-# else
-#  include <windows.h>
-# endif
+#include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,7,0,0
@@ -14,7 +10,7 @@ VS_VERSION_INFO VERSIONINFO
 	FILEFLAGS 0x0L
 #endif
 	FILEOS VOS__WINDOWS32
-	FILETYPE VFT_APP
+	FILETYPE VFT_DLL
 	FILESUBTYPE 0x0L
 	BEGIN
 		BLOCK "StringFileInfo"

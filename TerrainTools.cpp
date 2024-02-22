@@ -349,6 +349,17 @@ TerrainTools::TerrainTools(QString name)
     this->setEcut(this->sEcut->value());
     this->setEradius(this->sEradius->value());
     this->fheight->setText("0");
+    
+    // EFO pre-populate terrainTools values from Settings
+    if(Game::terrainTools != NULL)
+    {
+      this->setEsize(Game::terrainTools[0]);
+      this->setEemb(Game::terrainTools[1]);
+      this->setEcut(Game::terrainTools[2]);
+      this->setEradius(Game::terrainTools[3]);
+      this->setBrushSize(Game::terrainTools[4]);
+      this->setBrushAlpha(Game::terrainTools[5]);   
+    }
 }
 
 

@@ -45,6 +45,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 void LoadConEditor(){
     CELoadWindow* ceLoadWindow = new CELoadWindow();
+    ceLoadWindow->move(300,20);/// EFO moving to main screen
     ceLoadWindow->show();
 }
 
@@ -52,6 +53,7 @@ void LoadShapeViewer(QString arg){
     ShapeViewerWindow* shapeWindow = new ShapeViewerWindow();
     if(arg.length() > 0)
         shapeWindow->loadFile(arg);
+    shapeWindow->move(300,20);/// EFO moving to main screen
     shapeWindow->show();
 }
 
@@ -71,6 +73,7 @@ void LoadRouteEditor(){
         window->setWindowFlags(Qt::CustomizeWindowHint);
         window->setWindowState(Qt::WindowMaximized);
     } else {
+        window->move(300,20);  /// EFO moving to main screen
         window->resize(1280, 800);
     }
         
@@ -82,6 +85,8 @@ void LoadRouteEditor(){
         if(Game::checkRoot(Game::root) && (Game::checkRoute(Game::route) || Game::createNewRoutes)){
             window->showRoute();
         } else {
+            // EFO moving to the primary screen to join the Navi box
+            loadWindow->move(300,20);/// EFO moving to main screen
             loadWindow->show();
         }
     } else {
@@ -182,6 +187,14 @@ int main(int argc, char *argv[]){
    //     ::ShowWindow( ::GetConsoleWindow(), SW_HIDE ); //hide console window
    // #endif
 
+    // EFO set log to date/time so it isn't overwritten
+    logFile.setFileName("tsre-log-" + QDateTime::currentDateTime().toString("yyyyMMdd-hhmm") + ".txt");
+    
+    logFile.open(QIODevice::WriteOnly);
+    logFileOut.setDevice(&logFile);
+    qInstallMessageHandler( myMessageOutput );
+
+    
     QLocale lepsze(QLocale::English);
     //loc.setNumberOptions(lepsze.numberOptions());
     QLocale::setDefault(lepsze);
@@ -212,11 +225,7 @@ int main(int argc, char *argv[]){
     }
     
     Game::load();
-        
-    logFile.setFileName("log.txt");
-    logFile.open(QIODevice::WriteOnly);
-    logFileOut.setDevice(&logFile);
-    qInstallMessageHandler( myMessageOutput );
+
     
     qDebug() << "workingDir" << workingDir;
     

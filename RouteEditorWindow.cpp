@@ -180,6 +180,7 @@ RouteEditorWindow::RouteEditorWindow() {
     setWindowTitle(Game::AppName+" "+Game::AppVersion+" Route Editor");
     
     // MENUBAR
+    // EFO -- modifying many keystroke shortcuts to eliminate overlaps    
     // Route
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence("Shift+Ctrl+S"));
@@ -191,7 +192,7 @@ RouteEditorWindow::RouteEditorWindow() {
     exitAction = new QAction(tr("&Exit"), this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
-    trkEditr = new QAction(tr("&Edit route settings"), this);
+    trkEditr = new QAction(tr("E&dit route settings"), this);
     QObject::connect(trkEditr, SIGNAL(triggered()), glWidget, SLOT(showTrkEditr()));
     if(Game::serverClient == NULL){
         routeMenu = menuBar()->addMenu(tr("&Route"));
@@ -230,6 +231,7 @@ RouteEditorWindow::RouteEditorWindow() {
     //toolsAction = GuiFunct::newMenuCheckAction(tr("&Tools"), this); 
     //viewMenu->addAction(toolsAction);
     //QObject::connect(toolsAction, SIGNAL(triggered(bool)), this, SLOT(hideShowToolWidget(bool)));
+
     QAction* viewUnselectAll = new QAction(tr("&Unselect All"), this); 
     viewMenu->addAction(viewUnselectAll);
     QObject::connect(viewUnselectAll, SIGNAL(triggered()), this, SLOT(viewUnselectAll()));
@@ -237,25 +239,25 @@ RouteEditorWindow::RouteEditorWindow() {
     vViewWorldGrid = GuiFunct::newMenuCheckAction(tr("&World Grid"), this); 
     viewMenu->addAction(vViewWorldGrid);
     QObject::connect(vViewWorldGrid, SIGNAL(triggered(bool)), this, SLOT(viewWorldGrid(bool)));
-    vViewTileGrid = GuiFunct::newMenuCheckAction(tr("&Tile Grid"), this); 
+    vViewTileGrid = GuiFunct::newMenuCheckAction(tr("Tile &Grid"), this); 
     viewMenu->addAction(vViewTileGrid);
     QObject::connect(vViewTileGrid, SIGNAL(triggered(bool)), this, SLOT(viewTileGrid(bool)));    
-    vViewTerrainGrid = GuiFunct::newMenuCheckAction(tr("&Terrain Grid"), this, false); 
+    vViewTerrainGrid = GuiFunct::newMenuCheckAction(tr("Te&rrain Grid"), this, false); 
     viewMenu->addAction(vViewTerrainGrid);
     QObject::connect(vViewTerrainGrid, SIGNAL(triggered(bool)), this, SLOT(viewTerrainGrid(bool)));   
     vViewTerrainShape = GuiFunct::newMenuCheckAction(tr("&Hide Terrain Shape"), this, false); 
     viewMenu->addAction(vViewTerrainShape);
     QObject::connect(vViewTerrainShape, SIGNAL(triggered(bool)), this, SLOT(viewTerrainShape(bool)));   
-    vShowWorldObjPivotPoints = GuiFunct::newMenuCheckAction(tr("&WorldObj Markers"), this, false); 
+    vShowWorldObjPivotPoints = GuiFunct::newMenuCheckAction(tr("World&Obj Markers"), this, false); 
     viewMenu->addAction(vShowWorldObjPivotPoints);
     QObject::connect(vShowWorldObjPivotPoints, SIGNAL(triggered(bool)), this, SLOT(showWorldObjPivotPointsEnabled(bool)));
     vViewInteractives = GuiFunct::newMenuCheckAction(tr("&Interactives"), this); 
     viewMenu->addAction(vViewInteractives);
     QObject::connect(vViewInteractives, SIGNAL(triggered(bool)), this, SLOT(viewInteractives(bool)));
-    vViewTrackDbLines = GuiFunct::newMenuCheckAction(tr("&TrackDB Lines"), this); 
+    vViewTrackDbLines = GuiFunct::newMenuCheckAction(tr("Track&DB Lines"), this); 
     viewMenu->addAction(vViewTrackDbLines);
     QObject::connect(vViewTrackDbLines, SIGNAL(triggered(bool)), this, SLOT(viewTrackDbLines(bool)));    
-    vViewTsectionLines = GuiFunct::newMenuCheckAction(tr("&Tsection Lines"), this); 
+    vViewTsectionLines = GuiFunct::newMenuCheckAction(tr("T&section Lines"), this); 
     viewMenu->addAction(vViewTsectionLines);
     QObject::connect(vViewTsectionLines, SIGNAL(triggered(bool)), this, SLOT(viewTsectionLines(bool)));
     vViewTrackItems = GuiFunct::newMenuCheckAction(tr("&TrackDB Items"), this, Game::renderTrItems); 
@@ -268,12 +270,13 @@ RouteEditorWindow::RouteEditorWindow() {
     vViewMarkers = GuiFunct::newMenuCheckAction(tr("&Markers"), this, false); 
     viewMenu->addAction(vViewMarkers);
     QObject::connect(vViewMarkers, SIGNAL(triggered(bool)), this, SLOT(viewMarkers(bool)));
-    vViewSnapable = GuiFunct::newMenuCheckAction(tr("&Snapable Points"), this, false); 
+    vViewSnapable = GuiFunct::newMenuCheckAction(tr("S&napable Points"), this, false); 
     viewMenu->addAction(vViewSnapable);
     QObject::connect(vViewSnapable, SIGNAL(triggered(bool)), this, SLOT(viewSnapable(bool)));
     QAction* vViewCompass = GuiFunct::newMenuCheckAction(tr("&Compass"), this, false); 
     viewMenu->addAction(vViewCompass);
     QObject::connect(vViewCompass, SIGNAL(triggered(bool)), this, SLOT(viewCompass(bool)));
+
     // Tools
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     propertiesAction = GuiFunct::newMenuCheckAction(tr("&Properties"), this); 
@@ -289,7 +292,7 @@ RouteEditorWindow::RouteEditorWindow() {
     toolsMenu->addAction(errorViewAction);
     QObject::connect(errorViewAction, SIGNAL(triggered(bool)), this, SLOT(hideShowErrorMsgWidget(bool)));
     toolsMenu->addSeparator();
-    objectsAndTerrainAction = GuiFunct::newMenuCheckAction(tr("&Objects and Terrain"), this); 
+    objectsAndTerrainAction = GuiFunct::newMenuCheckAction(tr("O&bjects and Terrain"), this); 
     toolsMenu->addAction(objectsAndTerrainAction);
     QObject::connect(objectsAndTerrainAction, SIGNAL(triggered(bool)), this, SLOT(showToolsObjectAndTerrain(bool)));
     objectsAction = GuiFunct::newMenuCheckAction(tr("&Objects"), this); 
@@ -338,7 +341,7 @@ RouteEditorWindow::RouteEditorWindow() {
     
     hideAllTools();
     objTools->show();
-    
+    ///// EFO  End MENUBAR 
     
     if(Game::toolsHidden){
         box->hide();

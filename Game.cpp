@@ -43,12 +43,12 @@ TerrainLib *Game::terrainLib = NULL;
 
 bool Game::UseWorkingDir = false;
 QString Game::AppName = "TSRE5";
-QString Game::AppVersion = "v0.7.012";
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.002 ";
 QString Game::AppDataVersion = "0.697";
-QString Game::root = "C:/tsdata/Train Simulator/";
-QString Game::route = "bbb1";
-QString Game::routeName = "bbb";
-QString Game::trkName = "bbb";
+QString Game::root = "";
+QString Game::route = "";
+QString Game::routeName = "";
+QString Game::trkName = "";
 QString Game::season = "";
 //QString Game::route = "traska";
 //QString Game::route = "cmk";
@@ -102,6 +102,14 @@ bool Game::leaveTrackShapeAfterDelete = false;
 bool Game::renderTrItems = false;
 int Game::newRouteX = -5000;
 int Game::newRouteZ = 15000;
+//EFO added three
+float Game::wireLineHeight = 3;
+float Game::sectionLineHeight = 2.8;
+float Game::terrainTools[] = {1,5,5,9,1,10};
+int   Game::selectedTerrWidth = 2;
+QColor *Game::selectedColor = NULL;
+
+
 bool Game::consoleOutput = false;
 int Game::fpsLimit = 0;
 bool Game::ortsEngEnable = true;
@@ -367,6 +375,51 @@ void Game::load() {
             else
                 renderTrItems = false;
         }
+        
+        // EFO configure yellow line display height
+        if(val == "wireLineHeight"){
+            wireLineHeight = args[1].trimmed().toFloat();
+        }
+
+        // EFO configure grey line display height
+        if(val == "sectionLineHeight"){
+            sectionLineHeight = args[1].trimmed().toFloat();
+        }
+
+        // EFO configure selectedTerrWidth
+        if(val == "selectedTerrWidth"){
+            selectedTerrWidth = args[1].trimmed().toInt();
+        }
+
+        if(val == "selectedColor"){
+            selectedColor = new QColor(args[1].trimmed());
+            
+        qDebug() << "SelectedColor: " << args[1].trimmed() ;
+        qDebug() << "QColor: " << selectedColor[0] << ","<< selectedColor[1] << ","<< selectedColor[2]  ;        
+        }
+        
+        // EFO Configure Terrain Tools
+        if(val == "terrainSize") {
+            terrainTools[0] = args[1].trimmed().toFloat();
+        }
+        if(val == "terrainEmbankment") {
+            terrainTools[1] = args[1].trimmed().toFloat();
+        }
+        if(val == "terrainCut") {
+            terrainTools[2] = args[1].trimmed().toFloat();
+        }
+        if(val == "terrainRadius") {
+            terrainTools[3] = args[1].trimmed().toFloat();
+        }
+        if(val == "terrainBrushSize") {
+            terrainTools[4] = args[1].trimmed().toFloat();
+        }
+        if(val == "terrainBrushIntensity") {
+            terrainTools[5] = args[1].trimmed().toFloat();
+        }
+        // END EFO Configure Terrain Tools
+        
+        
         if(val == "geoPath")
             geoPath = args[1].trimmed();
         if(val == "colorConView")
@@ -400,6 +453,7 @@ void Game::load() {
         if(val == "oglDefaultLineWidth"){
             oglDefaultLineWidth = args[1].trimmed().toInt();
         }
+        
         if(val == "shadowsEnabled"){
             shadowsEnabled = args[1].trimmed().toInt();
         }
@@ -586,7 +640,10 @@ void Game::load() {
             serverAuth = args[1].trimmed();
         }
         
+     qDebug() << args[0];
     }
+
+
 }
 /*
 bool Game::loadRouteEditor(){

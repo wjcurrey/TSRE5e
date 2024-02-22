@@ -163,7 +163,10 @@ protected:
     OglObj punktySieci;
     OglObj sectionLines;
     int defaultEnd = 0;
-    int wysokoscSieci;
+    float lsectionLineHeight;
+    float lwireLineHeight;
+    float pointe[3];
+    float pointf[3];    
     int lineHash;
     int sectionHash;
     int iobjHash;

@@ -42,9 +42,12 @@ TDB::TDB(TSectionDAT* tsection, bool road) {
         tdbName = ErrorMessage::Source_RDB;
     }
     serial = 0;
-    wysokoscSieci = 4;
+    
+    // EFO Adds
     iTRitems = 0;
     iTRnodes = 0;
+    lwireLineHeight = 2;
+    lsectionLineHeight = 1.8;
 
     if(tsection == NULL)
         this->tsection = new TSectionDAT();
@@ -61,7 +64,7 @@ void TDB::loadTdb(){
     if(this->road) extension = "rdb";
     QString path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << "Wczytywanie pliku tdb: " << path;
+    qDebug() << "Loading TDB File: " << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -72,6 +75,10 @@ void TDB::loadTdb(){
     ParserX::NextLine(data);
     iTRnodes = 0;
     
+    // EFO Adds
+    lwireLineHeight = Game::wireLineHeight;
+    lsectionLineHeight = Game::sectionLineHeight;
+    qDebug() << "Line Heights set" << lsectionLineHeight << " " << lwireLineHeight;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         if (sh == "trackdb") {
             loadUtf16Data(data);
@@ -1970,23 +1977,46 @@ void TDB::renderAll(GLUU *gluu, float* playerT, float playerRot) {
             if (n->typ == -1) continue;
             if (n->typ == 1) {
                 if(n->iTrv < 1 ) continue;
+                
+                
+                
                 for (int i = 0; i < n->iTrv - 1; i++) {
+                    
+/*
+                    // compare last endpoint to new startpoint
+                    pointf[0] = n->trVectorSection[i].param[5];
+                    pointf[0] = n->trVectorSection[i].param[6];
+
+                    if (pointe[0] != pointf[0] || pointe[2] != pointf[2]) {        
+                        qDebug() << "Point Mismatch: " << pointe[0]-pointf[0] << " : " << pointe[2]-pointf[2];
+                    }
+  */               // EFO Adds    
                     linie[lPtr++] = ((n->trVectorSection[i].param[8] - playerT[0])*2048 + n->trVectorSection[i].param[10]);
-                    linie[lPtr++] = (n->trVectorSection[i].param[11] + wysokoscSieci);
+                    linie[lPtr++] = (n->trVectorSection[i].param[11] + lsectionLineHeight);
                     linie[lPtr++] = (((-n->trVectorSection[i].param[9] - playerT[1])*2048 - n->trVectorSection[i].param[12]));
 
+                    // EFO Adds
                     linie[lPtr++] = ((n->trVectorSection[i + 1].param[8] - playerT[0])*2048 + n->trVectorSection[i + 1].param[10]);
-                    linie[lPtr++] = (n->trVectorSection[i + 1].param[11] + wysokoscSieci);
+                    linie[lPtr++] = (n->trVectorSection[i + 1].param[11] + lsectionLineHeight);
                     linie[lPtr++] = (((-n->trVectorSection[i + 1].param[9] - playerT[1])*2048 - n->trVectorSection[i + 1].param[12]));
+                   
+                    // store last endpoint
+                    pointe[0] = n->trVectorSection[i + 1].param[5];
+                    pointe[2] = n->trVectorSection[i + 1].param[6];
+                    
+
+                    
                 }
                 if (n->TrPinS[1] != 0) {
                     //qDebug() << "track line " << i << n->iTrv;
                     linie[lPtr++] = ((n->trVectorSection[n->iTrv - 1].param[8] - playerT[0])*2048 + n->trVectorSection[n->iTrv - 1].param[10]);
-                    linie[lPtr++] = (n->trVectorSection[n->iTrv - 1].param[11] + wysokoscSieci);
+                    // EFO Adds
+                    linie[lPtr++] = (n->trVectorSection[n->iTrv - 1].param[11] + lsectionLineHeight);
                     linie[lPtr++] = (((-n->trVectorSection[n->iTrv - 1].param[9] - playerT[1])*2048 - n->trVectorSection[n->iTrv - 1].param[12]));
 
                     linie[lPtr++] = ((trackNodes[n->TrPinS[1]]->UiD[4] - playerT[0])*2048 + trackNodes[n->TrPinS[1]]->UiD[6]);
-                    linie[lPtr++] = (trackNodes[n->TrPinS[1]]->UiD[7] + wysokoscSieci);
+                    // EFO Adds
+                    linie[lPtr++] = (trackNodes[n->TrPinS[1]]->UiD[7] + lsectionLineHeight);
                     linie[lPtr++] = (((-trackNodes[n->TrPinS[1]]->UiD[5] - playerT[1])*2048 - trackNodes[n->TrPinS[1]]->UiD[8]));
                 }
             } else if (n->typ == 0) {
@@ -1995,7 +2025,8 @@ void TDB::renderAll(GLUU *gluu, float* playerT, float playerRot) {
                 konce[kPtr++] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
 
                 konce[kPtr++] = ((n->UiD[4] - playerT[0])*2048 + n->UiD[6]);
-                konce[kPtr++] = (n->UiD[7] + wysokoscSieci);
+                // EFO Adds
+                konce[kPtr++] = (n->UiD[7] + lsectionLineHeight);
                 konce[kPtr++] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
                 
                 if(fabs(n->UiD[4] - playerT[0]) > 1) continue;
@@ -2008,7 +2039,8 @@ void TDB::renderAll(GLUU *gluu, float* playerT, float playerRot) {
                     }    
                     endIdObj[i]->inUse = true;
                     endIdObj[i]->pos[0] = ((n->UiD[4] - playerT[0])*2048 + n->UiD[6]);
-                    endIdObj[i]->pos[1] = n->UiD[7] + wysokoscSieci;
+                    // EFO Adds
+                    endIdObj[i]->pos[1] = n->UiD[7] + lsectionLineHeight;
                     endIdObj[i]->pos[2] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
                 }
             } else if (n->typ == 2) {
@@ -2017,7 +2049,8 @@ void TDB::renderAll(GLUU *gluu, float* playerT, float playerRot) {
                 punkty[pPtr++] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
 
                 punkty[pPtr++] = ((n->UiD[4] - playerT[0])*2048 + n->UiD[6]);
-                punkty[pPtr++] = (n->UiD[7] + wysokoscSieci);
+                // EFO Adds
+                punkty[pPtr++] = (n->UiD[7] + lsectionLineHeight);
                 punkty[pPtr++] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
                 
                 if(fabs(n->UiD[4] - playerT[0]) > 1) continue;
@@ -2030,7 +2063,8 @@ void TDB::renderAll(GLUU *gluu, float* playerT, float playerRot) {
                     }    
                     junctIdObj[i]->inUse = true;
                     junctIdObj[i]->pos[0] = ((n->UiD[4] - playerT[0])*2048 + n->UiD[6]);
-                    junctIdObj[i]->pos[1] = n->UiD[7] + wysokoscSieci;
+                    // EFO Adds
+                    junctIdObj[i]->pos[1] = n->UiD[7] + lsectionLineHeight;
                     junctIdObj[i]->pos[2] = ((-n->UiD[5] - playerT[1])*2048 - n->UiD[8]);
                 }
             }
@@ -2407,8 +2441,10 @@ void TDB::getLine(float* &ptr, Vector3f p, Vector3f o, int idx, int id, int vid,
     Mat4::fromRotationTranslation(matrix, q, reinterpret_cast<float *> (&p));
     Mat4::rotate(matrix, matrix, o.x, 1, 0, 0);
 
+    /// Wire
+    // EFO Adds
     if(tsection->sekcja[idx] != NULL){
-        tsection->sekcja[idx]->drawSection(ptr, matrix, 0, id, vid, offset, step);
+        tsection->sekcja[idx]->drawSection(ptr, matrix, lwireLineHeight, id, vid, offset, step);
     }
 }
 
@@ -2434,8 +2470,19 @@ void TDB::drawLine(GLUU *gluu, float* &ptr, Vector3f p, Vector3f o, int idx) {
     point1[2] = 0;
     float point2[3];
     point2[0] = 0;
-    point2[1] = 2;
+    // EFO Adds
+    point2[1] = lwireLineHeight;
     point2[2] = 0;
+
+    /*
+    if (pointe[0] != point1[0] || pointe[2] != point1[2]) {        
+        qDebug() << "Point Mismatch: " << pointe[0]-point1[0] << " : " << pointe[2]-point1[2];
+    }
+    pointe[0] = point2[0];
+    pointe[1] = point2[1];
+    pointe[2] = point2[2];
+  */    
+    
     Vec3::transformMat4(point1, point1, matrix);
     Vec3::transformMat4(point2, point2, matrix);
     *ptr++ = point1[0];
@@ -2445,8 +2492,9 @@ void TDB::drawLine(GLUU *gluu, float* &ptr, Vector3f p, Vector3f o, int idx) {
     *ptr++ = point2[1];
     *ptr++ = point2[2];
 
+    /// Wire
     if(tsection->sekcja[idx] != NULL){
-        tsection->sekcja[idx]->drawSection(ptr, matrix, 2, -1, 0, 0, 0);
+        tsection->sekcja[idx]->drawSection(ptr, matrix, lwireLineHeight, -1, 0, 0, 0);
     }
 }
 
@@ -3763,7 +3811,9 @@ TDB::TDB(const TDB& o) {
     iTRitems = o.iTRitems;
     serial = o.serial;
     defaultEnd = o.defaultEnd;
-    wysokoscSieci = o.wysokoscSieci;
+    lsectionLineHeight = o.lsectionLineHeight;
+    // EFO Adds
+    lwireLineHeight = o.lwireLineHeight;
     road = o.road;
     
     for (auto it = o.trackItems.begin(); it != o.trackItems.end(); ++it ){

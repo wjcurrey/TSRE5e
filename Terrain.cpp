@@ -66,6 +66,8 @@ void Terrain::load(){
     VBO = new QOpenGLBuffer();
     VAO = new QOpenGLVertexArrayObject();
 
+   
+   
     int esdAlternativeTexture = 0x01;
     QString seasonPath;
     if((esdAlternativeTexture & Game::TextureFlags[Game::season]) != 0)
@@ -77,6 +79,10 @@ void Terrain::load(){
         if(esdAlternativeTexture & Game::TextureFlags["SnowTrack"] != 0)
             seasonPath = "snow/";
     }
+    
+    
+    
+    
     
     texturepath = Game::root + "/routes/" + Game::route + "/terrtex/"+seasonPath;
     rootTexturepath = Game::root + "/routes/" + Game::route + "/terrtex/";
@@ -2134,6 +2140,12 @@ void Terrain::reloadLines() {
     int ptr = 0;
     int i = 0;
 
+    // EFO set terrwidth from global
+    terrWidth = Game::selectedTerrWidth;    
+    
+    qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
+    qDebug() << "local TerrWidth: " << terrWidth;    
+    
     int samples = *tfile->nsamples;
     int sampleSize = *tfile->sampleSize;
     int patches = tfile->patchsetNpatches;
@@ -2362,8 +2374,9 @@ void Terrain::reloadLines() {
                  punkty[ptr++] = min + yy*patchSize+patchSize;
             }
         }
-    
-    selectedlines.setMaterial(0.0, 0.0, 0.8);
+    //// EFO Terrain Selected Color  was 0,0,0.8
+    selectedlines.setMaterial(1.0, 0.5, 0.0);
+    selectedlines.setLineWidth(terrWidth);
     selectedlines.init(punkty, ptr, RenderItem::V, GL_LINES);
     delete[] punkty;
 }

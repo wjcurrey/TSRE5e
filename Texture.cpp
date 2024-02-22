@@ -29,6 +29,7 @@ Texture::Texture(QString pathid) {
     QString tType = pathid.toLower().split(".").last();
     if(tType == "dds"){
         hashid.push_back(pathid.left(pathid.length() - 3)+"ace");
+         qDebug() << " dds found: " << pathid.toLower();
     }
 }
     

@@ -26,7 +26,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent) {
     QLabel* myLabel2 = new QLabel("<b>User guide</b> <a href=\"http://koniec.org/tsre5/\"><b>http://koniec.org/tsre5.</b></a>");
     myLabel2->setOpenExternalLinks(true);
     myLabel2->setContentsMargins(5,0,0,0);
-    QLabel* myLabel21 = new QLabel("<b>Official Forum</b> <a href=\"http://www.onrails.eu\"><b>http://www.onrails.eu.</b></a>");
+    QLabel* myLabel21 = new QLabel("<b>TrainSim Forum (for this fork)</b> <a href=\"https://www.trainsim.com/forums/forum/open-rails/tsre-route-editor\"><b>Trainsim.Com TSRE Forum</b></a>"); 
     myLabel21->setOpenExternalLinks(true);
     myLabel21->setContentsMargins(5,0,0,0);
     

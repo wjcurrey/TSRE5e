@@ -760,8 +760,12 @@ void WorldObj::drawBox(){
         QVector<float> punkty;
         if (!this->getBoxPoints(punkty)) return;
 
-        box.setMaterial(0.0, 0.0, 1.0);
+        qDebug() << "Settings Color:" << Game::selectedColor->redF() << Game::selectedColor->greenF() << Game::selectedColor->blueF() ;
+        
+        //// EFO object selected color was 0,0,1
+        box.setMaterial(Game::selectedColor->redF(), Game::selectedColor->greenF(), Game::selectedColor->blueF());
         box.init((float*)&punkty[0], punkty.size(), RenderItem::V, GL_LINES);
+        qDebug() << "SelectColor:" << selectColor[0] << selectColor[1] << selectColor[2] ;
         //box.setLineWidth(3);
     }
     

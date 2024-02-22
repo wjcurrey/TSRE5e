@@ -26,7 +26,6 @@ class Terrain : public GameObj {
     Q_OBJECT
 public:
     static Brush* DefaultBrush;
-    
     int loaded = false;
     float **terrainData;
     bool inUse = true;
@@ -144,6 +143,7 @@ public:
     void refreshWaterShapes();
     void getRotation(float *rot, int x, int z, int posx, int posz);
     float getHeight(int x, int z, float posx, float posz, bool addR);
+ 
     
 public slots:
     void menuToggleWater();
@@ -224,6 +224,10 @@ protected:
     void reloadLines();
     
     virtual void load();
+    
+private:
+    int terrWidth = 1;
+    
 };
 
 #endif	/* TERRAIN_H */

@@ -156,12 +156,12 @@ PropertiesDyntrack::PropertiesDyntrack() {
             sSectA[i].setMaximum(250);
             sSectA[i].setSingleStep(1.0);
         } else {
-            sSectA[i].setDecimals(3);
+            sSectA[i].setDecimals(5);      /// EFO increasing precision from decimals(3)
             sSectA[i].setMinimum(-3.14);
             sSectA[i].setMaximum(3.14);
             sSectA[i].setSingleStep(0.01);
         }
-        sSectR[i].setDecimals(2);
+        sSectR[i].setDecimals(3);  /// EFO increasing precision from decimals(2)
         sSectR[i].setMinimum(15);
         sSectR[i].setMaximum(5000);
         sSectR[i].setSingleStep(1.0);

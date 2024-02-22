@@ -1,14 +1,21 @@
-QMAKE_DEFAULT_INCDIRS = \
-    c:/mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ \
-    c:/mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 \
-    c:/mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward \
-    c:/mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/include \
-    c:/mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed \
-    c:/mingw64_730/x86_64-w64-mingw32/include
-QMAKE_DEFAULT_LIBDIRS = \
-    c \
-    /mingw64_730/lib/gcc/x86_64-w64-mingw32/7.3.0/;c \
-    /mingw64_730/lib/gcc/;c \
-    /mingw64_730/x86_64-w64-mingw32/lib/;c \
-    /mingw64_730/lib/;c \
-    /mingw64_730/lib
+QMAKE_CXX.QT_COMPILER_STDCXX = 201402L
+QMAKE_CXX.QMAKE_GCC_MAJOR_VERSION = 8
+QMAKE_CXX.QMAKE_GCC_MINOR_VERSION = 1
+QMAKE_CXX.QMAKE_GCC_PATCH_VERSION = 0
+QMAKE_CXX.COMPILER_MACROS = \
+    QT_COMPILER_STDCXX \
+    QMAKE_GCC_MAJOR_VERSION \
+    QMAKE_GCC_MINOR_VERSION \
+    QMAKE_GCC_PATCH_VERSION
+QMAKE_CXX.INCDIRS = \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++ \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32 \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed \
+    e:/DEV/Qt/Tools/mingw810_64/x86_64-w64-mingw32/include
+QMAKE_CXX.LIBDIRS = \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0 \
+    e:/DEV/Qt/Tools/mingw810_64/lib/gcc \
+    e:/DEV/Qt/Tools/mingw810_64/x86_64-w64-mingw32/lib \
+    e:/DEV/Qt/Tools/mingw810_64/lib

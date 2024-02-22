@@ -151,6 +151,12 @@ public:
     static bool useSuperelevation;
     static bool soundEnabled;
     static bool fullscreen;
+        
+    static float wireLineHeight;
+    static float sectionLineHeight;
+    static float terrainTools[];
+    static int selectedTerrWidth;
+    static QColor *selectedColor;
     
     static float fogDensity;// = 0.7;
     static float shadow1Res;

@@ -127,6 +127,35 @@ PropertiesSignal::PropertiesSignal() {
     posRotList->addWidget(transform, 4, 0, 1, 2);
     vbox->addItem(posRotList);
     
+    // EFO adding StaticDetailLevel to Signals
+    
+    label = new QLabel("Detail Level:");
+    label->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
+    label->setContentsMargins(3,0,0,0);
+    vbox->addWidget(label);
+    this->defaultDetailLevel.setDisabled(true);
+    this->defaultDetailLevel.setAlignment(Qt::AlignCenter);
+    this->enableCustomDetailLevel.setText("Custom");
+    QCheckBox* defaultDetailLevelLabel = new QCheckBox("Default", this);
+    defaultDetailLevelLabel->setDisabled(true);
+    defaultDetailLevelLabel->setChecked(true);
+    QObject::connect(&enableCustomDetailLevel, SIGNAL(stateChanged(int)),
+                      this, SLOT(enableCustomDetailLevelEnabled(int)));
+    this->customDetailLevel.setDisabled(true);
+    this->customDetailLevel.setAlignment(Qt::AlignCenter);
+    QObject::connect(&customDetailLevel, SIGNAL(textEdited(QString)),
+                      this, SLOT(customDetailLevelEdited(QString)));
+    QGridLayout *detailLevelView = new QGridLayout;
+    detailLevelView->setSpacing(2);
+    detailLevelView->setContentsMargins(0,0,0,0);    
+    detailLevelView->addWidget(defaultDetailLevelLabel, 0, 0);
+    detailLevelView->addWidget(&defaultDetailLevel, 0, 1);
+    detailLevelView->addWidget(&enableCustomDetailLevel, 1, 0);
+    detailLevelView->addWidget(&customDetailLevel, 1, 1);
+    vbox->addItem(detailLevelView);
+    
+    /// EFO End adding StaticDetailLevel to Signal
+    
     label = new QLabel("Flags:");
     label->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
     label->setContentsMargins(3,0,0,0);
@@ -379,6 +408,44 @@ void PropertiesSignal::haxFixFlagsEnabled(){
     }
 
 }
+
+
+
+
+//// SDL for Signals EFO
+
+void PropertiesSignal::enableCustomDetailLevelEnabled(int val){
+    if(worldObj == NULL)
+        return;
+    SignalObj* signalObj = (SignalObj*) worldObj;
+    Undo::SinglePushWorldObjData(worldObj);
+    if(val == 2){
+        customDetailLevel.setEnabled(true);
+        customDetailLevel.setText("0");
+        signalObj->setCustomDetailLevel(0);
+    } else {
+        customDetailLevel.setEnabled(false);
+        customDetailLevel.setText("");
+        signalObj->setCustomDetailLevel(-1);
+    }
+}
+
+void PropertiesSignal::customDetailLevelEdited(QString val){
+    if(worldObj == NULL)
+        return;
+    SignalObj* signalObj = (SignalObj*) worldObj;
+    bool ok = false;
+    int level = val.toInt(&ok);
+    //qDebug() << "aaaaaaaaaa";
+    if(ok){
+        Undo::SinglePushWorldObjData(worldObj);
+        signalObj->setCustomDetailLevel(level);
+    }
+}
+
+
+/// END SDL for Signals EFO
+
 
 void PropertiesSignal::editPositionEnabled(QString val){
     if(worldObj == NULL)

@@ -96,6 +96,8 @@ public:
     int sectionIdx;
     int trLoaded = 0;
         
+
+    
     WorldObj();
     WorldObj(const WorldObj& o);
     virtual ~WorldObj();
@@ -180,6 +182,10 @@ protected:
     float* matrix3x3 = NULL;
     QString templateName = "DEFAULT";
     bool internalLodControl = false;
+
+  private:
+    float selectColor[3]; 
+    
 };
 
 #endif	/* WORLDOBJ_H */
