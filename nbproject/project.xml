@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>TSRE5</name>
+            <name>TSRE5-Updated</name>
             <make-project-type>0</make-project-type>
             <c-extensions/>
             <cpp-extensions>cpp</cpp-extensions>
@@ -11,7 +11,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>websockets</sourceRootElem>
+                <sourceRootElem>E:\DEV\NetBeansProjects\TSRE5-TS2\TSRE5e\websockets</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -19,23 +19,7 @@
                     <type>4</type>
                 </confElem>
                 <confElem>
-                    <name>dynamic_release</name>
-                    <type>4</type>
-                </confElem>
-                <confElem>
                     <name>Release_x64</name>
-                    <type>4</type>
-                </confElem>
-                <confElem>
-                    <name>Debug_x64</name>
-                    <type>4</type>
-                </confElem>
-                <confElem>
-                    <name>linux</name>
-                    <type>4</type>
-                </confElem>
-                <confElem>
-                    <name>linux_debug</name>
                     <type>4</type>
                 </confElem>
             </confList>

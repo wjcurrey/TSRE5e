@@ -1,7 +1,7 @@
 # This file is generated automatically. Do not edit.
 # Use project properties -> Build -> Qt -> Expert -> Custom Definitions.
 TEMPLATE = app
-DESTDIR = dist/Release_x64/QT_5.7_static_MinGW_730_x64-Windows
+DESTDIR = dist/Release_x64/MinGW_64b-Windows
 TARGET = TSRE5
 VERSION = 0.7
 CONFIG -= debug_and_release app_bundle lib_bundle
@@ -13,20 +13,23 @@ HEADERS += AboutWindow.h AceLib.h ActLib.h ActionChooseDialog.h Activity.h Activ
 FORMS +=
 RESOURCES +=
 TRANSLATIONS +=
-OBJECTS_DIR = build/Release_x64/QT_5.7_static_MinGW_730_x64-Windows
+OBJECTS_DIR = build/Release_x64/MinGW_64b-Windows
 MOC_DIR = 
 RCC_DIR = 
 UI_DIR = 
 QMAKE_CC = gcc
 QMAKE_CXX = g++
 DEFINES += 
-INCLUDEPATH += /C/programy/openal-soft-1.18.2-bin/include 
-LIBS += C:/programy/openal-soft-1.18.2-bin/libs/Win64/libOpenAL32.dll.a  
+INCLUDEPATH += /E/DEV/openal-soft-1.18.2-bin/libs/Win64 
+LIBS += E:/DEV/openal-soft-1.18.2-bin/libs/Win64/libopenal32.a  
 equals(QT_MAJOR_VERSION, 4) {
 QMAKE_CXXFLAGS += -std=c++11
 }
 equals(QT_MAJOR_VERSION, 5) {
 CONFIG += c++11
 }
-CONFIG += console
 QT += websockets
+LIBS += -lopengl32
+LIBS += -lglu32
+LIBS += -L"E:\dev\glut\glut32bit64bit" -lglut64
+LIBS += -L"E:\DEV\openal-soft-1.18.2-bin\libs\Win64" -lopenal32

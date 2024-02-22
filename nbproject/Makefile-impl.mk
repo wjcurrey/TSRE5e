@@ -24,14 +24,14 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=TSRE5
+PROJECTNAME=TSRE5e
 
 # Active Configuration
 DEFAULTCONF=Release
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Release dynamic_release Release_x64 Debug_x64 linux linux_debug 
+ALLCONFS=Release Release_x64 
 
 
 # build
