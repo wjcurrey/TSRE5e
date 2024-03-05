@@ -24,6 +24,7 @@ public:
     float texYmax = -1;
 private:
 
+    
 };
 
 #endif	/* OBJFILE_H */

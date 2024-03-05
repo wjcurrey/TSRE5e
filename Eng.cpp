@@ -138,11 +138,11 @@ void Eng::load(){
             qDebug() << pathid << "not exist";
             return;
         } else {
-            qDebug() << pathid;
+            if(Game::debugOutput) qDebug() << pathid;
             addToFileList(pathid);
         }
     } else {
-        qDebug() << orpathid;
+        if(Game::debugOutput) qDebug() << orpathid;
         addToFileList(orpathid);
     }
 
@@ -642,7 +642,7 @@ void Eng::updateSim(float deltaTime){
     
     if(Game::soundEnabled){
         if(ruch1->onJunction > 0){
-            qDebug() << "--------------";
+            if(Game::debugOutput) qDebug() << "--------------";
             int soundSourceId = SoundManager::AddSoundSource(path, "j1.wav");
             float *pos = ruch1->getCurrentPosition();
             pos[2] = -pos[2];
@@ -955,7 +955,7 @@ void Eng::initOnTrack(float *tpos, int direction, QMap<int, int>* junctionDirect
     //    qDebug() << "fail";
     //    this->loaded = -1;
     this->loaded = 1;
-    qDebug() << "ok";
+    if(Game::debugOutput) qDebug() << "ok";
 }
 
 void Eng::fillContentHierarchyInfo(QVector<ContentHierarchyInfo*>& list, int parent){

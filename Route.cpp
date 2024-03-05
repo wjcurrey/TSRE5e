@@ -73,7 +73,7 @@ void Route::load(){
     trkName = Game::trkName;
     routeDir = Game::route;
     
-    qDebug() << "# Load Route";
+     qDebug() << "# Load Route";
     
     if(!Game::useQuadTree)
         terrainLib = new TerrainLibSimple();
@@ -107,10 +107,10 @@ void Route::load(){
     Game::useSuperelevation = trk->tsreSuperelevation;
     
     if(trk->tsreProjection != NULL){
-        qDebug() << "TSRE Geo Projection";
+        if(Game::debugOutput) qDebug() << "TSRE Geo Projection";
         Game::GeoCoordConverter = new GeoTsreCoordinateConverter(trk->tsreProjection);
     } else {
-        qDebug() << "MSTS Geo Projection";
+        if(Game::debugOutput) qDebug() << "MSTS Geo Projection";
         Game::GeoCoordConverter = new GeoMstsCoordinateConverter();
     }
     env = new Environment(Game::root + "/routes/" + Game::route + "/ENVFILES/editor.env");
@@ -222,7 +222,7 @@ void Route::load(QString name){
     env = new Environment(Game::root + "/routes/" + Game::route + "/ENVFILES/editor.env");*/
     Game::routeName = trk->routeName.toLower();
     routeName = Game::routeName;
-    qDebug() << Game::routeName;
+    // qDebug() << Game::routeName;
 
     this->tsection = new TSectionDAT();
     
@@ -463,7 +463,7 @@ void Route::loadAddons(){
     QDir aDir(dirFile);
     if(!aDir.exists()){
         qDebug() << dirFile;
-        qDebug() << "# No Addons";
+        if(Game::debugOutput) qDebug() << "# No Addons";
         return;
     }
         
@@ -631,7 +631,7 @@ void Route::loadActivities(){
     //    ActLib::Act[i]->setRouteContent(&path, &service, &traffic);
     //}
 
-    qDebug() << "activity loaded";
+    if(Game::debugOutput) qDebug() << "activity loaded";
     return;
 }
 
@@ -2403,4 +2403,30 @@ void Route::showTrkEditr(Trk * val){
         val = this->trk;
     trkWindow.trk = val;
     trkWindow.exec();
+}
+
+/// EFO hail mary
+void Route::rebuildTDB()
+{
+    qDebug() << "Route-TDBRebuild";
+  Game::loadAllWFiles = true;
+        preloadWFiles(true);
+        // load tsection with autofix
+        this->tsection = new TSectionDAT(true);
+        // update ids inside W files
+        foreach (Tile* tTile, tile){
+            if (tTile == NULL) continue;
+            if (tTile->loaded == 1) {
+                tTile->updateTrackSectionInfo(tsection->autoFixedShapeIds, tsection->autoFixedSectionIds);
+                qDebug() << "Route-TDBRebuild";
+             }
+        }
+        ErrorMessage *e = new ErrorMessage(
+            ErrorMessage::Type_Info, 
+            ErrorMessage::Source_Editor, 
+            QString("Route Track Database rebuilt by TSRE. "),
+                    "Please validate carefully before deleting backups"
+                    );
+        ErrorMessagesLib::PushErrorMessage(e);
+        
 }

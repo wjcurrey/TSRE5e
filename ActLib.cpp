@@ -48,7 +48,7 @@ int ActLib::GetAct(QString path, QString name){
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                qDebug() <<"actid "<< pathid;
+                if(Game::debugOutput) qDebug() <<"actid "<< pathid;
                 return (int)i.key();
             }
     }
@@ -67,11 +67,11 @@ int ActLib::AddAct(QString path, QString name, bool nowe) {
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                qDebug() <<"actid "<< pathid;
+                if(Game::debugOutput) qDebug() <<"actid "<< pathid;
                 return (int)i.key();
             }
     }
-    qDebug() << "Nowy " << jestact << " act: " << pathid;
+    if(Game::debugOutput) qDebug() << "New " << jestact << " act: " << pathid;
     Act[jestact] = new Activity(pathid, path, name, nowe);
     if(!nowe)
         route[Act[jestact]->header->routeid].push_back(jestact);
@@ -99,11 +99,11 @@ int ActLib::AddService(QString path, QString name, bool nowe) {
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 //i.value()->ref++;
-                qDebug() <<"serviceid "<< pathid;
+                if(Game::debugOutput) qDebug() <<"serviceid "<< pathid;
                 return (int)i.key();
             }
     }
-    qDebug() << "Nowy " << jestservice << " service: " << pathid;
+    if(Game::debugOutput) qDebug() << "New " << jestservice << " service: " << pathid;
     Services[jestservice] = new Service(path, name, nowe);
     return jestservice++;
 }
@@ -120,11 +120,11 @@ int ActLib::AddTraffic(QString path, QString name, bool nowe) {
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                qDebug() <<"trafficid "<< pathid;
+                if(Game::debugOutput) qDebug() <<"trafficid "<< pathid;
                 return (int)i.key();
             }
     }
-    qDebug() << "Nowy " << jesttraffic << " traffic: " << pathid;
+    if(Game::debugOutput) qDebug() << "New " << jesttraffic << " traffic: " << pathid;
     Traffics[jesttraffic] = new Traffic(path, name, nowe);
     return jesttraffic++;
 }
@@ -209,11 +209,11 @@ int ActLib::AddPath(QString path, QString name) {
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                qDebug() <<"pathid "<< pathid;
+                if(Game::debugOutput) qDebug() <<"pathid "<< pathid;
                 return (int)i.key();
             }
     }
-    qDebug() << "Nowy " << jestpath << " path: " << pathid;
+    if(Game::debugOutput) qDebug() << "New " << jestpath << " path: " << pathid;
     Paths[jestpath] = new Path(path, name);
     return jestpath++;
 }
@@ -222,7 +222,7 @@ int ActLib::LoadAllAct(QString gameRoot, bool gui){
     QString path;
     path = gameRoot + "/routes";
     QDir dir(path);
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     dir.setFilter(QDir::Dirs);
     
     QStringList dirPaths;
@@ -262,7 +262,7 @@ int ActLib::LoadAllAct(QString gameRoot, bool gui){
         }
     }
     
-    qDebug() << "loaded";
+    if(Game::debugOutput) qDebug() << "loaded";
     delete progress;
     return 0;
 }

@@ -123,7 +123,7 @@ void Consist::load(){
     int i;
     QString sh;
     pathid.replace("//","/");
-    qDebug() << pathid;
+    if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)){
         qDebug() << pathid << "not exist";
@@ -380,7 +380,7 @@ void Consist::appendEngItem(int id, int pos, bool flip){
             selectedIdx = -1;
         if(selectedIdx < -1 )
             selectedIdx = -1;
-        qDebug() << "selectedIdx "<< selectedIdx;
+        if(Game::debugOutput) qDebug() << "selectedIdx "<< selectedIdx;
         engItems.insert(selectedIdx+1, EngItem());
         newE = &engItems[selectedIdx+1];
     } else {
@@ -691,15 +691,15 @@ void Consist::initOnTrack(float *posTXZ, int direction, QMap<int, int> *junction
     float h = Game::terrainLib->getHeight(posTXZ[0], -posTXZ[1], posTXZ[2], posTXZ[3]);
     Vec3::set(pos, posTXZ[2], h, -posTXZ[3]);
     
-    qDebug() << posT[0]<< posT[1];
-    qDebug() << pos[0]<< pos[1]<< pos[2];
+    if(Game::debugOutput) qDebug() << posT[0]<< posT[1];
+    if(Game::debugOutput) qDebug() << pos[0]<< pos[1]<< pos[2];
     
     int ok = Game::trackDB->findNearestPositionOnTDB(posT, pos, NULL, tpos);
     if(ok < 0) {
         qDebug() << "coninit fail";
         return;
     }
-    qDebug() << "coninit init" << tpos[0] << tpos[1];
+    if(Game::debugOutput) qDebug() << "coninit init" << tpos[0] << tpos[1];
     
     float conLen = 0;
     if(engItems.size() > 0)
@@ -834,7 +834,7 @@ void Consist::save(){
     QString spath;
     spath = path + "/" + name;
     spath.replace("//", "/");
-    qDebug() << spath;
+    qDebug() << "Consist save: " << spath;
     QFile file(spath);
     
     

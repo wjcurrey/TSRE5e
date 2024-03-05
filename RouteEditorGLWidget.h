@@ -82,6 +82,8 @@ public slots:
     void editFind(int radius = 0);
     void editUndo();
     void showTrkEditr();
+    void rebuildTDB(); /// EFO hail mary    
+    
     void showContextMenu(const QPoint & point);
     void createNewTiles(QMap<int, QPair<int, int>*> list);
     void createNewLoTiles(QMap<int, QPair<int, int>*> list);
@@ -119,7 +121,7 @@ public slots:
     void pickObjRotElevForPlacement();
     
     void initRoute2();
-    
+     
 signals:
     void showWindow();
     void routeLoaded(Route * a);
@@ -140,7 +142,11 @@ signals:
     void sendMsg(QString name, int val);
     void sendMsg(QString name, float val);
     void sendMsg(QString name, QString val);
+    
+    // EFO Status Updates
+    void updStatus(QString statName, QString statValue);
 
+    
 protected:
     bool eventFilter(QObject *object, QEvent *event);
     void initializeGL() Q_DECL_OVERRIDE;
@@ -200,13 +206,16 @@ private:
     //float moveUltraStep = 2.0;
     float moveMaxStep = 0.25;
     //float moveMinStep = 0.01;
+    
     bool resizeTool = false;
     bool rotateTool = false;
     bool translateTool = false;
+
     bool stickPointerToTerrain = true;
     bool autoAddToTDB = true;
     float lastNewObjPos[3];
     float lastNewObjPosT[2];
+    int   placeTile[2];
     float placeRot[4];
     float placeElev = 0;
     long long int lastMousePressTime = 0;
@@ -219,7 +228,7 @@ private:
     GLuint depthTexture2 = 0;
     Brush* defaultPaintBrush;
     MapWindow* mapWindow;
-    ShapeLib *currentShapeLib = NULL;
+    ShapeLib *currentShapeLib = NULL;    
     EngLib *engLib = NULL;
     
     /*struct DefaultMenuActions {

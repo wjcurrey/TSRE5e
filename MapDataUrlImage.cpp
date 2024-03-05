@@ -107,6 +107,8 @@ bool MapDataUrlImage::draw(QImage* myImage) {
 
 void MapDataUrlImage::load() {
     
+    qDebug() << "SSLDetails - Supported: " << QSslSocket::supportsSsl() << "Build Version: "  << QSslSocket::sslLibraryBuildVersionString() << " DLL Version: "  << QSslSocket::sslLibraryVersionString();
+    
     if(Game::imageMapsUrl.length() < 2){
         QMessageBox msgBox;
         msgBox.setText("Enter imageMapsUrl (for example google static maps url) in settings.txt!");

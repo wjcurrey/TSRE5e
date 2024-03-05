@@ -24,6 +24,7 @@ class ActivityTools;
 class NaviBox;
 class AboutWindow;
 class NaviWindow;
+class StatusWindow;
 class ShapeViewWindow;
 class PropertiesAbstract;
 class GameObj;
@@ -89,6 +90,7 @@ public slots:
     void showActivityTrafficEditor();
     void showActivityTimetableEditor();
 
+    
 signals:
     void exitNow();
     void sendMsg(QString text);
@@ -123,6 +125,8 @@ private:
     QAction *createPathsAction;
     QAction *reloadRefAction;
     QAction *exitAction;
+    QAction *rebuildAction;
+    
     QAction *copyAction;
     QAction *undoAction;
     QAction *pasteAction;
@@ -158,6 +162,7 @@ private:
     
     AboutWindow* aboutWindow;
     NaviWindow* naviWindow;
+    StatusWindow* statusWindow;
     ErrorMessagesWindow* errorMessagesWindow;
     ClientUsersWindow* clientUsersWindow;
     ActivityEventWindow* activityEventWindow;

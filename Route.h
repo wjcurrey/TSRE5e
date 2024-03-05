@@ -153,6 +153,9 @@ public:
     void render(GLUU *gluu, float* playerT, float* playerW, float* target, float playerRot, float fov, int renderMode);
     void renderShadowMap(GLUU *gluu, float* playerT, float* playerW, float* target, float playerRot, float fov, bool selection);
 
+    void rebuildTDB();
+    
+    
 signals:
     void objectSelected(GameObj* obj);
     void objectSelected(QVector<GameObj*> obj);

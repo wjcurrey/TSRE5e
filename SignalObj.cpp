@@ -744,11 +744,11 @@ void SignalObj::renderTritems(GLUU* gluu, int selectionColor){
     ///////////////////////////////
     if (drawPositions == NULL) {
         if(spointer3d == NULL){
-            spointer3d = new TrackItemObj();
+            spointer3d = new TrackItemObj(3);   /// EFO trying a new shape
             spointer3d->setMaterial(1,0,0);
         }
         if(spointer3dSelected == NULL){
-            spointer3dSelected = new TrackItemObj();
+            spointer3dSelected = new TrackItemObj(3);    /// EFO trying a new shape
             spointer3dSelected->setMaterial(1,0.5,0.5);
         }
         drawPositions = new float*[32];
@@ -909,7 +909,7 @@ void SignalObj::save(QTextStream* out){
 *(out) << "		FileName ( "<<ParserX::AddComIfReq(this->fileName)<<" )\n";
 *(out) << "		Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<-this->position[2]<<" )\n";
 *(out) << "		QDirection ( "<<this->qDirection[0]<<" "<<this->qDirection[1]<<" "<<-this->qDirection[2]<<" "<<this->qDirection[3]<<" )\n";
-*(out) << "		VDbId ( "<<this->vDbId<<" )\n";
+if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";  // EFO 
 if(this->staticDetailLevel > -1)
 *(out) << "		StaticDetailLevel ( "<<this->staticDetailLevel<<" )\n";
 *(out) << "		SignalSubObj ( "<<ParserX::MakeFlagsString(this->signalSubObj)<<" )\n";
@@ -929,3 +929,5 @@ for(int i=0; i<32; i++)
 }
 *(out) << "	)\n";
 }
+
+

@@ -21,7 +21,7 @@ SigCfg::SigCfg() {
     QString sh;
     QString path = Game::root + "/routes/" + Game::route + "/sigcfg.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -29,7 +29,7 @@ SigCfg::SigCfg() {
     bufor->off += 46+16;
     //szukanie sigcfg
 
-    qDebug() << "sigcfg!";
+    if(Game::debugOutput) qDebug() << "sigcfg!";
     int iSignalType = 0;
     int iSignalShape = 0;
     while (!((sh = ParserX::NextTokenInside(bufor).toLower()) == "")) {
@@ -64,7 +64,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "#lighttextures - undefined token: "<<sh;
+                qDebug() << "sigcfg lighttextures - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -95,7 +95,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "#lightstab - undefined token: "<<sh;
+                qDebug() << "sigcfg lightstab - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -127,7 +127,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "#signaltypes - undefined token: "<<sh;
+                qDebug() << "sigcfg signaltypes - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -167,14 +167,14 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "#signalshapes - undefined token: "<<sh;
+                qDebug() << "sigcfg signalshapes - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
             ParserX::SkipToken(bufor);
             continue;
         }
-        qDebug() << "#sigcfg.dat - undefined token: "<<sh;
+        qDebug() << "sigcfg sigcfg.dat - undefined token: "<<sh;
         ParserX::SkipToken(bufor);
         continue;
     }

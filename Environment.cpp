@@ -21,11 +21,11 @@ Environment::Environment(QString path) {
     loaded = false;
     texturePath = Game::root + "/routes/" + Game::route + "/envfiles/textures/";
             
-    qDebug() << "Wczytywanie pliku env: " << path;
+    if(Game::debugOutput) qDebug() << "Wczytywanie pliku env: " << path;
 
     QString sh;
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -88,10 +88,10 @@ Environment::Environment(QString path) {
     }
     delete data;
     loaded = 1;
-qDebug() << water.size();
+if(Game::debugOutput) qDebug() << water.size();
     for(int i = 0; i < water.size(); i++){
-        qDebug() << water[i].height;
-qDebug() << water[i].tex;
+        if(Game::debugOutput) qDebug() << water[i].height;
+if(Game::debugOutput) qDebug() << water[i].tex;
     }
     return;
 }

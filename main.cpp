@@ -31,6 +31,7 @@
 QFile logFile;
 QTextStream logFileOut;
 
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg){
     const char symbols[] = { 'I', 'E', '!', 'X' };
     QString output = QString("[%1] %2").arg( symbols[type] ).arg( msg );
@@ -45,7 +46,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 void LoadConEditor(){
     CELoadWindow* ceLoadWindow = new CELoadWindow();
-    ceLoadWindow->move(300,20);/// EFO moving to main screen
+    QStringList winPos = Game::mainPos.split(","); 
+    if(winPos.count() > 1) ceLoadWindow->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
     ceLoadWindow->show();
 }
 
@@ -53,7 +55,8 @@ void LoadShapeViewer(QString arg){
     ShapeViewerWindow* shapeWindow = new ShapeViewerWindow();
     if(arg.length() > 0)
         shapeWindow->loadFile(arg);
-    shapeWindow->move(300,20);/// EFO moving to main screen
+    QStringList winPos = Game::mainPos.split(","); 
+    if(winPos.count() > 1) shapeWindow->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
     shapeWindow->show();
 }
 
@@ -73,8 +76,36 @@ void LoadRouteEditor(){
         window->setWindowFlags(Qt::CustomizeWindowHint);
         window->setWindowState(Qt::WindowMaximized);
     } else {
-        window->move(300,20);  /// EFO moving to main screen
+
         window->resize(1280, 800);
+        
+        //// EFO Try to keep window on main window:
+        const QScreen* primaryScreen = QApplication::primaryScreen();
+        const QSize windowSize = window->size();
+
+        
+       
+        // Calculate the centered position based on both monitors
+        const QRect primaryGeometry = primaryScreen->geometry();
+        const QPoint centeredPos((primaryGeometry.width() - windowSize.width()) / 2,
+                                 (primaryGeometry.height() - windowSize.height()) / 2);
+        
+        if(Game::debugOutput) qDebug() << "Primary: " << primaryGeometry.width() << "/" << primaryGeometry.height();
+        if(Game::debugOutput) qDebug() << "Window: " << windowSize.width() << "/" << windowSize.height();
+        
+        if(Game::debugOutput) qDebug() << "Window   Orig: " << window->pos() ;
+        
+        // Ensure the window stays within the primary monitor bounds
+        window->move(centeredPos.x() >= 0 ? centeredPos.x() : 0,
+                    centeredPos.y() >= 0 ? centeredPos.y() : 0);
+ 
+        if(Game::debugOutput) qDebug() << "Window Center: " << window->pos() ;        
+        
+        QStringList winPos = Game::mainPos.split(","); 
+        if(winPos.count() > 1) window->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
+        
+        if(Game::debugOutput) qDebug() << "Window  Final: " << window->pos() ;        
+
     }
         
     if(!Game::ServerMode){
@@ -85,10 +116,30 @@ void LoadRouteEditor(){
         if(Game::checkRoot(Game::root) && (Game::checkRoute(Game::route) || Game::createNewRoutes)){
             window->showRoute();
         } else {
-            // EFO moving to the primary screen to join the Navi box
-            loadWindow->move(300,20);/// EFO moving to main screen
+            // EFO moving to the primary screen to match the main window
+            QStringList winPos = Game::mainPos.split(","); 
+            if(winPos.count() > 1) loadWindow->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
+    /*
+            else {
+                    //// EFO Try to keep window on main window:
+                    const QScreen* primaryScreen = QApplication::primaryScreen();
+                    const QSize windowSize = loadWindow->size();
+
+                    // Calculate the centered position based on both monitors
+                    const QRect primaryGeometry = primaryScreen->geometry();
+                    const QPoint centeredPos((primaryGeometry.width() - windowSize.width()) / 2,
+                                             (primaryGeometry.height() - windowSize.height()) / 2);
+
+                    // Ensure the window stays within the primary monitor bounds
+                    loadWindow->move(centeredPos.x() >= 0 ? centeredPos.x() : 0,
+                                centeredPos.y() >= 0 ? centeredPos.y() : 0);
+                  }
+     */
+            }
+            
+            
             loadWindow->show();
-        }
+        
     } else {
         QObject::connect(Game::serverClient, SIGNAL(loadRoute()), window, SLOT(showRoute()));
         Game::serverClient->connectNow();
@@ -187,6 +238,8 @@ int main(int argc, char *argv[]){
    //     ::ShowWindow( ::GetConsoleWindow(), SW_HIDE ); //hide console window
    // #endif
 
+
+                    
     // EFO set log to date/time so it isn't overwritten
     logFile.setFileName("tsre-log-" + QDateTime::currentDateTime().toString("yyyyMMdd-hhmm") + ".txt");
     
@@ -219,15 +272,16 @@ int main(int argc, char *argv[]){
     QApplication app(argc, argv);
     
     QString workingDir = QDir::currentPath();
+
+    qSetMessagePattern("%{file}:%{function}:%{line}: \t%{message}");
+
     
     if(!Game::UseWorkingDir){
         QDir::setCurrent(QCoreApplication::applicationDirPath());
     }
     
-    Game::load();
-
-    
-    qDebug() << "workingDir" << workingDir;
+    Game::load();    
+    if(Game::debugOutput) qDebug() << "workingDir" << workingDir;
     
     QCommandLineParser parser;
     switch (parseCommandLineArgs(parser)) {
@@ -246,7 +300,7 @@ int main(int argc, char *argv[]){
 
     //app.set
     Game::PixelRatio = app.devicePixelRatio();
-    qDebug() << "devicePixelRatio"<< app.devicePixelRatio();
+    if(Game::debugOutput) qDebug() << "devicePixelRatio"<< app.devicePixelRatio();
     app.setStyle(QStyleFactory::create("Fusion"));
     if(!Game::systemTheme){
         //app.setStyle(QStyleFactory::create("Fusion"));
@@ -277,12 +331,19 @@ int main(int argc, char *argv[]){
         Game::StyleRedText = "#FF5555";
     } else {
         QPalette palette = app.palette();
-        palette.setColor(QPalette::Disabled, QPalette::Text , QColor(160,90,64));
-        palette.setColor(QPalette::Disabled, QPalette::WindowText , QColor(160,90,64));
-        palette.setColor(QPalette::Highlight, QColor(160, 90, 64));
-        palette.setColor(QPalette::Inactive, QPalette::HighlightedText, Qt::white);
-        app.setPalette(palette);
-        app.setStyleSheet("QPushButton:checked{background-color: #e0c0a4;} ");
+//        palette.setColor(QPalette::Disabled, QPalette::Text , QColor(160,90,64));
+//        palette.setColor(QPalette::Disabled, QPalette::WindowText , QColor(160,90,64));
+//        palette.setColor(QPalette::Highlight, QColor(160, 90, 64));
+//        palette.setColor(QPalette::Inactive, QPalette::HighlightedText, Qt::white);
+//        app.setPalette(palette);
+//        app.setStyleSheet("QPushButton:checked{background-color: #e0c0a4;} ");
+//        Game::StyleMainLabel = "#c4a480";
+//        Game::StyleGreenButton = "#008800";
+//        Game::StyleRedButton = "#880000";
+//        Game::StyleYellowButton = "#888800";
+//        Game::StyleGreenText = "#55FF55";
+//        Game::StyleRedText = "#FF5555";
+
     }
     
     Game::InitAssets();

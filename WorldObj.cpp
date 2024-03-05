@@ -18,6 +18,7 @@
 #include "StaticObj.h"
 #include "DynTrackObj.h"
 #include "ForestObj.h"
+#include "PolyForestObj.h"
 #include "TransferObj.h"
 #include "TrackObj.h"
 #include "SpeedpostObj.h"
@@ -131,6 +132,10 @@ WorldObj* WorldObj::createObj(int sh) {
         nowy = (WorldObj*) (new ForestObj());
         (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";
         (nowy)->typeID = (nowy)->forest;
+    } else if (sh == TS::PolyForest) {
+        nowy = (WorldObj*) (new PolyForestObj());
+        (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";
+        (nowy)->typeID = (nowy)->polyforest;
     } else if (sh == TS::Transfer || sh == TS::Transfer2) {
         nowy = (WorldObj*) (new TransferObj());
         (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";
@@ -760,13 +765,13 @@ void WorldObj::drawBox(){
         QVector<float> punkty;
         if (!this->getBoxPoints(punkty)) return;
 
-        qDebug() << "Settings Color:" << Game::selectedColor->redF() << Game::selectedColor->greenF() << Game::selectedColor->blueF() ;
+        // if(Game::debugOutput) qDebug() << "Obj Select Color:" << Game::selectedColor->redF() << Game::selectedColor->greenF() << Game::selectedColor->blueF() ;
         
         //// EFO object selected color was 0,0,1
         box.setMaterial(Game::selectedColor->redF(), Game::selectedColor->greenF(), Game::selectedColor->blueF());
         box.init((float*)&punkty[0], punkty.size(), RenderItem::V, GL_LINES);
-        qDebug() << "SelectColor:" << selectColor[0] << selectColor[1] << selectColor[2] ;
-        //box.setLineWidth(3);
+        // if(Game::debugOutput) qDebug() << "Obj Select Color:" << selectColor[0] << selectColor[1] << selectColor[2] ;
+        box.setLineWidth(Game::selectedWidth);
     }
     
     box.render();

@@ -49,6 +49,8 @@
 #include "RouteEditorClient.h"
 #include "RouteClient.h"
 #include "ClientInfo.h"
+#include "StatusWindow.h"
+
 
 RouteEditorGLWidget::RouteEditorGLWidget(QWidget *parent)
 : QOpenGLWidget(parent),
@@ -58,6 +60,9 @@ m_zRot(0) {
     
     this->installEventFilter(this);
 }
+
+
+
 
 
 bool RouteEditorGLWidget::eventFilter(QObject *object, QEvent *event){
@@ -130,7 +135,7 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
 
     camera->update(fps);
     
-    update();
+    update();   
 }
 
 bool RouteEditorGLWidget::initRoute(){
@@ -557,6 +562,7 @@ void RouteEditorGLWidget::paintGL2() {
         emit this->naviInfo(route->getTileObjCount((int) camera->pozT[0], (int) camera->pozT[1]), route->getTileHiddenObjCount((int) camera->pozT[0], (int) camera->pozT[1]));
         emit this->posInfo(camera->getCurrentPos());
         emit this->pointerInfo(aktPointerPos);
+        
     }
 }
 
@@ -631,7 +637,7 @@ void RouteEditorGLWidget::handleSelection() {
         int realy = viewport[3] - (int) y - 1;
         glReadPixels(x, realy, 1, 1, GL_RGBA, GL_FLOAT, &winZ);
 
-        qDebug() << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
+        qDebug() << "640:" << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
         int colorHash = (int) (winZ[0]*255)*256 * 256 + (int) (winZ[1]*255)*256 + (int) (winZ[2]*255);
         qDebug() << colorHash;
         int ww = (colorHash >> 20) & 0xF;
@@ -889,6 +895,8 @@ void RouteEditorGLWidget::keyPressEvent(QKeyEvent * event) {
 
     Undo::StateBeginIfNotExist();
 
+    // EFO Key events
+    
     switch (event->key()) {
         case Qt::Key_Control:
             moveStep = moveMaxStep / 10.0;
@@ -936,28 +944,65 @@ void RouteEditorGLWidget::keyPressEvent(QKeyEvent * event) {
             }
         }
             break;
-        //case Qt::Key_E:
-        //    enableTool("selectTool");
-        //    break;
+
+        /// EFO Added to 
+        case Qt::Key_Escape:        
+            resizeTool = false;
+            translateTool = false;
+            rotateTool = false;
+            emit updStatus(QString("Stat3"), QString(""));            
+            break;
+        
+        /// EFO Added to 
+        case Qt::Key_E:        
+              //    enableTool("selectTool");
+              resizeTool = false;
+              translateTool = false;
+              rotateTool = false;            
+              emit updStatus(QString("Stat3"), QString(""));
+            break;
+
         case Qt::Key_R:
             enableTool("selectTool");
             rotateTool = true;
+            emit updStatus(QString("Stat3"), QString("Rotate:ON"));  /// EFO Added to 
+
             break;
         case Qt::Key_T:
             enableTool("selectTool");
             translateTool = true;
+            emit updStatus(QString("Stat3"), QString("Transform:ON"));  /// EFO Added to 
+
             break;
         case Qt::Key_Y:
             enableTool("selectTool");
             resizeTool = true;
+            emit updStatus(QString("Stat3"), QString("Resize:ON"));   /// EFO Added to 
+
             break;
         case Qt::Key_Q:
             if (keyControlEnabled)
+            {
                 autoAddToTDB = !autoAddToTDB;
+                if(autoAddToTDB == true) emit updStatus(QString("Stat1"), QString("AutoTDB: ON"));   /// EFO Added to 
+                    else     emit updStatus(QString("Stat1"), QString("AutoTDB: OFF"));  /// EFO Added to 
+                break;
+            }
             else if (keyShiftEnabled)
+            {
                 stickPointerToTerrain = !stickPointerToTerrain;
+                if(stickPointerToTerrain == true) emit updStatus(QString("Stat2"), QString("StickToTerrain: ON"));  /// EFO Added to 
+                else     emit updStatus(QString("Stat2"), QString("StickToTerrain: OFF"));  /// EFO Added to 
+                break;
+            }
             else
-                enableTool("placeTool");
+            {   enableTool("placeTool");
+                /// EFO Added to 
+                resizeTool = false;
+                translateTool = false;
+                rotateTool = false;            
+                emit updStatus(QString("Stat3"), QString(""));
+            }
             break;
         case Qt::Key_Home:
             aktPointerPos[1] += 40;
@@ -973,9 +1018,15 @@ void RouteEditorGLWidget::keyPressEvent(QKeyEvent * event) {
                 if (!keyControlEnabled) {
                     this->defaultPaintBrush->direction = -this->defaultPaintBrush->direction;
                     if (this->defaultPaintBrush->direction == 1)
+                    {
                         emit sendMsg(QString("brushDirection"), QString("+"));
+                        emit updStatus(QString("Stat4"), QString("Terrain Brush +")); /// EFO Added to 
+                    }   
                     else
+                    {
                         emit sendMsg(QString("brushDirection"), QString("-"));
+                        emit updStatus(QString("Stat4"), QString("Terrain Brush -"));  /// EFO Added to 
+                    }
                 }
                 break;
             default:
@@ -1367,18 +1418,28 @@ void RouteEditorGLWidget::wheelEvent(QWheelEvent *event) {
 
     if (event->orientation() == Qt::Vertical) {
         if (toolEnabled == "selectTool" || toolEnabled == "placeTool") {
+            /// Move the selected object up or down
             if (selectedObj != NULL) {
                 if (selectedObj->typeObj == GameObj::worldobj) {
                     Undo::StateBeginIfNotExist();
                     Undo::PushGameObjData(selectedObj);
                     ((WorldObj*) selectedObj)->translate(0, numDegrees*moveStep, 0);
                 }
+                else
+                { 
+                /// EFO Move the camera forward or backward if no object selected
+                if(numDegrees != 0)  { camera->moveForward( (numDegrees*10) ); }                
+                }
             }
+        } else {
+            /// EFO Move the camera forward or backward if in free view 
+            if(numDegrees != 0)  { camera->moveForward( (numDegrees*10) ); }
         }
     } else {
-
+        
     }
     event->accept();
+    //qDebug() << "scrollwheel: " << numDegrees;
 }
 
 void RouteEditorGLWidget::mouseReleaseEvent(QMouseEvent* event) {
@@ -1750,6 +1811,16 @@ void RouteEditorGLWidget::showTrkEditr() {
     if (route != NULL)
         route->showTrkEditr();
 }
+
+/// EFO hail mary
+void RouteEditorGLWidget::rebuildTDB() {
+    qDebug() << "REGLW-TDBRebuild1";
+    if (route != NULL)
+        qDebug() << "REGLW-TDBRebuild2";
+        route->rebuildTDB();
+}
+
+
 
 void RouteEditorGLWidget::setTerrainToObj(){
     Undo::StateBegin();

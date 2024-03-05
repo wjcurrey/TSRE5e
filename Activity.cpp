@@ -112,7 +112,7 @@ void Activity::load() {
 
     QString sh;
     pathid.replace("//", "/");
-    qDebug() << pathid;
+    if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
         qDebug() << pathid << "not exist";

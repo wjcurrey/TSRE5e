@@ -56,7 +56,7 @@ Service::~Service() {
 void Service::load(){
     QString sh;
     pathid.replace("//", "/");
-    qDebug() << pathid;
+    if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
         qDebug() << pathid << "not exist";
@@ -228,13 +228,13 @@ void Service::initToPlay(){
     if(pathPointer == NULL){
         QDir dir(Game::root + "/routes/" + Game::route + "/paths");
         int pathPointerId;
-        qDebug() << "pathid" << (pathPointerId = ActLib::AddPath(dir.path(), pathId+".pat"));
+        if(Game::debugOutput) qDebug() << "pathid" << (pathPointerId = ActLib::AddPath(dir.path(), pathId+".pat"));
         pathPointer = ActLib::Paths[pathPointerId];
     }
     if(conPointer == NULL){
         QDir dir(Game::root + "/trains/consists/");
         int conPointerId;
-        qDebug() << "conid" << (conPointerId =  ConLib::addCon(dir.path(), trainConfig+".con"));
+        if(Game::debugOutput) qDebug() << "conid" << (conPointerId =  ConLib::addCon(dir.path(), trainConfig+".con"));
         conPointer = new Consist(ConLib::con[conPointerId], true);
         conPointer->initOnTrack(pathPointer->getStartPositionTXZ(), pathPointer->getStartDirection(), pathPointer->getJunctionDirections());
     }

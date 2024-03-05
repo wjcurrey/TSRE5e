@@ -30,6 +30,9 @@
 #include <QColor>
 #include "TarFile.h"
 #include "Renderer.h"
+#include "RouteEditorWindow.h"
+#include "NaviWindow.h"
+#include "StatusWindow.h"
 
 bool Game::ServerMode = false;
 QString Game::serverLogin = "";
@@ -43,7 +46,7 @@ TerrainLib *Game::terrainLib = NULL;
 
 bool Game::UseWorkingDir = false;
 QString Game::AppName = "TSRE5";
-QString Game::AppVersion = "Trainsim.Com Fork v0.8.002 ";
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.003 ";
 QString Game::AppDataVersion = "0.697";
 QString Game::root = "";
 QString Game::route = "";
@@ -58,7 +61,7 @@ QString Game::ActivityToPlay = "";
 Renderer *Game::currentRenderer = NULL;
 bool Game::playerMode = false;
 bool Game::useNetworkEng = false;
-bool Game::useQuadTree = true;
+bool Game::useQuadTree = false;
 bool Game::useTdbEmptyItems = true;
 int Game::allowObjLag = 1000;
 int Game::maxObjLag = 10;
@@ -67,7 +70,7 @@ int Game::startTileX = 0;
 int Game::startTileY = 0;
 float Game::objectLod = 3000;
 float Game::distantLod = 100000;
-int Game::tileLod = 2;
+int Game::tileLod = 1;
 int Game::start = 0;
 bool Game::ignoreMissingGlobalShapes = false;
 bool Game::deleteTrWatermarks = false;
@@ -102,13 +105,6 @@ bool Game::leaveTrackShapeAfterDelete = false;
 bool Game::renderTrItems = false;
 int Game::newRouteX = -5000;
 int Game::newRouteZ = 15000;
-//EFO added three
-float Game::wireLineHeight = 3;
-float Game::sectionLineHeight = 2.8;
-float Game::terrainTools[] = {1,5,5,9,1,10};
-int   Game::selectedTerrWidth = 2;
-QColor *Game::selectedColor = NULL;
-
 
 bool Game::consoleOutput = false;
 int Game::fpsLimit = 0;
@@ -184,6 +180,22 @@ bool Game::useOnlyPositiveQuaternions = false;
 
 QStringList Game::objectsToRemove;
 QString Game::routeMergeString;
+
+// EFO added 
+float Game::wireLineHeight = 3;
+float Game::sectionLineHeight = 2.8;
+float Game::terrainTools[] = {1,5,5,9,1,10};
+int   Game::selectedWidth = 2;
+int   Game::selectedTerrWidth = 2;
+
+QColor *Game::selectedColor = NULL;
+QColor *Game::selectedTerrColor = NULL;
+QString Game::mainPos = "";
+QString Game::statusPos = "";
+QString Game::naviPos = "";
+
+bool  Game::debugOutput = false;
+bool  Game::legacySupport;
     
 QHash<QString, int> Game::TextureFlags {
         {"None", 0x0},
@@ -253,31 +265,69 @@ void Game::load() {
         return;
     }
     
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
 
     QTextStream in(&file);
     in.setCodec("UTF-8");
     QString line;
     QStringList args;
     QString val;
+    QString skipped;   // save what's being skipped for output later
+
+    qDebug() << "Debug: " << Game::debugOutput;
+    
     while (!in.atEnd()) {
         line = in.readLine();
-        //qDebug() << line;
-        if(line.startsWith("#", Qt::CaseInsensitive)) continue;
+        
+       //qDebug() << line;
+       
+        // EFO  Partial comment stripper if "//" is found after arguments
+        if (line.indexOf("//") >= 0 && line.indexOf("://") <= 0) {
+            skipped = line.mid(line.indexOf("//"),99);
+            line = line.left(line.indexOf("//"));
+        }
+       
+       // EFO Main comment stripper
+       if(line.startsWith("#", Qt::CaseInsensitive)) {  if(Game::debugOutput) qDebug() << "Skipping Settings  # comment: " << skipped;  ; continue;}
+       if(line.startsWith("//", Qt::CaseInsensitive)){  if(Game::debugOutput) qDebug() << "Skipping Settings // comment: " << skipped; ; continue;}
+        
         //args = line.split("=");
         args.clear();
         args.push_back(line.section('=', 0, 0));
         args.push_back(line.section('=', 1));
-        //qDebug() << args[0] << args[1];
+        //if(Game::debugOutput) qDebug() << args[0] << args[1];
+        
+        
         if(args.count() < 2) continue;
-        val = args[0].trimmed();
-        //qDebug() << args[0].trimmed() << " "<< args[1].trimmed();
+        val = args[0].trimmed();       
+        
+        //if(Game::debugOutput) qDebug() << args[0].trimmed() << " "<< args[1].trimmed();
         if(val == "consoleOutput"){
             if(args[1].trimmed().toLower() == "true")
                 Game::consoleOutput = true;
             else
                 Game::consoleOutput = false;
         }
+        if(val == "debugOutput"){
+            if(args[1].trimmed().toLower() == "true")
+                Game::debugOutput = true;
+            else if(args[1].trimmed().toLower() == "ext")
+            {
+                qSetMessagePattern("%{file}:%{function}:%{line}: \t%{message}");
+                Game::debugOutput = true;
+                qDebug() << "Expanded Debugging Enabled";
+                
+            }
+            else
+                Game::debugOutput = false;
+        }        
+        
+        if(val == "legacySupport"){
+            if(args[1].trimmed().toLower() == "true")
+                Game::legacySupport = true;
+        }
+
+        
         if(val == "gameRoot")
             root = args[1].trimmed();
         if(val == "routeName")
@@ -391,11 +441,24 @@ void Game::load() {
             selectedTerrWidth = args[1].trimmed().toInt();
         }
 
+                // EFO configure selectedTerrWidth
+        if(val == "selectedWidth"){
+            selectedWidth = args[1].trimmed().toInt();
+        }
+
+        
         if(val == "selectedColor"){
             selectedColor = new QColor(args[1].trimmed());
             
-        qDebug() << "SelectedColor: " << args[1].trimmed() ;
-        qDebug() << "QColor: " << selectedColor[0] << ","<< selectedColor[1] << ","<< selectedColor[2]  ;        
+        if(Game::debugOutput) qDebug() << "SelectedColor: " << args[1].trimmed() ;
+        //if(Game::debugOutput)  qDebug() << "QColor: " << selectedColor[0] << ","<< selectedColor[1] << ","<< selectedColor[2]  ;        
+        }
+        
+        if(val == "selectedTerrColor"){
+            selectedTerrColor = new QColor(args[1].trimmed());
+            
+        //if(Game::debugOutput) qDebug() << "SelectedTerrColor: " << args[1].trimmed() ;
+        //if(Game::debugOutput) qDebug() << "QColor Terr: " << selectedTerrColor[0] << ","<< selectedTerrColor[1] << ","<< selectedTerrColor[2]  ;        
         }
         
         // EFO Configure Terrain Tools
@@ -639,8 +702,26 @@ void Game::load() {
         if(val == "serverAuth"){
             serverAuth = args[1].trimmed();
         }
+
+        // EFO Configure WindowPos
+        if(val == "mainWindow") {
+//                this->RouteEditorWindow.move(args[1].trimmed().toFloat());
+            mainPos = args[1].trimmed();
+        }
+
+        if(val == "naviWindow") {
+  //          this->NaviWindow.move( args[1].trimmed().toFloat());
+            naviPos = args[1].trimmed();
+        }      
         
-     qDebug() << args[0];
+        if(val == "statusWindow") {
+  //          this->StatusWindow.move( args[1].trimmed().toFloat());
+            statusPos = args[1].trimmed();
+        }
+
+        if(Game::debugOutput) qDebug() << "Skipping Settings comment: " << skipped;
+        
+      // if(Game::debugOutput) qDebug() << args[0] << "=" << args[1];
     }
 
 
@@ -691,7 +772,7 @@ bool Game::checkRoot(QString dir){
     path.replace("//", "/");
     QFile file(path);
     if (!file.exists()) {
-        qDebug () << "/routes not exist: "<< file.fileName();
+        qDebug () << "/routes not exist: "<< dir <<  file.fileName();
         return false;
     }
     path = dir + "/global";

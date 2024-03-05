@@ -16,6 +16,7 @@
 #include <QDateTime>
 #include <QProgressDialog>
 #include <QCoreApplication>
+#include "Game.h"
 
 //int EngLib::jesteng = 0;
 //std::unordered_map<int, Eng*> EngLib::eng;
@@ -87,11 +88,11 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     QDir trainDir;
     trainDir.setFilter(QDir::Files);
     trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
-        qDebug() << "not exist";
+        qDebug() << "Path not exist" << path;
     dir.setFilter(QDir::Dirs);
-    qDebug() << dir.count() <<" dirs";
+    if(Game::debugOutput) qDebug() << dir.count() <<" dirs";
     unsigned long long timeNow = QDateTime::currentMSecsSinceEpoch();
     QStringList dirPaths;
     QStringList engPaths;

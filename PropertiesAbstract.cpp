@@ -65,9 +65,10 @@ void PropertiesAbstract::copyREnabled(){
     clipboard->setText(this->quat.text());
 }
 
+/// EFO appending tileX and tileY
 void PropertiesAbstract::copyPEnabled(){
     QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(this->posX.text()+" "+this->posY.text()+" "+this->posZ.text());
+    clipboard->setText(this->posX.text()+" "+this->posY.text()+" "+this->posZ.text()+" "+this->tX.text()+" "+this->tY.text());
 }
 
 void PropertiesAbstract::copyFEnabled(){
@@ -84,10 +85,10 @@ void PropertiesAbstract::pasteFEnabled(){
     quat.setText(clipboard->text());
 }
 
-
+/// EFO appending tileX and tileY
 void PropertiesAbstract::copyPREnabled(){
     QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(this->posX.text()+" "+this->posY.text()+" "+this->posZ.text()+" "+this->quat.text());
+    clipboard->setText(this->posX.text()+" "+this->posY.text()+" "+this->posZ.text()+" "+this->quat.text()+" "+this->tX.text()+" "+this->tY.text());
 }
 
 void PropertiesAbstract::rotYEnabled(){
@@ -120,17 +121,20 @@ void PropertiesAbstract::pasteREnabled(){
     quat.setText(clipboard->text());
 }
 
+/// EFO where to add tile to copy paste rot -- append to position 3/4
 void PropertiesAbstract::pastePEnabled(){
     if(worldObj == NULL)
         return;
     QClipboard *clipboard = QApplication::clipboard();
     QStringList args = clipboard->text().split(" ");
-    if(args.length() != 3)
+    if(args.length() != 5)  // was 3
         return;
-    float nq[3];
+    float nq[5];  
     nq[0] = args[0].toFloat();
     nq[1] = args[1].toFloat();
     nq[2] = -args[2].toFloat();
+    nq[3] = args[3].toInt();
+    nq[4] = args[4].toInt();
     
     Undo::SinglePushWorldObjData(worldObj);
     worldObj->setPosition((float*)&nq);
@@ -139,16 +143,21 @@ void PropertiesAbstract::pastePEnabled(){
     this->posX.setText(args[0]);
     this->posY.setText(args[1]);
     this->posZ.setText(args[2]);
+    this->tX.text() = nq[3];  
+    this->tY.text() = nq[4];    
 }
 
+/// EFO where to add tile to copy paste rot -- append to position 3/4
 void PropertiesAbstract::pastePREnabled(){
     if(worldObj == NULL)
         return;
     QClipboard *clipboard = QApplication::clipboard();
     QStringList args = clipboard->text().split(" ");
-    if(args.length() != 7)
+    
+    
+    if(args.length() != 9)   // was 7
         return;
-    float nq[3];
+    float nq[5];
     float rq[4];
     nq[0] = args[0].toFloat();
     nq[1] = args[1].toFloat();
@@ -157,8 +166,10 @@ void PropertiesAbstract::pastePREnabled(){
     rq[1] = args[4].toFloat();
     rq[2] = -args[5].toFloat();
     rq[3] = args[6].toFloat();
+    nq[3] = args[8].toInt();
+    nq[4] = args[9].toInt();
     
-    Undo::SinglePushWorldObjData(worldObj);
+        Undo::SinglePushWorldObjData(worldObj);
     worldObj->setPosition((float*)&nq);
     worldObj->setQdirection((float*)&rq);
     worldObj->setModified();
@@ -167,6 +178,11 @@ void PropertiesAbstract::pastePREnabled(){
     this->posY.setText(args[1]);
     this->posZ.setText(args[2]);
     quat.setText(args[3]+" "+args[4]+" "+args[5]+" "+args[6]);
+    this->tX.text() = nq[7];  
+    this->tY.text() = nq[8];        
+
+    if(Game::debugOutput) qDebug() << "PastePRE: " << args;        
+    
 }
 
 void PropertiesAbstract::transformEnabled(){

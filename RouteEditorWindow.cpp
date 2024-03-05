@@ -9,6 +9,7 @@
  */
 
 #include <QtWidgets>
+#include <QStatusBar>
 #include "RouteEditorGLWidget.h"
 #include "RouteEditorWindow.h"
 #include "Game.h"
@@ -47,6 +48,7 @@
 #include "PropertiesActivityPath.h"
 #include "PropertiesConsist.h"
 #include "NaviWindow.h"
+#include "StatusWindow.h"
 #include "ErrorMessagesWindow.h"
 #include "ClientUsersWindow.h"
 #include "ErrorMessagesLib.h"
@@ -60,6 +62,7 @@
 #include "ActivityTimetableWindow.h"
 #include "ActivityTimetableProperties.h"
 #include "RouteEditorClient.h"
+#include "Route.h"
 
 RouteEditorWindow::RouteEditorWindow() {
 
@@ -69,9 +72,12 @@ RouteEditorWindow::RouteEditorWindow() {
     activityTools = new ActivityTools("ActivityTools");
     //naviBox = new NaviBox();
     glWidget = new RouteEditorGLWidget(this);
+    
     shapeViewWindow = new ShapeViewWindow(this);
     aboutWindow = new AboutWindow(this);
     naviWindow = new NaviWindow(this);
+    // statusWindow = new StatusWindow(this);
+    
     errorMessagesWindow = ErrorMessagesLib::GetWindow(this);
     clientUsersWindow = new ClientUsersWindow(this);
     activityEventWindow = new ActivityEventWindow(this);
@@ -104,6 +110,9 @@ RouteEditorWindow::RouteEditorWindow() {
     objProperties["Undefined"] = new PropertiesUndefined;
     
     QWidget* main = new QWidget();
+
+   
+    
     box = new QWidget(this);
     box2 = new QWidget(this);
     box->setFixedWidth(250);
@@ -185,21 +194,31 @@ RouteEditorWindow::RouteEditorWindow() {
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence("Shift+Ctrl+S"));
     QObject::connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
+
     createPathsAction = new QAction(tr("&Create Debug Paths"), this);
     QObject::connect(createPathsAction, SIGNAL(triggered()), this, SLOT(createPaths()));
+    
     reloadRefAction = new QAction(tr("&Reload Ref File"), this);
     QObject::connect(reloadRefAction, SIGNAL(triggered()), this, SLOT(reloadRef()));
+    
     exitAction = new QAction(tr("&Exit"), this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+    
     trkEditr = new QAction(tr("E&dit route settings"), this);
     QObject::connect(trkEditr, SIGNAL(triggered()), glWidget, SLOT(showTrkEditr()));
+    
+    rebuildAction = new QAction(tr("Re&build TDB (experimental)"), this);
+    QObject::connect(rebuildAction, SIGNAL(triggered()), glWidget, SLOT(rebuildTDB()));
+    
+    
     if(Game::serverClient == NULL){
         routeMenu = menuBar()->addMenu(tr("&Route"));
         routeMenu->addAction(saveAction);
         routeMenu->addAction(reloadRefAction);
         routeMenu->addAction(createPathsAction);
         routeMenu->addAction(trkEditr);
+        //routeMenu->addAction(rebuildAction);    // Not yet ready
         routeMenu->addAction(exitAction);
     } else {
         routeMenu = menuBar()->addMenu(tr("&Server"));
@@ -314,7 +333,7 @@ RouteEditorWindow::RouteEditorWindow() {
     activityAction->setShortcut(QKeySequence("F4"));
     toolsMenu->addAction(activityAction);
     QObject::connect(activityAction, SIGNAL(triggered(bool)), this, SLOT(showToolsActivity(bool)));
-    // Settigs
+    // Settings
     terrainCameraAction = GuiFunct::newMenuCheckAction(tr("&Stick Camera To Terrain"), this); 
     terrainCameraAction->setChecked(Game::cameraStickToTerrain);
     terrainCameraAction->setShortcut(QKeySequence("/"));
@@ -561,6 +580,11 @@ RouteEditorWindow::RouteEditorWindow() {
     if(Game::serverClient != NULL)
         QObject::connect(Game::serverClient, SIGNAL(refreshObjLists()),
                       objTools, SLOT(refreshObjLists()));
+    
+     /// EFO Status Update  changed to naviWindow
+      QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));   
+      QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));         
+    
 }
 
 void RouteEditorWindow::keyPressEvent(QKeyEvent *e) {
@@ -575,7 +599,7 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     QVector<QString> unsavedItems;
     glWidget->getUnsavedInfo(unsavedItems);
     if(unsavedItems.size() == 0){
-        qDebug() << "nic do zapisania";
+        qDebug() << "Nothing to Save";
         emit exitNow();
         event->accept();
         SoundManager::CloseAl();
@@ -583,7 +607,7 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
         return;
     }
     
-    UnsavedDialog unsavedDialog;
+    UnsavedDialog unsavedDialog;   /// EFO need to add the stwqc here when terrain and world are split
     unsavedDialog.setWindowTitle("Save changes?");
     unsavedDialog.setMsg("Save changes in route?");
     for(int i = 0; i < unsavedItems.size(); i++){
@@ -601,7 +625,8 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
         qApp->quit();
         return;
     }
-    
+
+    //// EFO  need to flesh this out for saving terrain and world separately
     save();
 
     emit exitNow();
@@ -884,11 +909,14 @@ void RouteEditorWindow::showRoute(){
     }
 }
 
+// EFO Move windows
 void RouteEditorWindow::show(){
-    naviWindow->move(0, this->height() - naviWindow->height() );
+//    naviWindow->move(0,800);
+//    statusWindow->move(0,500);
     
     if(!Game::playerMode){
         naviWindow->show();
+        // statusWindow->show();   // EFO
         //errorMessagesWindow->show();
         //errorMessagesWindow->refreshErrorList();
     }

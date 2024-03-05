@@ -78,7 +78,7 @@ void TDB::loadTdb(){
     // EFO Adds
     lwireLineHeight = Game::wireLineHeight;
     lsectionLineHeight = Game::sectionLineHeight;
-    qDebug() << "Line Heights set" << lsectionLineHeight << " " << lwireLineHeight;
+    if(Game::debugOutput) qDebug() << "Line Heights set" << lsectionLineHeight << " " << lwireLineHeight;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         if (sh == "trackdb") {
             loadUtf16Data(data);
@@ -2442,9 +2442,9 @@ void TDB::getLine(float* &ptr, Vector3f p, Vector3f o, int idx, int id, int vid,
     Mat4::rotate(matrix, matrix, o.x, 1, 0, 0);
 
     /// Wire
-    // EFO Adds
+    // EFO don't add lwireLineHeight for 0 here -- it's used for other things like platform and siding objects
     if(tsection->sekcja[idx] != NULL){
-        tsection->sekcja[idx]->drawSection(ptr, matrix, lwireLineHeight, id, vid, offset, step);
+        tsection->sekcja[idx]->drawSection(ptr, matrix, 0, id, vid, offset, step);
     }
 }
 

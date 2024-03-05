@@ -769,11 +769,11 @@ void SpeedpostObj::renderTritems(GLUU* gluu, int selectionColor){
         float minlval = 9999;
         
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(0);
+            pointer3d = new TrackItemObj(3);  // EFO switching to the new shape
             pointer3d->setMaterial(0.7,0.7,0.7);
         }
         if(pointer3dSelected == NULL){
-            pointer3dSelected = new TrackItemObj(0);
+            pointer3dSelected = new TrackItemObj(3);   // EFO switching to the new shape
             pointer3dSelected->setMaterial(0.9,0.9,0.9);
         }
 
@@ -923,6 +923,6 @@ for(int i = 0; i < this->trItemId.size(); i+=2)
 *(out) << "		FileName ( "<<ParserX::AddComIfReq(this->fileName)<<" )\n";
 *(out) << "		Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<-this->position[2]<<" )\n";
 *(out) << "		QDirection ( "<<this->qDirection[0]<<" "<<this->qDirection[1]<<" "<<-this->qDirection[2]<<" "<<this->qDirection[3]<<" )\n";
-*(out) << "		VDbId ( "<<this->vDbId<<" )\n";
+if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";  // EFO 
 *(out) << "	)\n";
 }

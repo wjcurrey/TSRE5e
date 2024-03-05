@@ -36,6 +36,9 @@ public slots:
     void mkrFilesSelected(QString item);
     void mkrListSelected(QString item);
 
+    void recStatus(QString statName, QString statVal );       
+    
+    
 signals:
     void jumpTo(PreciseTileCoordinate*);
     void sendMsg(QString name);
@@ -63,6 +66,14 @@ private:
     QLineEdit pzBox;
     QLabel tileInfo;
     QString lastEdit = "";
+
+
+    /// EFO New
+    QLineEdit status1;
+    QLineEdit status2;
+    QLineEdit status3;
+    QLineEdit status4;        
+    ///
     
     int lastTX = 0; 
     int lastTZ = 0;

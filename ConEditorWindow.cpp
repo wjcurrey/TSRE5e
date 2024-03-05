@@ -898,7 +898,7 @@ void ConEditorWindow::closeEvent( QCloseEvent *event )
     con1->getUnsaed(unsavedConIds);
     con1->getUnsaedAct(unsavedActIds);
     if(unsavedConIds.size()+unsavedActIds.size() == 0){
-        qDebug() << "nic do zapisania";
+        qDebug() << "Nothing to Save";
         event->accept();
         return;
     }

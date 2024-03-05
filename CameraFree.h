@@ -48,6 +48,7 @@ public:
     void MouseMove(QMouseEvent* e);
     void MouseDown(QMouseEvent* e);
     void MouseUp(QMouseEvent* e);
+    void wheelEvent(QWheelEvent *event);
     void keyDown(QKeyEvent * e);
     void keyUp(QKeyEvent * e);
     void update(float fps);

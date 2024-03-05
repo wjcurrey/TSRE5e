@@ -27,14 +27,32 @@ int MapWindow::isAlpha = 0;
 
 MapWindow::MapWindow() : QDialog() {
 
-    mapServicesCombo.setMaximumWidth(130);
+      
+    mapServicesCombo.setMaximumWidth(230);
     mapServicesCombo.setStyleSheet("combobox-popup: 0;");
     mapServicesCombo.addItem("OSM Vector", 0);
     mapServices.push_back(new MapDataOSM());
-    mapServicesCombo.addItem("Raster Images Z17", 1);
+
+    // EFO 
+    QString provider = "";    
+    if(Game::imageMapsUrl.toLower().contains("google")) 
+        provider = "Google "; 
+    if(Game::imageMapsUrl.toLower().contains("mapbox"))
+        provider = "MapBox "; 
+    
+    // EFO hide if no provider
+    if(provider.length() > 1)
+    {
+    mapServicesCombo.addItem(provider + " Images Z17", 1);
     mapServices.push_back(new MapDataUrlImage(17));
-    mapServicesCombo.addItem("Raster Images Z18", 2);
+    mapServicesCombo.addItem(provider + " Images Z18", 2);
     mapServices.push_back(new MapDataUrlImage(18));
+    }
+    else
+    {
+    mapServicesCombo.addItem("Missing URL in Settings.txt", 1);    
+    mapServices.push_back(new MapDataUrlImage(18));
+    }
     
     loadButton = new QPushButton("Load", this);
     QPushButton *saveButton = new QPushButton("Save to disk", this);
@@ -247,4 +265,3 @@ bool MapWindow::LoadMapFromDisk(int x, int z){
 
 MapWindow::~MapWindow() {
 }
-

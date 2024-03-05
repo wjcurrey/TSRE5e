@@ -559,7 +559,7 @@ void PlatformObj::render(GLUU* gluu, float lod, float posx, float posz, float* p
         Mat4::multiply(gluu->mvMatrix, gluu->mvMatrix, matrix);
         gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(4);  /// was type 1 
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         pointer3d->render(selectionColor);
@@ -616,8 +616,8 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
     }
 
     if(line == NULL){
-        if(spointer3d == NULL) spointer3d = new TrackItemObj();
-        if(spointer3dSelected == NULL) spointer3dSelected = new TrackItemObj();
+        if(spointer3d == NULL) spointer3d = new TrackItemObj(4);   /// was empty
+        if(spointer3dSelected == NULL) spointer3dSelected = new TrackItemObj(4);   /// was empty
 
         makelineShape();
         
@@ -849,7 +849,7 @@ void PlatformObj::save(QTextStream* out) {
     *(out) << "		StaticFlags ( " << flags << " )\n";
     *(out) << "		Position ( " << this->position[0] << " " << this->position[1] << " " << -this->position[2] << " )\n";
     *(out) << "		QDirection ( " << this->qDirection[0] << " " << this->qDirection[1] << " " << -this->qDirection[2] << " " << this->qDirection[3] << " )\n";
-    *(out) << "		VDbId ( " << this->vDbId << " )\n";
+    if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";
     if (this->staticDetailLevel > -1)
         *(out) << "		StaticDetailLevel ( " << this->staticDetailLevel << " )\n";
     *(out) << "	)\n";

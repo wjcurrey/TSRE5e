@@ -16,6 +16,9 @@
 #include "CoordsMkr.h"
 #include "CoordsKml.h"
 #include "Game.h"
+#include "Route.h"
+#include "RouteEditorGLWidget.h"
+#include "ShapeLib.h"
 
 NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     this->setWindowFlags(Qt::WindowType::Tool);
@@ -23,6 +26,10 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     this->setFixedWidth(300);
     this->setFixedHeight(180);
     this->setWindowTitle(tr("Navi Window"));
+    QStringList winPos = Game::naviPos.split(","); 
+    if(winPos.count() > 1) this->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
+
+    
     markerFiles.setStyleSheet("combobox-popup: 0;");
     markerFiles.view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     markerList.setStyleSheet("combobox-popup: 0;");
@@ -43,6 +50,19 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     QLabel *lonLabel = new QLabel("lon", this);
     QLabel *empty = new QLabel(" ", this);
     
+    /// EFO New
+    status1.setText("");
+    status2.setText("");
+    status3.setText("");
+    status4.setText("");
+    
+    status1.setEnabled(false);
+    status2.setEnabled(false);
+    status3.setEnabled(false);
+    status4.setEnabled(false);
+    
+    ///
+    
     QLabel *label1 = new QLabel("Position:");
     label1->setContentsMargins(3,0,0,0);
     label1->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
@@ -54,6 +74,22 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     v->addWidget(&markerList);
     
     QGridLayout *vbox = new QGridLayout;
+
+
+/// EFO    
+    vbox->setSpacing(2);
+    vbox->setContentsMargins(3,0,1,0);    
+    //int row = 0;
+    vbox->addWidget(&status1,0,0);
+    vbox->addWidget(&status2,1,0);
+    vbox->addWidget(&status3,0,1);
+    vbox->addWidget(&status4,1,1);
+    v->addItem(vbox);    
+
+    
+    vbox = new QGridLayout;
+    /// EFO end
+    
     vbox->setSpacing(2);
     vbox->setContentsMargins(3,0,1,0);    
     vbox->addWidget(pointerPosLabel,0,0);
@@ -155,6 +191,7 @@ void NaviWindow::jumpTileSelected(){
         aCoords->wZ = -aCoords->wZ;
         emit jumpTo(aCoords);
     }
+    
 
 }
 
@@ -236,3 +273,14 @@ NaviWindow::~NaviWindow() {
 void NaviWindow::hideEvent(QHideEvent *e){
     emit windowClosed();
 }
+
+void NaviWindow::recStatus(QString statName, QString statVal ){   
+    //qDebug() << "status: " << statVal;
+    // this->status1->setText(QString(statVal));
+
+    if(statName.contains("Stat1"))    { status1.setText(statVal); }    
+    if(statName.contains("Stat2")) { status2.setText(statVal); }
+    if(statName.contains("Stat3"))    { status3.setText(statVal); }
+    if(statName.contains("Stat4"))    { status4.setText(statVal); }
+}
+    

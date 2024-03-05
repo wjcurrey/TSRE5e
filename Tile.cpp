@@ -184,6 +184,7 @@ void Tile::loadInit(){
 void Tile::updateTrackSectionInfo(QHash<unsigned int, unsigned int> shapes, QHash<unsigned int, unsigned int> sect){
     int count = 0;
     for (auto it = obiekty.begin(); it != obiekty.end(); ++it) {
+        qDebug() << "Tile-UpdTrackSectInfo ";
         WorldObj* obj = (WorldObj*) it->second;
         if(obj == NULL) 
             continue;
@@ -511,14 +512,14 @@ void Tile::ViewDbSphere::set(int sh, FileBuffer* data){
 }
 
 void Tile::ViewDbSphere::save(QTextStream* out, const QString offset){
-*(out) << offset+"ViewDbSphere (\n";
-*(out) << offset+"	VDbId ( "<<this->vDbId<<" )\n";
-*(out) << offset+"	Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<this->position[2]<<" )\n";
-*(out) << offset+"	Radius ( "<<this->radius<<" )\n";
-for(int i = 0; i < this->viewDbSphere.size(); i++){
-    this->viewDbSphere[i].save(out, offset + "	");
-}
-*(out) << offset+")\n";
+// *(out) << offset+"ViewDbSphere (\n";
+// *(out) << offset+"	VDbId ( "<<this->vDbId<<" )\n";
+// *(out) << offset+"	Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<this->position[2]<<" )\n";
+// *(out) << offset+"	Radius ( "<<this->radius<<" )\n";
+// for(int i = 0; i < this->viewDbSphere.size(); i++){
+//    this->viewDbSphere[i].save(out, offset + "	");
+//}
+//*(out) << offset+")\n";
 }
 
 void Tile::transalteObj(float px, float py, float pz, int uid) {
@@ -656,6 +657,7 @@ void Tile::saveToStream(QTextStream &out){
     out << ")";
 }
 
+/// EFO Saving out the World file W aka Tile
 void Tile::save() {
     QString sh;
     QString path;
@@ -673,11 +675,11 @@ void Tile::save() {
     out << "Tr_Worldfile (\n";
 
     QString offset = "";
-    if(!Game::deleteViewDbSpheres && this->vDbIdCount > 0){
-        out << "	VDbIdCount ( "<<this->vDbIdCount<<" )\n";
-        for(int i = 0; i < this->viewDbSphere.size(); i++){
-            this->viewDbSphere[i].save(&out, offset + "	");
-        }
+    if((!Game::deleteViewDbSpheres || Game::legacySupport) && this->vDbIdCount > 0){
+         out << "	VDbIdCount ( "<<this->vDbIdCount<<" )\n";
+         for(int i = 0; i < this->viewDbSphere.size(); i++){
+             this->viewDbSphere[i].save(&out, offset + "	");
+         }
     }
 
     if(!Game::sortTileObjects){

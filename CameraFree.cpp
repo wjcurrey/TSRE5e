@@ -15,6 +15,9 @@
 #include "GameObj.h"
 #include "GeoCoordinates.h"
 #include "TerrainLib.h"
+#include "TDB.h"
+#include "Route.h"
+#include "Camera.h"
 
 CameraFree::CameraFree(float* pt) {
     pozT = pt;
@@ -293,6 +296,7 @@ void CameraFree::check_coords() {
         if(h + 2 > playerPos[1])
             playerPos[1] = h + 2;
     }
+    
 }
 
 void CameraFree::MouseMove(QMouseEvent* e) {
@@ -325,6 +329,8 @@ void CameraFree::MouseUp(QMouseEvent* e) {
     starex = e->x();
     starey = e->y();
 }
+
+
 
 void CameraFree::keyUp(QKeyEvent * e) {
     int code = e->key();

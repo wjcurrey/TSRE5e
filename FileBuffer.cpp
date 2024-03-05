@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <string> 
 #include <algorithm>
+#include "Game.h"
 
 FileBuffer::FileBuffer() {
     this->off = 0;
@@ -116,7 +117,7 @@ void FileBuffer::findToken(int id) {
 
 void FileBuffer::toUtf16(){
     if(isBOM()) return;
-    qDebug() << "converting to UTF16";
+    if(Game::debugOutput) qDebug() << "converting to UTF16";
     // 
     unsigned char * newData = new unsigned char[length * 2];
     for(int i = 0; i < length; i++){
@@ -149,7 +150,7 @@ bool FileBuffer::insertFile(QString incPath, QString alternativePath, QString* l
             return false;
         }
     }
-    qDebug() << incPath;
+    if(Game::debugOutput) qDebug() << incPath;
     if(loaded != NULL){
         *loaded = incPath;
     }

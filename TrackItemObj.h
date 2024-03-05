@@ -17,6 +17,9 @@ class TrackItemObj : public OglObj {
 public:
     TrackItemObj(int type = 0);
     TrackItemObj(const TrackItemObj& orig);
+    
+    void translate(float px, float py, float pz);    
+    
     virtual ~TrackItemObj();
 private:
 

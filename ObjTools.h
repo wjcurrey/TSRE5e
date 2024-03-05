@@ -65,6 +65,11 @@ signals:
     void sendMsg(QString name, int val);
     void sendMsg(QString name, float val);
     void sendMsg(QString name, QString val);
+
+    /// EFO Status updates
+    void updStatus(QString statName, QString statValue);
+    
+
     
 private:
     Route* route = NULL;

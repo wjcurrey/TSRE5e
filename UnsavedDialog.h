@@ -27,12 +27,16 @@ public:
     
 public slots:
     void ok();
+    void okt();
+    void okw();    
     void cancel();
     void exit();
     
 private:
     QLabel infoLabel;
     QPushButton* bok;
+    QPushButton* bokt;
+    QPushButton* bokw;
     QPushButton* bexit;
     QPushButton* bcancel;
 };

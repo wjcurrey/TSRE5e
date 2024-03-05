@@ -163,7 +163,7 @@ PropertiesDyntrack::PropertiesDyntrack() {
         }
         sSectR[i].setDecimals(3);  /// EFO increasing precision from decimals(2)
         sSectR[i].setMinimum(15);
-        sSectR[i].setMaximum(5000);
+        sSectR[i].setMaximum(15000);   //EFO increasing max radius to 15000 from 5000
         sSectR[i].setSingleStep(1.0);
     }
     
@@ -300,7 +300,7 @@ void PropertiesDyntrack::updateObj(GameObj* obj){
 }
 
 void PropertiesDyntrack::chSectEnabled(int idx){
-    qDebug() << "chSectEnabled";
+    if(Game::debugOutput) qDebug() << "chSectEnabled";
     if(dobj == NULL){
         infoLabel->setText("NULL");
         return;
@@ -333,7 +333,7 @@ void PropertiesDyntrack::chSectEnabled(int idx){
 }
 
 void PropertiesDyntrack::sSectEnabled(int idx){
-    qDebug() << "sSectEnabled";
+    if(Game::debugOutput) qDebug() << "sSectEnabled";
     if(dobj == NULL){
         infoLabel->setText("NULL");
         return;
@@ -368,7 +368,7 @@ void PropertiesDyntrack::flexData(int x, int z, float* p){
     emit enableTool("");
     if(dobj == NULL) return;
     
-    qDebug() << "flex1";
+    if(Game::debugOutput) qDebug() << "flex1";
     
     float p1[3];
     float p2[3];
@@ -383,7 +383,7 @@ void PropertiesDyntrack::flexData(int x, int z, float* p){
     float elev = 0;
     
     bool success = Flex::AutoFlex(dobj->x, dobj->y, (float*)p1, x, z, (float*)p2, (float*)dyntrackData, elev);
-    qDebug() << "flex2" << elev;
+    if(Game::debugOutput) qDebug() << "flex2" << elev;
     dobj->set("dyntrackdata", (float*)dyntrackData);
     dobj->setElevation(elev);
     this->showObj(dobj);
@@ -466,16 +466,16 @@ void PropertiesDyntrack::elevPromEnabled(QString val){
     }
     //oneInXm
     float oneInXm = 1000.0/prom;
-    qDebug () << "oneInXm" << oneInXm;
-    qDebug () << "Game::trackElevationMaxPm" << Game::trackElevationMaxPm;
+    if(Game::debugOutput) qDebug () << "oneInXm" << oneInXm;
+    if(Game::debugOutput) qDebug () << "Game::trackElevationMaxPm" << Game::trackElevationMaxPm;
     this->elev1inXm.setText(QString::number(oneInXm));
     //prog 
     float prog = qRadiansToDegrees(qAtan(prom/1000.0));
-    qDebug () << "prog" << prog;
+    if(Game::debugOutput) qDebug () << "prog" << prog;
     this->elevProg.setText(QString::number(prog));
     //prop 
     float prop = prom/10.0;
-    qDebug () << "prop" << prop;
+    if(Game::debugOutput) qDebug () << "prop" << prop;
     this->elevProp.setText(QString::number(prop));  
     
     Undo::SinglePushWorldObjData(worldObj);
@@ -512,15 +512,15 @@ void PropertiesDyntrack::elev1inXmEnabled(QString val){
         return;
     }
     
-    qDebug () << "Game::trackElevationMaxPm: " << Game::trackElevationMaxPm;
+    if(Game::debugOutput) qDebug () << "Game::trackElevationMaxPm: " << Game::trackElevationMaxPm;
     this->elevProm.setText(QString::number(prom));  
     //prop 
     float prop = prom/10.0;
-    qDebug () << "prop" << prop;
+    if(Game::debugOutput) qDebug () << "prop" << prop;
     this->elevProp.setText(QString::number(prop));
     //prog 
     float prog = qRadiansToDegrees(qAtan(prom/1000.0));
-    qDebug () << "prog" << prog;
+    if(Game::debugOutput) qDebug () << "prog" << prog;
     this->elevProg.setText(QString::number(prog));
     
     Undo::SinglePushWorldObjData(worldObj);
@@ -541,16 +541,16 @@ void PropertiesDyntrack::elevProgEnabled(QString val){
     }
     //prop 
     float prop = qTan(qDegreesToRadians(prog))*100.0;
-    qDebug () << "prop" << prop;
-    qDebug () << "prog" << prog;
+    if(Game::debugOutput) qDebug () << "prop" << prop;
+    if(Game::debugOutput) qDebug () << "prog" << prog;
     this->elevProp.setText(QString::number(prop));
     //prom
     float prom = prop*10.0;
-    qDebug () << "prom" << prom;
+    if(Game::debugOutput) qDebug () << "prom" << prom;
     this->elevProm.setText(QString::number(prom));
     //oneInXm
     float oneInXm = 1000.0/prom;
-    qDebug () << "oneInXm" << oneInXm;
+    if(Game::debugOutput) qDebug () << "oneInXm" << oneInXm;
     this->elev1inXm.setText(QString::number(oneInXm));
      
     Undo::SinglePushWorldObjData(worldObj);
@@ -570,17 +570,17 @@ void PropertiesDyntrack::elevPropEnabled(QString val){
         return;}
     //prom    
     float prom = prop*10.0;
-    qDebug () << "prop" << prop;
-    qDebug () << "prom" << prom;
-    qDebug () << "Game::trackElevationMaxPm/10.0: " << Game::trackElevationMaxPm/10.0;
+    if(Game::debugOutput) qDebug () << "prop" << prop;
+    if(Game::debugOutput) qDebug () << "prom" << prom;
+    if(Game::debugOutput) qDebug () << "Game::trackElevationMaxPm/10.0: " << Game::trackElevationMaxPm/10.0;
     this->elevProm.setText(QString::number(prom));
     //prog 
     float prog = qRadiansToDegrees(qAtan(prom/1000.0));
-    qDebug () << "prog" << prog;
+    if(Game::debugOutput) qDebug () << "prog" << prog;
     this->elevProg.setText(QString::number(prog));
     //oneInXm
     float oneInXm = 1000.0/prom;
-    qDebug () << "oneInXm" << oneInXm;
+    if(Game::debugOutput) qDebug () << "oneInXm" << oneInXm;
     this->elev1inXm.setText(QString::number(oneInXm));
     
     Undo::SinglePushWorldObjData(worldObj);

@@ -474,7 +474,7 @@ void ActivityTools::conFilesShowEnabled(QString val){
     if(actShow.currentIndex() < 0)
         return;
     QString file = conFilesShow.currentData().toString();
-    qDebug() << file;
+    if(Game::debugOutput) qDebug() << file;
     int id = actShow.currentData().toInt();
     if(ActLib::Act[id] == NULL)
         return;
@@ -485,7 +485,7 @@ void ActivityTools::actPlayEnabled(){
     if(actShow.currentIndex() < 0)
         return;
     int id = actShow.currentData().toInt();
-    qDebug() << "id" << id;
+    if(Game::debugOutput) qDebug() << "id" << id;
     Activity *a = ActLib::Act[id];
     
     if(a == NULL)
@@ -499,7 +499,7 @@ void ActivityTools::actSaveEnabled(){
     QVector<QString> unsavedItems;
     ActLib::GetUnsavedInfo(unsavedItems);
     if(unsavedItems.size() == 0){
-        qDebug() << "nic do zapisania";
+        qDebug() << "Nothing to Save";
         return;
     }
     
@@ -520,7 +520,7 @@ void ActivityTools::activitySelected(QString n){
     if(actShow.currentIndex() < 0)
         return;
     int id = actShow.currentData().toInt();
-    qDebug() << "id" << id;
+    if(Game::debugOutput) qDebug() << "id" << id;
     Consist *e;
     Activity *a = ActLib::Act[id];
     
@@ -666,7 +666,7 @@ void ActivityTools::actPathsEditToolEnabled(){
     for(int i = 0; i < route->path.size(); i++){
         route->path[i]->unselect();
     }
-    qDebug() << "aa";
+    if(Game::debugOutput) qDebug() << "aa";
     //route->path[currentPathId]->select();
     emit objectSelected(route->path[currentPathId]);
 }

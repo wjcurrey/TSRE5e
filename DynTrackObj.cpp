@@ -90,7 +90,7 @@ void DynTrackObj::rotate(float x, float y, float z){
     this->tRotation[1] += y;
     if(matrix3x3 != NULL) matrix3x3 = NULL;
 
-    qDebug() << "rot" << x << y << z;
+    if(Game::debugOutput) qDebug() << "rot" << x << y << z;
     float vect2[3];
     float vect[3];
     float quat[4];
@@ -109,8 +109,8 @@ void DynTrackObj::rotate(float x, float y, float z){
     Vec3::transformQuat(reinterpret_cast<float*>(&vect), this->endp, this->qDirection);
     Vec3::transformQuat(reinterpret_cast<float*>(&vect2), this->endp, quat);
 
-    qDebug() << this->endp[0] << " "<< vect[0] << " " << vect2[0];
-    qDebug() << this->endp[2] << " "<< vect[2] << " " << vect2[2];
+    if(Game::debugOutput) qDebug() << this->endp[0] << " "<< vect[0] << " " << vect2[0];
+    if(Game::debugOutput) qDebug() << this->endp[2] << " "<< vect[2] << " " << vect2[2];
     
     vect[0] = (vect2[0] - vect[0]);
     vect[2] = (vect2[2] - vect[2]);
@@ -473,7 +473,7 @@ if(this->jNodePosn!=NULL)
 *(out) << "		StaticFlags ( "<<ParserX::MakeFlagsString(this->staticFlags)<<" )\n";
 *(out) << "		Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<-this->position[2]<<" )\n";
 *(out) << "		QDirection ( "<<this->qDirection[0]<<" "<<this->qDirection[1]<<" "<<-this->qDirection[2]<<" "<<this->qDirection[3]<<" )\n";
-*(out) << "		VDbId ( "<<this->vDbId<<" )\n";
+if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";  // EFO 
 if(this->staticDetailLevel > -1)
 *(out) << "		StaticDetailLevel ( "<<this->staticDetailLevel<<" )\n";
 *(out) << "	)\n";

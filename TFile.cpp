@@ -13,6 +13,7 @@
 #include <QFile>
 #include "ReadFile.h"
 #include <QDataStream>
+#include "Game.h"
 
 TFile::TFile() {
     loaded = false;
@@ -89,7 +90,7 @@ void TFile::setBufferNames(QString name){
 
 bool TFile::readT(QString fSfile) {
         fSfile.replace("//","/");
-        qDebug() << "T File "<< fSfile;
+        if(Game::debugOutput) qDebug() << "T File "<< fSfile;
         QFile file(fSfile);
         if (!file.open(QIODevice::ReadOnly)){
             //qDebug() << "fail t file "<< fSfile;
@@ -563,10 +564,10 @@ void TFile::removeMat(int id){
             tdata[j*13+0+6] = id;
     }
     
-    qDebug() << *materials[id].name;
+    if(Game::debugOutput) qDebug() << *materials[id].name;
     materials[id] = materials[materialsCount-1];
     amaterials[id] = amaterials[materialsCount-1];
-    qDebug() << *materials[id].name;
+    if(Game::debugOutput) qDebug() << *materials[id].name;
     materialsCount--;
 }
 

@@ -553,7 +553,12 @@ void TrackObj::save(QTextStream* out){
 *(out) << "		Elevation ( "<<this->elevation<<" )\n";
 if(this->jNodePosn.size() != 0)
     for(int i = 0; i < this->jNodePosn.size(); i++ ){
+        // EFO JNodPosN Fix to match position
+        if (this->jNodePosn[i][2] == this->position[0] && this->jNodePosn[i][4] == -this->position[2])
+        {
         *(out) << "		JNodePosn ( "<<this->jNodePosn[i][0]<<" "<<this->jNodePosn[i][1]<<" "<<this->jNodePosn[i][2]<<" "<<this->jNodePosn[i][3]<<" "<<this->jNodePosn[i][4]<<" )\n";
+         i = 9999;  // only need one, so skip the rest
+        }
     }
 *(out) << "		CollideFlags ( "<<this->collideFlags<<" )\n";
 if(this->collideFunction > 0 )
@@ -567,7 +572,7 @@ if(this->matrix3x3!=NULL)
 *(out) << "		Matrix3x3 ( "<<this->matrix3x3[0]<<" "<<this->matrix3x3[1]<<" "<<this->matrix3x3[2]<<" "<<this->matrix3x3[3]<<" "<<this->matrix3x3[4]<<" "<<this->matrix3x3[5]<<" "<<this->matrix3x3[6]<<" "<<this->matrix3x3[7]<<" "<<this->matrix3x3[8]<<" )\n";
 else                        
 *(out) << "		QDirection ( "<<this->qDirection[0]<<" "<<this->qDirection[1]<<" "<<-this->qDirection[2]<<" "<<this->qDirection[3]<<" )\n";
-*(out) << "		VDbId ( "<<this->vDbId<<" )\n";
+if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";  // EFO 
 if(this->staticDetailLevel > -1)
 *(out) << "		StaticDetailLevel ( "<<this->staticDetailLevel<<" )\n";
 *(out) << "	)\n";

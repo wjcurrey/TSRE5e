@@ -40,7 +40,7 @@ int ConLib::addCon(QString path, QString name) {
                 return (int)it->first;
             }
     }
-    qDebug() << "Nowy " << jestcon << " con: " << pathid;
+    qDebug() << "New " << jestcon << " con: " << pathid;
 
     con[jestcon] = new Consist(pathid, path, name);
 

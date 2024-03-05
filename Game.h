@@ -151,13 +151,7 @@ public:
     static bool useSuperelevation;
     static bool soundEnabled;
     static bool fullscreen;
-        
-    static float wireLineHeight;
-    static float sectionLineHeight;
-    static float terrainTools[];
-    static int selectedTerrWidth;
-    static QColor *selectedColor;
-    
+            
     static float fogDensity;// = 0.7;
     static float shadow1Res;
     static float shadow1Bias;
@@ -191,6 +185,21 @@ public:
     
     static QString routeMergeString;
     static QStringList objectsToRemove;
+    
+    // EFO Adds
+    static float wireLineHeight;
+    static float sectionLineHeight;
+    static float terrainTools[];
+    static int selectedTerrWidth;
+    static int selectedWidth;    
+    static QColor *selectedColor;
+    static QColor *selectedTerrColor;    
+    static QString mainPos;
+    static QString statusPos;
+    static QString naviPos;
+    static bool debugOutput;
+    static bool legacySupport;
+
     
 private:
     //static RouteEditorWindow* window;

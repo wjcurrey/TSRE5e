@@ -476,7 +476,7 @@ if(this->staticFlags != 0)
 *(out) << "		StaticFlags ( "<<ParserX::MakeFlagsString(this->staticFlags)<<" )\n";
 *(out) << "		Position ( "<<this->position[0]<<" "<<this->position[1]<<" "<<-this->position[2]<<" )\n";
 *(out) << "		QDirection ( "<<this->qDirection[0]<<" "<<this->qDirection[1]<<" "<<-this->qDirection[2]<<" "<<this->qDirection[3]<<" )\n";
-*(out) << "		VDbId ( "<<this->vDbId<<" )\n";
+if(Game::legacySupport)   *(out) << "		VDbId ( " << this->vDbId << " )\n";  // EFO 
 if(this->staticDetailLevel > -1)
 *(out) << "		StaticDetailLevel ( "<<this->staticDetailLevel<<" )\n";
 *(out) << "	)\n";

@@ -489,14 +489,20 @@ void ObjTools::lastItemsListSelected(QListWidgetItem * item){
 
 void ObjTools::selectToolEnabled(bool val){
     if(val)
+    {
         emit enableTool("selectTool");
+        emit updStatus(QString("Stat3"), QString(""));       /// EFO Added to 
+    }
     else
         emit enableTool("");
 }
 
 void ObjTools::placeToolEnabled(bool val){
     if(val)
+    {
         emit enableTool("placeTool");
+        emit updStatus(QString("Stat3"), QString(""));        /// EFO Added to 
+    }
     else
         emit enableTool("");
 }

@@ -331,11 +331,11 @@ Terrain::~Terrain() {
             delete[] fData;
     }
     long timeNow2 = QDateTime::currentMSecsSinceEpoch();
-    qDebug() << "= release terrain "<< timeNow2 - timeNow1;
+    if(Game::debugOutput) qDebug() << "= release terrain "<< timeNow2 - timeNow1;
 }
 
 void Terrain::SaveEmpty(QString name, int samples, int sampleSize, int patches, bool low) {
-    qDebug() << "New terrain tile";
+    if(Game::debugOutput) qDebug() << "New terrain tile";
     QString path;
     if(low){
         if(!QDir(Game::root + "/routes/" + Game::route + "/lo_tiles/").exists())
@@ -510,11 +510,12 @@ void Terrain::convertTexToDefaultCoords(int idx) {
       +fabs(tfile->tdata[(idx)*13 + 5 + 6] - 0.0)
       +fabs(tfile->tdata[(idx)*13 + 6 + 6] - 0.062375)
       ) < 0.01){
-        qDebug() << "rot ok";
+        if(Game::debugOutput) qDebug() << "rot ok";
         return;
     }
-    qDebug() << "rot ->";
+    if(Game::debugOutput) qDebug() << "rot ->";
     
+    // EFO Texture resolution?
     TexLib::mtex[texid[idx]]->advancedCrop((float*)&tfile->tdata[(idx)*13 + 6], 512, 512);
     tfile->tdata[(idx)*13 + 1 + 6] = 0.001;
     tfile->tdata[(idx)*13 + 2 + 6] = 0.001;
@@ -553,19 +554,19 @@ void Terrain::rotateTex(int idx) {
 
     float x11 = (0) * tfile->tdata[(idx)*13 + 3 + 6] + (0) * tfile->tdata[(idx)*13 + 4 + 6] + tfile->tdata[(idx)*13 + 1 + 6];
     float y11 = (0) * tfile->tdata[(idx)*13 + 5 + 6] + (0) * tfile->tdata[(idx)*13 + 6 + 6] + tfile->tdata[(idx)*13 + 2 + 6];
-    qDebug() << x11 << " " << y11;
+    if(Game::debugOutput) qDebug() << x11 << " " << y11;
     float x21 = (16) * tfile->tdata[(idx)*13 + 3 + 6] + (0) * tfile->tdata[(idx)*13 + 4 + 6] + tfile->tdata[(idx)*13 + 1 + 6];
     float y21 = (16) * tfile->tdata[(idx)*13 + 5 + 6] + (0) * tfile->tdata[(idx)*13 + 6 + 6] + tfile->tdata[(idx)*13 + 2 + 6];
-    qDebug() << x21 << " " << y21;
+    if(Game::debugOutput) qDebug() << x21 << " " << y21;
     float x12 = (0) * tfile->tdata[(idx)*13 + 3 + 6] + (16) * tfile->tdata[(idx)*13 + 4 + 6] + tfile->tdata[(idx)*13 + 1 + 6];
     float y12 = (0) * tfile->tdata[(idx)*13 + 5 + 6] + (16) * tfile->tdata[(idx)*13 + 6 + 6] + tfile->tdata[(idx)*13 + 2 + 6];
-    qDebug() << x12 << " " << y12;
+    if(Game::debugOutput) qDebug() << x12 << " " << y12;
     float x22 = (16) * tfile->tdata[(idx)*13 + 3 + 6] + (16) * tfile->tdata[(idx)*13 + 4 + 6] + tfile->tdata[(idx)*13 + 1 + 6];
     float y22 = (16) * tfile->tdata[(idx)*13 + 5 + 6] + (16) * tfile->tdata[(idx)*13 + 6 + 6] + tfile->tdata[(idx)*13 + 2 + 6];
-    qDebug() << x22 << " " << y22;
+    if(Game::debugOutput) qDebug() << x22 << " " << y22;
     float t;
     if ((x11 < x21) && (y11 == y21)) {
-        qDebug() << "rot1";
+        if(Game::debugOutput) qDebug() << "rot1";
         tfile->tdata[(idx)*13 + 1 + 6] = x12;
         t = tfile->tdata[(idx)*13 + 4 + 6];
         tfile->tdata[(idx)*13 + 4 + 6] = tfile->tdata[(idx)*13 + 3 + 6];
@@ -574,7 +575,7 @@ void Terrain::rotateTex(int idx) {
         tfile->tdata[(idx)*13 + 5 + 6] = -tfile->tdata[(idx)*13 + 6 + 6];
         tfile->tdata[(idx)*13 + 6 + 6] = -t;
     } else if ((x11 == x21) && (y11 < y21)) {
-        qDebug() << "rot2";
+        if(Game::debugOutput) qDebug() << "rot2";
         tfile->tdata[(idx)*13 + 2 + 6] = y21;
         t = tfile->tdata[(idx)*13 + 4 + 6];
         tfile->tdata[(idx)*13 + 4 + 6] = -tfile->tdata[(idx)*13 + 3 + 6];
@@ -583,7 +584,7 @@ void Terrain::rotateTex(int idx) {
         tfile->tdata[(idx)*13 + 5 + 6] = tfile->tdata[(idx)*13 + 6 + 6];
         tfile->tdata[(idx)*13 + 6 + 6] = t;
     } else if ((x11 > x21) && (y11 == y21)) {
-        qDebug() << "rot3";
+        if(Game::debugOutput) qDebug() << "rot3";
         tfile->tdata[(idx)*13 + 1 + 6] = x12;
         t = tfile->tdata[(idx)*13 + 4 + 6];
         tfile->tdata[(idx)*13 + 4 + 6] = tfile->tdata[(idx)*13 + 3 + 6];
@@ -592,7 +593,7 @@ void Terrain::rotateTex(int idx) {
         tfile->tdata[(idx)*13 + 5 + 6] = -tfile->tdata[(idx)*13 + 6 + 6];
         tfile->tdata[(idx)*13 + 6 + 6] = -t;
     } else if ((x11 == x21) && (y11 > y21)) {
-        qDebug() << "rot4";
+        if(Game::debugOutput) qDebug() << "rot4";
         tfile->tdata[(idx)*13 + 2 + 6] = y21;
         t = tfile->tdata[(idx)*13 + 4 + 6];
         tfile->tdata[(idx)*13 + 4 + 6] = -tfile->tdata[(idx)*13 + 3 + 6];
@@ -677,14 +678,14 @@ void Terrain::setTileBlob(){
     int X, Y;
     getLowCornerTileXY(X, Y);
     int hash = (X*10000+Y);
-    qDebug() << hash;
+    if(Game::debugOutput) qDebug() << hash;
     if(MapWindow::mapTileImages[hash] != NULL)
         this->showBlob = true;
     else {
         if(MapWindow::LoadMapFromDisk(X, Y)){
             this->showBlob = true;
         } else {
-            qDebug() << "load map first!";
+            if(Game::debugOutput) qDebug() << "load map first!";
         }
     }
 }
@@ -696,22 +697,22 @@ void Terrain::makeTextureFromMap(){
     int X, Y;
     getLowCornerTileXY(X, Y);
     int hash = (X*10000+Y);
-    qDebug() << hash;
+    if(Game::debugOutput) qDebug() << hash;
     if(MapWindow::mapTileImages[hash] == NULL){
-        qDebug() << "mat tex not found";
+        if(Game::debugOutput) qDebug() << "mat tex not found";
         return;
     }
     QString path = QString::number(hash)+".:maptex";
     QString tname = name + "_map.ace";
     int mapTexid = TexLib::addTex(path);
     if(!TexLib::mtex[mapTexid]->loaded){
-        qDebug() << "mat tex not loaded";
+        if(Game::debugOutput) qDebug() << "mat tex not loaded";
         return;
     }
     
     int newMat = tfile->getMatByTexture(tname);
     if(newMat >= 0){
-        qDebug() << "material already exist";
+        if(Game::debugOutput) qDebug() << "material already exist";
     } else {
         newMat = tfile->newMat();
     }
@@ -1382,14 +1383,14 @@ void Terrain::setTexture(Brush* brush, int u) {
         autoRot = true;
     } else {
         QString path = texturepath + brush->tex->pathid.section("/", -1);
-        qDebug() << path;
+        if(Game::debugOutput) qDebug() << path;
         if (!QFile::exists(path)){
             int newTidx = TexLib::getTex(path);
             if(newTidx >= 0){
-                qDebug() << "ref tex";
+                if(Game::debugOutput) qDebug() << "ref tex";
                 texid[u] = newTidx;
             } else {
-                qDebug() << "new tex";
+                if(Game::debugOutput) qDebug() << "new tex";
                 texid[u] = TexLib::cloneTex(brush->texId);
                 path = path.section(".", 0, -2) + ".ace";
                 TexLib::mtex[texid[u]]->pathid = path;
@@ -1401,15 +1402,15 @@ void Terrain::setTexture(Brush* brush, int u) {
         texid[u] = brush->texId;
         uniqueTex[u] = false;
         QString tname = TexLib::mtex[brush->texId]->pathid.section("/", -1);
-        qDebug() << TexLib::mtex[brush->texId]->pathid;
-        qDebug() << tname;
+        if(Game::debugOutput) qDebug() << TexLib::mtex[brush->texId]->pathid;
+        if(Game::debugOutput) qDebug() << tname;
         int mid = tfile->getMatByTexture(tname);
         if(mid < 0){
             tfile->tdata[(u)*13 + 0 + 6] = tfile->cloneMat(tfile->tdata[(u)*13 + 0 + 6]);
             *tfile->materials[(int) tfile->tdata[(u)*13 + 0 + 6]].tex[0] = tname;
             *tfile->amaterials[(int) tfile->tdata[(u)*13 + 0 + 6]].tex[0] = tname;
-            qDebug() << *tfile->materials[(int) tfile->tdata[(u)*13 + 0 + 6]].tex[0];
-            qDebug() << "new material";
+            if(Game::debugOutput) qDebug() << *tfile->materials[(int) tfile->tdata[(u)*13 + 0 + 6]].tex[0];
+            if(Game::debugOutput) qDebug() << "new material";
         } else {
             tfile->tdata[(u)*13 + 0 + 6] = mid;
             qDebug() << "existed material";
@@ -1429,7 +1430,7 @@ void Terrain::setTexture(Brush* brush, int u) {
             count = 2;
         if(brush->texTransformation == brush->ROT270)
             count = 3;
-        qDebug() << count;
+        if(Game::debugOutput) qDebug() << count;
         for(int i = 0; i < count; i++)
             rotateTex(u);
     }    
@@ -1506,7 +1507,7 @@ void Terrain::paintTextureOnTile(Brush* brush, int y, int u, float x, float z) {
         tfile->materials[tfile->tdata[(y * patches + u)*13 + 0 + 6]].itex[1][3] = 1107296256;
         *tfile->materials[(int) tfile->tdata[(y * patches + u)*13 + 0 + 6]].tex[0] = name;
         *tfile->amaterials[(int) tfile->tdata[(y * patches + u)*13 + 0 + 6]].tex[0] = name;
-        qDebug() << *tfile->materials[(int) tfile->tdata[(y * patches + u)*13 + 0 + 6]].tex[0];
+        if(Game::debugOutput) qDebug() << *tfile->materials[(int) tfile->tdata[(y * patches + u)*13 + 0 + 6]].tex[0];
         texid[y * patches + u] = TexLib::cloneTex(texid[y * patches + u]);
         TexLib::mtex[texid[y * patches + u]]->pathid = texturepath + name;
         uniqueTex[y * patches + u] = true;
@@ -2140,11 +2141,11 @@ void Terrain::reloadLines() {
     int ptr = 0;
     int i = 0;
 
-    // EFO set terrwidth from global
+    // EFO set terrwidth from global, might be able to remove this and use the global
     terrWidth = Game::selectedTerrWidth;    
     
-    qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
-    qDebug() << "local TerrWidth: " << terrWidth;    
+    if(Game::debugOutput) qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
+    if(Game::debugOutput) qDebug() << "local TerrWidth: " << terrWidth;    
     
     int samples = *tfile->nsamples;
     int sampleSize = *tfile->sampleSize;
@@ -2375,8 +2376,8 @@ void Terrain::reloadLines() {
             }
         }
     //// EFO Terrain Selected Color  was 0,0,0.8
-    selectedlines.setMaterial(1.0, 0.5, 0.0);
-    selectedlines.setLineWidth(terrWidth);
+    selectedlines.setMaterial(Game::selectedTerrColor->redF(), Game::selectedTerrColor->greenF(), Game::selectedTerrColor->blueF());
+    selectedlines.setLineWidth(Game::selectedTerrWidth);
     selectedlines.init(punkty, ptr, RenderItem::V, GL_LINES);
     delete[] punkty;
 }
@@ -2890,9 +2891,9 @@ void Terrain::save() {
             this->tfile->sampleFbuffer = new QString(filename + "_f.raw");
         saveF(path + *this->tfile->sampleFbuffer);
     }
-    qDebug() << "writing t start";
+    if(Game::debugOutput) qDebug() << "writing t start";
     this->tfile->save(path + filename + ".t");
-    qDebug() << "writing t end";
+    if(Game::debugOutput) qDebug() << "writing t end";
     int patches = tfile->patchsetNpatches;
     for (int u = 0; u < patches; u++)
         for (int y = 0; y < patches; y++) {
@@ -2906,10 +2907,10 @@ void Terrain::save() {
 void Terrain::saveRAW(QString name) {
     name.replace("//", "/");
     QFile *file = new QFile(name);
-    qDebug() << "zapis " << name;
+    if(Game::debugOutput) qDebug() << "zapis " << name;
     if (!file->open(QIODevice::WriteOnly))
         return;
-    qDebug() << "w";
+    if(Game::debugOutput) qDebug() << "w";
     QDataStream write(file);
     write.setByteOrder(QDataStream::LittleEndian);
     saveRAW(write);
@@ -3001,10 +3002,10 @@ void Terrain::readF(FileBuffer *data){
 void Terrain::saveF(QString name) {
     name.replace("//", "/");
     QFile *file = new QFile(name);
-    qDebug() << "zapis " << name;
+    if(Game::debugOutput) qDebug() << "zapis " << name;
     if (!file->open(QIODevice::WriteOnly))
         return;
-    qDebug() << "w";
+    if(Game::debugOutput) qDebug() << "w";
     QDataStream write(file);
     write.setByteOrder(QDataStream::LittleEndian);
     saveF(write);
@@ -3180,8 +3181,8 @@ void Terrain::menuSelectObjects(){
             }
         }
     //minx = 1024 - maxx; maxx = 1024 - minx ; minz = 1024 - maxz; maxz = 1024 - minz;
-    qDebug() << minx << maxx << minz << maxz;
-    qDebug() << minx - 1024 << maxx - 1024 << minz - 1024 << maxz - 1024;
+    if(Game::debugOutput) qDebug() << minx << maxx << minz << maxz;
+    if(Game::debugOutput) qDebug() << minx - 1024 << maxx - 1024 << minz - 1024 << maxz - 1024;
     if(Game::currentRoute != NULL)
         Game::currentRoute->selectObjectsByXYRange(mojex, mojez, minx - 1024 , maxx - 1024 , minz - 1024 , maxz - 1024);
 }
