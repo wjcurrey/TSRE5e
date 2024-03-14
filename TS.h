@@ -1462,6 +1462,7 @@ public:
         Pickup = 1545,
         Wagon = 1546,
         Engine = 1547,
+        EOTD = 1548,
         
         TSRE_Requested_Terrain_tFile = 100001,
         TSRE_Requested_Terrain_RawFile = 100002,

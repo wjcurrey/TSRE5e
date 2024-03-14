@@ -47,7 +47,7 @@ public:
         soundregion = 18,
         groupobject = 19,
         ruler = 20,
-        polyforest = 21     /// EFO Polyforest
+        polyforest = 21     
     };
     TypeID typeID = this->undefined;
     enum ShadowType {

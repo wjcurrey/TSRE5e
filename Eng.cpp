@@ -152,9 +152,10 @@ void Eng::load(){
     data->skipBOM();
     QString loadedPath;
     
+    /// Reading the input file
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         //qDebug() << sh;
-        if (sh == ("simisa@@@@@@@@@@jinx0d0t______")) {
+        if (sh == ("simisa@@@@@@@@@@jinx0d0t______")) {    /// Header Record
             continue;
         }
         if (sh == ("include")) {
@@ -164,7 +165,7 @@ void Eng::load(){
                 addToFileList(loadedPath);
             continue;
         }
-        if (sh == ("wagon")) {
+        if (sh == ("wagon")) {   //// Wagon files
             if(engName.length() == 0){
                 engName = ParserX::GetString(data).trimmed();
                 displayName = engName;
@@ -323,7 +324,8 @@ void Eng::load(){
             ParserX::SkipToken(data);
             continue;
         }
-        if(sh == "engine"){
+        
+        if(sh == "engine"){   /// Engine files
             ParserX::GetString(data);
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                 //qDebug() << sh;
@@ -391,7 +393,25 @@ void Eng::load(){
             }
             ParserX::SkipToken(data);
             continue;
-        }
+        }       
+        
+        if(sh == "ortseot"){    //// EOT file   EFO
+            engType = "eot";
+            wagonTypeId = 7;
+            ParserX::GetString(data);
+            while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
+                //qDebug() << sh;
+                if (sh == ("level")) {
+                    ParserX::GetStringInside(data);
+                    ParserX::SkipToken(data);
+                    continue;
+                }
+                ParserX::SkipToken(data);
+            }
+            ParserX::SkipToken(data);
+            continue;
+        } 
+                
         if (sh == ("name")) {
             displayName = ParserX::GetString(data);
             ParserX::SkipToken(data);
@@ -426,7 +446,10 @@ bool Eng::engFilter(QString q){
         return true;
     if(q == "tender" && wagonTypeId == 3)
         return true;   
+    if(q == "eot" && wagonTypeId == 7)
+        return true;   
     return false;
+    
 }
 
 bool Eng::couplingFilter(QString q){
@@ -471,6 +494,10 @@ void Eng::unselect(){
 bool Eng::isSelected(){
     return selected;
 }
+
+
+////////////// Below this point doesn't appear to be used by ConEditor
+////////////// but used for the internal game engine and possibly Activity Editor
 
 void Eng::drawBorder(){
 
@@ -732,6 +759,7 @@ void Eng::render(int aktwx, int aktwz, int selectionColor) {
      //
 
 }
+
 void Eng::reload(){
     long long int shapeLibId = reinterpret_cast<long long int>(Game::currentShapeLib);
     if(shape.id[shapeLibId] >= 0) 

@@ -115,6 +115,12 @@ void MapDataUrlImage::load() {
         msgBox.exec();
         return;
     }
+    if(zoom == -1){    
+        QMessageBox msgBox;
+        msgBox.setText("imageMapZoomOffzet in settings.txt may cause unexpected results!");
+        msgBox.exec();
+        return;
+    }
     
     images.clear();
     LatitudeLongitudeCoordinate p00;
@@ -125,10 +131,16 @@ void MapDataUrlImage::load() {
     if(maxlat > 53.4)
         isteps = 7;
     double tzoom = zoom;
+    
+    
+    
     if(tzoom == 18){
         isteps *= 2;
         jsteps *= 2;
     }
+    
+   
+    
     qDebug() << "level"<<level;
     tzoom -= log2(level);
     qDebug() << tzoom;
@@ -179,6 +191,9 @@ void MapDataUrlImage::autoTimerGet(){
     connect(mgr, SIGNAL(finished(QNetworkReply*)), this, SLOT(isTimerData(QNetworkReply*)));
     // the HTTP request
     qDebug() << "wait";
+
+    
+    
     static int count = 0;
     for(int i = 0; i < requests.size(); i++){
         if(requests[i].complete == true)
@@ -186,7 +201,7 @@ void MapDataUrlImage::autoTimerGet(){
         QString imageMapsUrl = Game::imageMapsUrl;
         imageMapsUrl.replace("{lat}", QString::number(requests[i].lat));
         imageMapsUrl.replace("{lon}", QString::number(requests[i].lon));
-        imageMapsUrl.replace("{zoom}", QString::number(requests[i].zoom));
+        imageMapsUrl.replace("{zoom}", QString::number(requests[i].zoom + Game::imageMapsZoomOffset));  /// EFO Adjustment for MapBox
         imageMapsUrl.replace("{res}", QString::number(Resolution));
         QNetworkRequest req(QUrl(QString("")+imageMapsUrl));
         qDebug() << req.url();
@@ -263,11 +278,11 @@ void MapDataUrlImage::get(LatitudeLongitudeCoordinate* center, double tzoom) {
     connect(mgr, SIGNAL(finished(QNetworkReply*)), this, SLOT(isData(QNetworkReply*)));
     // the HTTP request
     qDebug() << "wait";
-    
+        
     QString imageMapsUrl = Game::imageMapsUrl;
     imageMapsUrl.replace("{lat}", QString::number(center->Latitude));
     imageMapsUrl.replace("{lon}", QString::number(center->Longitude));
-    imageMapsUrl.replace("{zoom}", QString::number(tzoom));
+    imageMapsUrl.replace("{zoom}", QString::number(tzoom + Game::imageMapsZoomOffset)); /// EFO Adjustment for MapBox
     imageMapsUrl.replace("{res}", QString::number(Resolution));
     QNetworkRequest req(QUrl(QString("")+imageMapsUrl));
     qDebug() << req.url();

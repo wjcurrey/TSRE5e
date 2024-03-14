@@ -663,7 +663,12 @@ void ConEditorWindow::fillCurrentEng(int engSetId){
     QString ttype = currentEng->type;
     if(currentEng->engType.length() > 1)
         ttype += " ( "+currentEng->engType+" )";
+    
+    if(currentEng->engType == "eot") ttype = currentEng->engType.toUpper();
+    
     eType.setText(ttype);
+    
+    
     //eBrakes;
     //eCouplings;
     eMass.setText(QString::number(currentEng->mass) + " t");

@@ -33,6 +33,7 @@
 #include "RouteEditorWindow.h"
 #include "NaviWindow.h"
 #include "StatusWindow.h"
+#include "Camera.h"
 
 bool Game::ServerMode = false;
 QString Game::serverLogin = "";
@@ -187,16 +188,24 @@ float Game::sectionLineHeight = 2.8;
 float Game::terrainTools[] = {1,5,5,9,1,10};
 int   Game::selectedWidth = 2;
 int   Game::selectedTerrWidth = 2;
+bool  Game::lockCamera = false;
+QColor *Game::selectedColor = new QColor("#FF0000");       /// EFO default red
+QColor *Game::selectedTerrColor = new QColor("#FF0000");   /// EFO default red
 
-QColor *Game::selectedColor = NULL;
-QColor *Game::selectedTerrColor = NULL;
-QString Game::mainPos = "";
-QString Game::statusPos = "";
-QString Game::naviPos = "";
+QString Game::mainPos;   /// EFO Null handling exists
+QString Game::statusPos;  /// EFO Null handling exists
+QString Game::naviPos;  /// EFO Null handling exists
 
 bool  Game::debugOutput = false;
-bool  Game::legacySupport;
-    
+bool  Game::legacySupport = false; 
+bool  Game::newSymbols = true;
+int   Game::pointerIn = 4;
+int   Game::pointerOut = 3;
+int   Game::pyramid = 5;
+int   Game::maxAutoPlacement = 999;
+int   Game::imageMapsZoomOffset = 0;
+
+
 QHash<QString, int> Game::TextureFlags {
         {"None", 0x0},
         {"Snow", 0x1},
@@ -543,7 +552,14 @@ void Game::load() {
         }
         if(val == "imageMapsUrl"){
             imageMapsUrl = args[1].trimmed();
+        }        
+        
+        if(val == "imageMapsZoomOffset"){
+            imageMapsZoomOffset = args[1].trimmed().toInt();
         }
+        
+        
+        
         if(val == "mapImageResolution"){
             mapImageResolution = args[1].trimmed().toInt();
         }
@@ -705,20 +721,49 @@ void Game::load() {
 
         // EFO Configure WindowPos
         if(val == "mainWindow") {
-//                this->RouteEditorWindow.move(args[1].trimmed().toFloat());
             mainPos = args[1].trimmed();
         }
 
         if(val == "naviWindow") {
-  //          this->NaviWindow.move( args[1].trimmed().toFloat());
             naviPos = args[1].trimmed();
         }      
         
         if(val == "statusWindow") {
-  //          this->StatusWindow.move( args[1].trimmed().toFloat());
             statusPos = args[1].trimmed();
         }
+        
+        if(val == "maxAutoPlacement") {
+            maxAutoPlacement = args[1].trimmed().toInt();
+        }
 
+        if(val == "lockCamera") {
+             if(args[1].trimmed().toLower() == "true")
+                 lockCamera = true;
+            else
+                 lockCamera = false;
+        }       
+
+        if(val == "newSymbols") {
+             if(args[1].trimmed().toLower() == "true")
+             {
+                 newSymbols = true;
+                 pointerIn = 4;
+                 pointerOut = 3;
+                 pyramid = 5;
+                 qDebug() << "Symbol = true";
+             }
+            else
+             {   
+                 newSymbols = false;
+                 pointerIn = 2;
+                 pointerOut = 2;
+                 pyramid = 0;
+                 qDebug() << "Symbol = false";
+             }
+        }       
+        
+        
+        
         if(Game::debugOutput) qDebug() << "Skipping Settings comment: " << skipped;
         
       // if(Game::debugOutput) qDebug() << args[0] << "=" << args[1];

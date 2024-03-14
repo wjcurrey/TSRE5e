@@ -47,6 +47,14 @@ MapWindow::MapWindow() : QDialog() {
     mapServices.push_back(new MapDataUrlImage(17));
     mapServicesCombo.addItem(provider + " Images Z18", 2);
     mapServices.push_back(new MapDataUrlImage(18));
+    
+    if(Game::imageMapsZoomOffset) 
+    {
+        mapServicesCombo.addItem("Warning -- Zoom Offset Detected ", 3);
+        mapServices.push_back(new MapDataUrlImage(-1));       
+    }
+    
+    // qDebug() << "Map Provider: " << provider << " " << Game::imageMapsUrl;
     }
     else
     {

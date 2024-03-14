@@ -187,7 +187,7 @@ void StaticObj::pushRenderItems(float lod, float posx, float posz, float* player
     
     if(Game::showWorldObjPivotPoints){
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(1);  
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         //pointer3d->pushRenderItem(selectionColor);

@@ -199,8 +199,13 @@ public:
     static QString naviPos;
     static bool debugOutput;
     static bool legacySupport;
-
-    
+    static bool lockCamera;
+    static bool newSymbols;
+    static int pointerIn;
+    static int pointerOut;
+    static int pyramid;
+    static int maxAutoPlacement;
+    static int imageMapsZoomOffset;
 private:
     //static RouteEditorWindow* window;
     //static LoadWindow* loadWindow;

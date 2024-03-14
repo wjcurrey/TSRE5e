@@ -559,7 +559,7 @@ void PlatformObj::render(GLUU* gluu, float lod, float posx, float posz, float* p
         Mat4::multiply(gluu->mvMatrix, gluu->mvMatrix, matrix);
         gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(4);  /// was type 1 
+            pointer3d = new TrackItemObj(Game::pointerIn);  /// was type 1   /// newSymbols
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         pointer3d->render(selectionColor);
@@ -616,8 +616,8 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
     }
 
     if(line == NULL){
-        if(spointer3d == NULL) spointer3d = new TrackItemObj(4);   /// was empty
-        if(spointer3dSelected == NULL) spointer3dSelected = new TrackItemObj(4);   /// was empty
+        if(spointer3d == NULL) spointer3d = new TrackItemObj(Game::pointerIn);   /// was empty   /// newSymbols
+        if(spointer3dSelected == NULL) spointer3dSelected = new TrackItemObj(Game::pointerIn);   /// was empty  /// newSymbols
 
         makelineShape();
         

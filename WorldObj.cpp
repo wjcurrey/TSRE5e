@@ -216,6 +216,10 @@ WorldObj* WorldObj::createObj(QString sh) {
         nowy = (WorldObj*) (new ForestObj());
         (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";
         (nowy)->typeID = (nowy)->forest;
+    } else if (sh == "polyforest") {
+        nowy = (WorldObj*) (new PolyForestObj());
+        (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";
+        (nowy)->typeID = (nowy)->polyforest;
     } else if (sh == "transfer") {
         nowy = (WorldObj*) (new TransferObj());
         (nowy)->resPath = Game::root + "/routes/" + Game::route + "/textures";

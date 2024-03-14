@@ -61,6 +61,7 @@ Consist::Consist(Consist * con, bool fullCopy) {
         engItems.back().eng = con->engItems[i].eng;
         engItems.back().flip = con->engItems[i].flip;
         engItems.back().uid = con->engItems[i].uid;
+        
     }
     
     if(fullCopy){
@@ -252,6 +253,28 @@ bool Consist::load(FileBuffer* data){
                     ParserX::SkipToken(data);
                     continue;
                 }
+                if (sh == ("ortseot")) {   //// EFO Adding EOT support
+                    engItems.push_back(EngItem());
+                    engItems.back().type = 2;
+                    engItems.back().eot = true;
+                    while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
+                        if (sh == ("uid")) {
+                            engItems.back().uid = ParserX::GetNumber(data);
+                            ParserX::SkipToken(data);
+                            continue;
+                        }
+                        if (sh == ("eotdata")) {
+                            engItems.back().ename = ParserX::GetString(data);
+                            engItems.back().epath = ParserX::GetString(data);
+                            engItems.back().eng = Game::currentEngLib->addEng(Game::root + "/TRAINS/ORTS_EOT/" + engItems.back().epath, engItems.back().ename + ".eot");
+                            ParserX::SkipToken(data);
+                            continue;
+                        }
+                        ParserX::SkipToken(data);
+                    }
+                    ParserX::SkipToken(data);
+                    continue;
+                }
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
@@ -267,10 +290,13 @@ void Consist::refreshEngData(){
     QString fext;
     QString wext = ".wag";
     QString eext = ".eng";
+    QString oext = ".eot";    
     
     for(int i = 0; i < engItems.size(); i++){
         if(engItems[i].type == 0)
             fext = wext;
+        else if(engItems[i].eot)
+            fext = oext;
         else
             fext = eext;
         engItems[i].eng = Game::currentEngLib->addEng(Game::root + "/TRAINS/TRAINSET/" + engItems[i].epath, engItems[i].ename + fext);
@@ -393,7 +419,8 @@ void Consist::appendEngItem(int id, int pos, bool flip){
     newE->epath = eng->path.split("/").last();
     newE->uid = this->nextWagonUID++;
     newE->flip = flip;
-
+    newE->eot = eng->engType.contains("eot");
+    
     initPos();
     modified = true;
 }
@@ -441,6 +468,7 @@ void Consist::replaceEngItem(int id, int pos){
     newE->epath = eng->path.split("/").last();
     newE->txt = NULL;
     modified = true;
+    newE->eot = eng->engType.contains("eot");
 }
 
 void Consist::flipSelected(){
@@ -646,9 +674,15 @@ void Consist::render(int aktwx, int aktwz, int selectionColor, bool renderText) 
                 txtEngineS = new TextObj("S");
                 txtEngineS->setColor(255,0,0);
             }
-            txtEngineS->render(M_PI/2);
+            txtEngineS->render(M_PI/2);            
         }
-        
+        if(wt == 7){
+            if(txtEngineS == NULL){
+                txtEngineS = new TextObj("O");
+                txtEngineS->setColor(255,0,0);
+            }
+            txtEngineS->render(M_PI/2);           
+        }        
         gluu->mvPopMatrix();
 
     }
@@ -871,6 +905,21 @@ void Consist::save(QString woff, QTextStream* out){
     *out << woff <<"		Durability ( " << QString::number(durability, 'f', 5) << " )\n";
 
     for(int i = 0; i < this->engItems.size(); i++){
+        
+        if(Game::debugOutput)
+         qDebug() << engItems[i].type                 
+                  << " ename: " << engItems[i].ename 
+                  << " epath: " << engItems[i].epath 
+                  << " eot: " << engItems[i].eot;
+                
+        if(this->engItems[i].eot){   //// Overriding for EOT   EFO
+            *out << woff <<"		ORTSEot (\n";
+            *out << woff <<"			UiD ( " << engItems[i].uid << " )\n";
+            *out << woff <<"			EOTData ( " << ParserX::AddComIfReq(engItems[i].ename) << " " << ParserX::AddComIfReq(engItems[i].epath) << " )\n";
+            *out << woff <<"		)\n";
+            continue;    /// skip ahead so it doesnt become an engine, too
+        }         
+        
         if(this->engItems[i].type == 1){
             *out << woff <<"		Engine (\n";
             if(this->engItems[i].flip)

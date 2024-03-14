@@ -769,11 +769,11 @@ void SpeedpostObj::renderTritems(GLUU* gluu, int selectionColor){
         float minlval = 9999;
         
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(3);  // EFO switching to the new shape
+            pointer3d = new TrackItemObj(Game::pointerOut);  // EFO switching to the new shape newSymbols
             pointer3d->setMaterial(0.7,0.7,0.7);
         }
         if(pointer3dSelected == NULL){
-            pointer3dSelected = new TrackItemObj(3);   // EFO switching to the new shape
+            pointer3dSelected = new TrackItemObj(Game::pointerOut);   // EFO switching to the new shape newSymbols
             pointer3dSelected->setMaterial(0.9,0.9,0.9);
         }
 

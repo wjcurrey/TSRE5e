@@ -39,6 +39,7 @@ Camera::Camera(float* pt) {
     
     moveF = moveR = moveB = moveL = false;
     fov = Game::cameraFov;
+    lockYaxis = Game::lockCamera;
 }
 
 Camera::Camera(const Camera& orig) {

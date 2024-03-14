@@ -332,7 +332,7 @@ void TrackObj::pushRenderItems(float lod, float posx, float posz, float* playerW
     
     if(Game::showWorldObjPivotPoints){
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(1);   
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         //pointer3d->pushRenderItem(selectionColor);
@@ -416,7 +416,7 @@ void TrackObj::render(GLUU* gluu, float lod, float posx, float posz, float* pos,
     
     if(Game::showWorldObjPivotPoints){
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(1);  
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         pointer3d->render(selectionColor);

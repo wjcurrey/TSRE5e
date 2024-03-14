@@ -63,7 +63,11 @@ void EngInfoWidget::setInfo(Eng* eng){
     QString ttype = eng->type;
     if(eng->engType.length() > 1)
         ttype += " ( "+eng->engType+" )";
+    
+    if(eng->engType == "eot") ttype = eng->engType.toUpper();
+    
     eType.setText(ttype);
+    
     //eBrakes;
     //eCouplings;
     eMass.setText(QString::number(eng->mass) + " t");

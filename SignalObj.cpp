@@ -714,7 +714,7 @@ void SignalObj::render(GLUU* gluu, float lod, float posx, float posz, float* pos
     
     if(Game::showWorldObjPivotPoints){
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(1);  
             pointer3d->setMaterial(0.9,0.9,0.7);
         }
         pointer3d->render(selectionColor);
@@ -744,11 +744,11 @@ void SignalObj::renderTritems(GLUU* gluu, int selectionColor){
     ///////////////////////////////
     if (drawPositions == NULL) {
         if(spointer3d == NULL){
-            spointer3d = new TrackItemObj(3);   /// EFO trying a new shape
+            spointer3d = new TrackItemObj(Game::pointerOut);   /// EFO orig ())  new shape  newSymbols
             spointer3d->setMaterial(1,0,0);
         }
         if(spointer3dSelected == NULL){
-            spointer3dSelected = new TrackItemObj(3);    /// EFO trying a new shape
+            spointer3dSelected = new TrackItemObj(Game::pointerOut);    /// EFO orig())  new shape   newSymbols
             spointer3dSelected->setMaterial(1,0.5,0.5);
         }
         drawPositions = new float*[32];

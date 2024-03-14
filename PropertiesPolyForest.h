@@ -8,8 +8,8 @@
  *  See LICENSE.md or https://www.gnu.org/licenses/gpl.html
  */
 
-#ifndef PROPERTIESFOREST_H
-#define	PROPERTIESFOREST_H
+#ifndef PROPERTIESPOLYFOREST_H
+#define	PROPERTIESPOLYFOREST_H
 
 #include "PropertiesAbstract.h"
 

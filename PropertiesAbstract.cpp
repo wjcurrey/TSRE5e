@@ -166,8 +166,8 @@ void PropertiesAbstract::pastePREnabled(){
     rq[1] = args[4].toFloat();
     rq[2] = -args[5].toFloat();
     rq[3] = args[6].toFloat();
-    nq[3] = args[8].toInt();
-    nq[4] = args[9].toInt();
+    nq[3] = args[7].toInt();
+    nq[4] = args[8].toInt();
     
         Undo::SinglePushWorldObjData(worldObj);
     worldObj->setPosition((float*)&nq);

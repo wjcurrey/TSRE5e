@@ -87,7 +87,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     QDir dir(path);
     QDir trainDir;
     trainDir.setFilter(QDir::Files);
-    trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag");
+    trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag"<<"*.eot");
     if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
         qDebug() << "Path not exist" << path;
@@ -103,6 +103,27 @@ int EngLib::loadAll(QString gameRoot, bool gui){
             //qDebug() << path << dirFile <<"/"<< engfile;
             //addEng(path+dirFile,engfile);
             dirPaths.push_back(path+dirFile);
+            engPaths.push_back(engfile);
+        }
+    }
+    
+    //// EFO --- this is a second run at a separate directory  EOT Support
+    QString path2;
+    path2 = gameRoot + "/trains/orts_eot/";    
+    QDir dir2(path2);
+    trainDir.setFilter(QDir::Files);
+    if(Game::debugOutput) qDebug() << path2;
+    if(!dir2.exists())
+        qDebug() << "Path not exist" << path2;
+    dir2.setFilter(QDir::Dirs);
+    if(Game::debugOutput) qDebug() << dir2.count() <<" dirs2";
+    foreach(QString dirFile, dir2.entryList()){
+        //qDebug() << dirFile;
+        trainDir.setPath(path2+dirFile);
+        foreach(QString engfile, trainDir.entryList()){
+            qDebug() << path2 << dirFile <<"/"<< engfile;
+            //addEng(path+dirFile,engfile);
+            dirPaths.push_back(path2+dirFile);
             engPaths.push_back(engfile);
         }
     }

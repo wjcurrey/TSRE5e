@@ -916,9 +916,14 @@ void RouteEditorWindow::show(){
     
     if(!Game::playerMode){
         naviWindow->show();
-        // statusWindow->show();   // EFO
-        //errorMessagesWindow->show();
-        //errorMessagesWindow->refreshErrorList();
+
+        QStringList winPos = Game::naviPos.split(","); 
+        if(winPos.count() < 2)                
+        {            
+            const int naviTemp1 = this->x() - 300;  // left of window 
+            const int naviTemp2 = this->y() + 500;  // 500 from the top corner
+            naviWindow->move(std::max(0,naviTemp1) , std::min(naviTemp2,QApplication::primaryScreen()->geometry().bottom()-200));
+        }    
     }
     
     QMainWindow::show();

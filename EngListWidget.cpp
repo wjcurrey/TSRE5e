@@ -20,13 +20,14 @@ EngListWidget::EngListWidget() : QWidget(){
     addRandButton.setText("Add Rand");
     addNum.setText("1");
     
-    engType.addItem("ALL");
+    engType.addItem("ALL");   /// 0
     engType.addItem("electric");
     engType.addItem("diesel");
     engType.addItem("steam");
     engType.addItem("carriage");
-    engType.addItem("freight");
-    engType.addItem("tender");
+    engType.addItem("freight");    
+    engType.addItem("tender");  
+    engType.addItem("eot");   /// 7
 
     couplingType.addItem("ALL");
     couplingType.addItem("Chain");

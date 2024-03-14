@@ -46,6 +46,7 @@ public:
         TextObj * txt = NULL;
         QString epath;
         QString ename;
+        bool eot = false;
     };
     Consist();
     Consist(Consist * con, bool fullCopy = true);
