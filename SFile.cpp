@@ -49,11 +49,32 @@ SFile::SFile(const SFile& orig) {
 SFile::~SFile() {
 }
 
+QString SFile::evaluatePathId() {   //// EFO fixing relative paths which have folders between Trainset and /../    
+    int trainsetPos = pathid.indexOf("trainset");
+    int parentDirPos = pathid.indexOf("/../");
+    if (trainsetPos != -1 && parentDirPos != -1 && trainsetPos < parentDirPos) {        
+        if(Game::debugOutput) qDebug() << "Before APF:" << pathid;
+        // Replace everything between "trainset" and "/../" with empty string
+        pathid = pathid.mid(0, trainsetPos+8) + pathid.mid(parentDirPos + 3);                
+        if(Game::debugOutput) qDebug() << "After AFP: " << pathid;
+        return pathid;        
+    } else {
+        // Pathid doesn't contain the specific pattern or "trainset" comes after "/../"
+        return pathid;
+    }
+}
+
 void SFile::load() {
     //unsigned long long int timeNow = QDateTime::currentMSecsSinceEpoch();
+    
+    /// EFO fix relative path errors AFP
+    pathid = evaluatePathId();  
+    
     QFile *file = new QFile(pathid);
+
+    
     if (!file->open(QIODevice::ReadOnly)){
-        qDebug() << "S Shape: not exist "<<pathid;
+        if(Game::debugOutput) qDebug() << "S Shape: not exist "<<pathid;
         file->close();
         return;
     }
@@ -156,7 +177,7 @@ void SFile::load() {
                                 }
                                 break;
                             default:
-                                qDebug() << "#SFile Animations - unknown token: "<< pozycja1 << TS::IdName[pozycja1];
+                                if(Game::debugOutput) qDebug() << "#SFile Animations - unknown token: "<< pozycja1 << TS::IdName[pozycja1];
                                 break;
                         }
                         data->off = akto1 + offset1;
@@ -164,7 +185,7 @@ void SFile::load() {
                     }
                     break;
                 default:
-                    qDebug() << "#SFile - unknown token: "<< pozycja << TS::IdName[pozycja];
+                    if(Game::debugOutput) qDebug() << "#SFile - unknown token: "<< pozycja << TS::IdName[pozycja];
                     break;
             }
             data->off = akto + offset;
@@ -268,7 +289,7 @@ void SFile::load() {
                     }
                     if(sh == "lod_controls"){
                         if(loadingCount < 9){
-                            qDebug() << "#shape - loading error" << sh;
+                            if(Game::debugOutput) qDebug() << "#shape - loading error" << sh;
                             return;
                         }
                         SFileX::odczytajlodd(data, this);
@@ -282,7 +303,7 @@ void SFile::load() {
                                 animations.push_back(Animation());
                                 animations.back().loadX(data);
                                 if(animations.size() > 0){
-                                    qDebug() << animations[0].node.size();
+                                    if(Game::debugOutput) qDebug() << animations[0].node.size();
                                     /*for(int i = 0; i < animations[0].node.size(); i++){
                                         qDebug() << animations[0].node[i].linearKey.size();
                                         qDebug() << animations[0].node[i].slerpRot.size();
@@ -297,14 +318,14 @@ void SFile::load() {
                         ParserX::SkipToken(data);
                         continue;
                     }
-                    qDebug() << "#shape - undefined token" << sh;
+                    if(Game::debugOutput) qDebug() << "#shape - undefined token" << sh;
                     ParserX::SkipToken(data);
                 }
                 
                 ParserX::SkipToken(data);
                 continue;
             }
-            qDebug() << "#SFile - undefined token" << sh;
+            if(Game::debugOutput) qDebug() << "#SFile - undefined token" << sh;
             ParserX::SkipToken(data);
         }
     }
@@ -397,7 +418,7 @@ void SFile::Animation::loadC(FileBuffer* data, int length){
                                 }
                                 break;
                             default:
-                                qDebug() << "#controller" << pozycja2 << TS::IdName[pozycja2];
+                                if(Game::debugOutput) qDebug() << "#controller" << pozycja2 << TS::IdName[pozycja2];
                                 break;
                         }
                         data->off = akto2 + offset2;
@@ -408,7 +429,7 @@ void SFile::Animation::loadC(FileBuffer* data, int length){
                 }
                 break;
             default:
-                qDebug() << "#SFile Animation - unknown token: "<< pozycja << TS::IdName[pozycja];
+                if(Game::debugOutput) qDebug() << "#SFile Animation - unknown token: "<< pozycja << TS::IdName[pozycja];
                 break;
         }
         data->off = akto + offset;
@@ -506,7 +527,7 @@ void SFile::loadSd() {
         return;
     QFile file(pathid+"d");
     if (!file.open(QIODevice::ReadOnly)){
-        qDebug() << "Sd Shape: not exist "<<pathid+"d";
+        if(Game::legacySupport) qDebug() << "Sd Shape: not exist "<<pathid+"d";  /// EFO only show for legacy support
         return;
     }
     FileBuffer* data = ReadFile::read(&file);
@@ -583,10 +604,10 @@ void SFile::loadSd() {
     if((esdAlternativeTexture & Game::TextureFlags[Game::season]) != 0)
         seasonPath = "/" + Game::season.toLower();
     
-    if(Game::season == "Winter" || Game::season == "AutumnSnow" || Game::season == "WinterSnow" || Game::season == "SpringSnow" ){
-        if(esdAlternativeTexture & Game::TextureFlags["Snow"] != 0)
+    if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnown" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
+        if(esdAlternativeTexture & Game::TextureFlags["snow"] != 0)
             seasonPath = "/snow";
-        if(esdAlternativeTexture & Game::TextureFlags["SnowTrack"] != 0)
+        if(esdAlternativeTexture & Game::TextureFlags["snowtrack"] != 0)
             seasonPath = "/snow";
     }
     texPath += seasonPath;
@@ -818,7 +839,7 @@ void SFile::addSnapablePoints(QVector<float> &out){
 
 void SFile::reload() {
     loaded = 0;
-    qDebug() << "reload";
+    if(Game::debugOutput) qDebug() << "reload";
     QStringList list;
     
     for (int i = 0; i < distancelevel[0].iloscs; i++) {
@@ -835,7 +856,7 @@ void SFile::reload() {
     
     list.removeDuplicates();
     for(QString s : list){
-        qDebug() << s;
+        if(Game::debugOutput) qDebug() << s;
         TexLib::addTex(texPath, s, true);
     }
 }
@@ -859,7 +880,7 @@ void SFile::setCurrentDistanceLevel(unsigned int stateId, int level){
     if(level >= iloscd)
         level = 0;
     state[stateId].distanceLevel = level;
-    qDebug() << state[stateId].distanceLevel;
+    if(Game::debugOutput) qDebug() << state[stateId].distanceLevel;
 }
 
 void SFile::enableSubObjByNameQueue(unsigned int stateId, QString name, bool val){

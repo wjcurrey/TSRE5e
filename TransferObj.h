@@ -48,6 +48,8 @@ public:
     void resize(float x, float y, float z);
     int getDefaultDetailLevel();
     void render(GLUU* gluu, float lod, float posx, float posz, float* playerW, float* target, float fov, int selectionColor, int renderMode);
+    void reload();
+    
 private:
     void drawShape(int selectionColor = 0);
     int tex;

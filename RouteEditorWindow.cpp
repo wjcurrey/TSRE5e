@@ -63,6 +63,8 @@
 #include "ActivityTimetableProperties.h"
 #include "RouteEditorClient.h"
 #include "Route.h"
+#include "LoadWindow.h"
+#include "CELoadWindow.h"
 
 RouteEditorWindow::RouteEditorWindow() {
 
@@ -76,7 +78,8 @@ RouteEditorWindow::RouteEditorWindow() {
     shapeViewWindow = new ShapeViewWindow(this);
     aboutWindow = new AboutWindow(this);
     naviWindow = new NaviWindow(this);
-    // statusWindow = new StatusWindow(this);
+    statusWindow = new StatusWindow(this);
+    
     
     errorMessagesWindow = ErrorMessagesLib::GetWindow(this);
     clientUsersWindow = new ClientUsersWindow(this);
@@ -109,9 +112,7 @@ RouteEditorWindow::RouteEditorWindow() {
     // last 
     objProperties["Undefined"] = new PropertiesUndefined;
     
-    QWidget* main = new QWidget();
-
-   
+    QWidget* remain = new QWidget();
     
     box = new QWidget(this);
     box2 = new QWidget(this);
@@ -162,30 +163,30 @@ RouteEditorWindow::RouteEditorWindow() {
     mainLayout->setSpacing(3);
     
     QString mainWindowLayout = Game::mainWindowLayout;
-    if(!mainWindowLayout.contains('W')){
+    if(!mainWindowLayout.toUpper().contains('W')){
         mainWindowLayout += 'W';
     }
     for(int i = 0; i < mainWindowLayout.length(); i++){
-        if(mainWindowLayout[i] == 'P')
+        if(mainWindowLayout[i].toUpper() == 'P')
             mainLayout->addWidget(box2);
-        if(mainWindowLayout[i] == 'T')
+        if(mainWindowLayout[i].toUpper() == 'T')
             mainLayout->addWidget(box);
-        if(mainWindowLayout[i] == 'W')
+        if(mainWindowLayout[i].toUpper() == 'W')
             mainLayout->addWidget(glWidget);
     }
-    if(!mainWindowLayout.contains('T')){
+    if(!mainWindowLayout.toUpper().contains('T')){
         box->move(this->pos());
         box->setWindowFlags(Qt::WindowType::Tool);
     }
-    if(!mainWindowLayout.contains('P')){
+    if(!mainWindowLayout.toUpper().contains('P')){
         box2->move(this->pos());
         box2->setWindowFlags(Qt::WindowType::Tool);
     }
     
-    main->setLayout(mainLayout);
+    remain->setLayout(mainLayout);
     mainLayout->setContentsMargins(0,0,0,0);
     
-    this->setCentralWidget(main);
+    this->setCentralWidget(remain);
     setWindowTitle(Game::AppName+" "+Game::AppVersion+" Route Editor");
     
     // MENUBAR
@@ -200,6 +201,11 @@ RouteEditorWindow::RouteEditorWindow() {
     
     reloadRefAction = new QAction(tr("&Reload Ref File"), this);
     QObject::connect(reloadRefAction, SIGNAL(triggered()), this, SLOT(reloadRef()));
+    
+    closeAction = new QAction(tr("&Close"), this);
+    QObject::connect(closeAction, SIGNAL(triggered()), this, SLOT(close()));
+
+   
     
     exitAction = new QAction(tr("&Exit"), this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
@@ -286,24 +292,33 @@ RouteEditorWindow::RouteEditorWindow() {
     vViewPointer3d = GuiFunct::newMenuCheckAction(tr("&3D Pointer"), this); 
     viewMenu->addAction(vViewPointer3d);
     QObject::connect(vViewPointer3d, SIGNAL(triggered(bool)), this, SLOT(viewPointer3d(bool)));
-    vViewMarkers = GuiFunct::newMenuCheckAction(tr("&Markers"), this, false); 
+    vViewMarkers = GuiFunct::newMenuCheckAction(tr("&Markers"), this, Game::viewMarkers); 
     viewMenu->addAction(vViewMarkers);
     QObject::connect(vViewMarkers, SIGNAL(triggered(bool)), this, SLOT(viewMarkers(bool)));
-    vViewSnapable = GuiFunct::newMenuCheckAction(tr("S&napable Points"), this, false); 
+    vViewSnapable = GuiFunct::newMenuCheckAction(tr("S&napable Points"), this, Game::viewSnapable); 
     viewMenu->addAction(vViewSnapable);
     QObject::connect(vViewSnapable, SIGNAL(triggered(bool)), this, SLOT(viewSnapable(bool)));
-    QAction* vViewCompass = GuiFunct::newMenuCheckAction(tr("&Compass"), this, false); 
+    QAction* vViewCompass = GuiFunct::newMenuCheckAction(tr("&Compass"), this, Game::viewCompass); 
     viewMenu->addAction(vViewCompass);
     QObject::connect(vViewCompass, SIGNAL(triggered(bool)), this, SLOT(viewCompass(bool)));
 
     // Tools
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     propertiesAction = GuiFunct::newMenuCheckAction(tr("&Properties"), this); 
+    propertiesAction->setShortcut(QKeySequence("F5"));            
     toolsMenu->addAction(propertiesAction);
     QObject::connect(propertiesAction, SIGNAL(triggered(bool)), this, SLOT(hideShowPropertiesWidget(bool)));
+
     naviAction = GuiFunct::newMenuCheckAction(tr("&Navi Window"), this); 
+    naviAction->setShortcut(QKeySequence("F6"));    
     toolsMenu->addAction(naviAction);
     QObject::connect(naviAction, SIGNAL(triggered(bool)), this, SLOT(hideShowNaviWidget(bool)));
+
+    statAction = GuiFunct::newMenuCheckAction(tr("Status &Window"), this, false); 
+    statAction->setShortcut(QKeySequence("F7"));
+    toolsMenu->addAction(statAction);
+    QObject::connect(statAction, SIGNAL(triggered(bool)), this, SLOT(hideShowStatWidget(bool)));
+    
     shapeViewAction = GuiFunct::newMenuCheckAction(tr("&Shape View Window"), this, false); 
     toolsMenu->addAction(shapeViewAction);
     QObject::connect(shapeViewAction, SIGNAL(triggered(bool)), this, SLOT(hideShowShapeViewWidget(bool)));
@@ -361,7 +376,7 @@ RouteEditorWindow::RouteEditorWindow() {
     hideAllTools();
     objTools->show();
     ///// EFO  End MENUBAR 
-    
+ 
     if(Game::toolsHidden){
         box->hide();
         box2->hide();
@@ -373,6 +388,7 @@ RouteEditorWindow::RouteEditorWindow() {
     
     if(Game::playerMode){
         naviWindow->hide();
+        statusWindow->hide();
         errorMessagesWindow->hide();
         box->hide();
         box2->hide();
@@ -411,7 +427,8 @@ RouteEditorWindow::RouteEditorWindow() {
     QObject::connect(naviWindow, SIGNAL(sendMsg(QString, int)), glWidget, SLOT(msg(QString, int)));
     QObject::connect(naviWindow, SIGNAL(sendMsg(QString, float)), glWidget, SLOT(msg(QString, float)));
     QObject::connect(naviWindow, SIGNAL(sendMsg(QString, QString)), glWidget, SLOT(msg(QString, QString)));
-    ///
+
+
     QObject::connect(glWidget, SIGNAL(sendMsg(QString)), shapeViewWindow, SLOT(msg(QString)));
     QObject::connect(glWidget, SIGNAL(sendMsg(QString, bool)), shapeViewWindow, SLOT(msg(QString, bool)));
     QObject::connect(glWidget, SIGNAL(sendMsg(QString, int)), shapeViewWindow, SLOT(msg(QString, int)));
@@ -515,6 +532,9 @@ RouteEditorWindow::RouteEditorWindow() {
     QObject::connect(naviWindow, SIGNAL(windowClosed()),
                       this, SLOT(naviWindowClosed())); 
     
+    QObject::connect(statusWindow, SIGNAL(windowClosed()),
+                      this, SLOT(statusWindowClosed()));     
+
     QObject::connect(errorMessagesWindow, SIGNAL(windowClosed()),
                       this, SLOT(errorMessagesWindowClosed())); 
 
@@ -577,14 +597,23 @@ RouteEditorWindow::RouteEditorWindow() {
     QObject::connect(glWidget, SIGNAL(refreshObjLists()),
                       objTools, SLOT(refreshObjLists()));
     
-    if(Game::serverClient != NULL)
+        if(Game::serverClient != NULL)
         QObject::connect(Game::serverClient, SIGNAL(refreshObjLists()),
                       objTools, SLOT(refreshObjLists()));
     
-     /// EFO Status Update  changed to naviWindow
-      QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));   
-      QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));         
-    
+     /// EFO Status Update  was changed from naviWindow
+//      QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));   
+//      QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));         
+
+      /// EFO Status Update  changed to statusWindow 
+      QObject::connect(this, SIGNAL(updStatus(QString, QString)),     statusWindow, SLOT(recStatus(QString, QString)));   
+      QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));   
+      QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));         
+
+      /// EFO connect the status buttons to the other windows
+      
+
+      
 }
 
 void RouteEditorWindow::keyPressEvent(QKeyEvent *e) {
@@ -595,15 +624,24 @@ void RouteEditorWindow::keyPressEvent(QKeyEvent *e) {
         QWidget::keyPressEvent(e);
 }
 
+void RouteEditorWindow::exitToLoadWindow(){
+        LoadWindow *loadWindow = new LoadWindow();
+
+        QStringList winPos = Game::mainPos.split(","); 
+        if(winPos.count() > 1) loadWindow->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());        
+        loadWindow->show();        
+}
+
 void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     QVector<QString> unsavedItems;
     glWidget->getUnsavedInfo(unsavedItems);
     if(unsavedItems.size() == 0){
-        qDebug() << "Nothing to Save";
+        if(Game::debugOutput) qDebug() << "Nothing to Save";
         emit exitNow();
         event->accept();
-        SoundManager::CloseAl();
-        qApp->quit();
+        SoundManager::CloseAl();              
+        //exitToLoadWindow();
+        //qApp->quit();
         return;
     }
     
@@ -621,8 +659,9 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     if(unsavedDialog.changed == 2){
         emit exitNow();
         event->accept();
-        SoundManager::CloseAl();
-        qApp->quit();
+        SoundManager::CloseAl();        
+        //exitToLoadWindow();                
+        //qApp->quit();
         return;
     }
 
@@ -633,15 +672,22 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     event->accept();
     
     SoundManager::CloseAl();
-    qApp->quit();
+    //exitToLoadWindow();    
+    //qApp->quit();
+    
 }
 
 void RouteEditorWindow::save(){
     emit sendMsg(QString("save"));
+    emit updStatus(QString("stat0"),QString("Saved"));    
 }
 
 void RouteEditorWindow::reloadRef(){
     emit reloadRefFile();
+}
+
+void RouteEditorWindow::refreshErrors(){
+    emit refreshErrorList(); 
 }
 
 void RouteEditorWindow::createPaths(){
@@ -823,9 +869,13 @@ void RouteEditorWindow::updateProperties(GameObj* obj){
 }
 
 void RouteEditorWindow::hideShowPropertiesWidget(bool show){
-    if(show) box2->show();
-    else box2->hide();
+    if(show) 
+        { box2->show(); propertiesAction->setChecked(true); }
+    else 
+        { box2->hide(); propertiesAction->setChecked(false); }
 }
+
+
 
 void RouteEditorWindow::hideShowShapeViewWidget(bool show){
     if(show) shapeViewWindow->show();
@@ -840,13 +890,17 @@ void RouteEditorWindow::hideShowErrorMsgWidget(bool show){
 }
 
 void RouteEditorWindow::hideShowNaviWidget(bool show){
-    if(show) naviWindow->show();
-    else naviWindow->hide();
+    if(show) { naviWindow->show();  }
+    else { naviWindow->hide();  }
 }
 
+void RouteEditorWindow::hideShowStatWidget(bool show){
+    if(show) { statusWindow->show();  }
+    else { statusWindow->hide();  }
+}
 void RouteEditorWindow::hideShowToolWidget(bool show){
-    if(show) box->show();
-    else box->hide();
+    if(show) { box->show();     }
+    else     { box->hide();    }
 }
 
 void RouteEditorWindow::viewWorldGrid(bool show){
@@ -916,15 +970,32 @@ void RouteEditorWindow::show(){
     
     if(!Game::playerMode){
         naviWindow->show();
-
         QStringList winPos = Game::naviPos.split(","); 
+        
         if(winPos.count() < 2)                
         {            
             const int naviTemp1 = this->x() - 300;  // left of window 
             const int naviTemp2 = this->y() + 500;  // 500 from the top corner
             naviWindow->move(std::max(0,naviTemp1) , std::min(naviTemp2,QApplication::primaryScreen()->geometry().bottom()-200));
         }    
+        
+        /// EFO Status Window is only enabled if you trigger the "S" in MainWindowLayout
+        if(Game::mainWindowLayout.contains("s"))
+         {
+             statusWindow->show();
+             statAction->setChecked(true);
+         }
+         winPos = Game::statusPos.split(","); 
+        
+          if(winPos.count() < 2)                
+          {            
+            const int naviTemp1 = this->x() - 300;  // left of window 
+            const int naviTemp2 = this->y() + 200;  // 200 from the top corner
+            statusWindow->move(std::max(0,naviTemp1) , std::min(naviTemp2,QApplication::primaryScreen()->geometry().bottom()-200));
+          }            
     }
+    
+    if(Game::lockCamera == true) emit updStatus(QString("camera"),QString("Camera Locked")); else emit updStatus(QString("camera"),QString("Camera Unlocked"));
     
     QMainWindow::show();
 }
@@ -934,6 +1005,13 @@ void RouteEditorWindow::naviWindowClosed(){
     naviAction->setChecked(false);
     naviAction->blockSignals(false);
 }
+
+void RouteEditorWindow::statusWindowClosed(){
+    statAction->blockSignals(true);
+    statAction->setChecked(false);
+    statAction->blockSignals(false);
+}
+
 
 void RouteEditorWindow::errorMessagesWindowClosed(){
     errorViewAction->blockSignals(true);

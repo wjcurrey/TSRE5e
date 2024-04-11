@@ -138,7 +138,7 @@ void TFile::load(FileBuffer* data){
                     get157(data);
                     break;
                 default:
-                    qDebug() << "TFile - unknown token: "<< pozycja;
+                    if(Game::debugOutput) qDebug() << "TFile - unknown token: "<< pozycja;
                     i--;
                     break;
             }
@@ -210,7 +210,7 @@ void TFile::get139(FileBuffer* data, int length) {
                         sampleASbuffer[i] = data->get();
                     break;
                 default:
-                    qDebug() << "TFile - unknown token: "<< pozycja;
+                    if(Game::debugOutput) qDebug() << "TFile - unknown token: "<< pozycja;
                     break;
             }
             data->off = akto + offset;
@@ -583,7 +583,7 @@ int TFile::getMatByTexture(QString tname){
 void TFile::save(QString name){
     name.replace("//", "/");
     QFile *file = new QFile(name);
-    qDebug() << "zapis .t "<<name;
+    if(Game::debugOutput) qDebug() << "zapis .t "<<name;
     if (!file->open(QIODevice::WriteOnly))
         return;
     QDataStream write(file);
@@ -889,7 +889,7 @@ void TFile::save(QDataStream &write){
 }
 
 void TFile::print(){
-    qDebug() << "Materials count " << (qint32)materialsCount;
+    if(Game::debugOutput) qDebug() << "Materials count " << (qint32)materialsCount;
     
     Mat tmat;
     for(int j = 0; j < materialsCount*2; j++){
@@ -897,19 +897,19 @@ void TFile::print(){
             tmat = materials[j];
         else
             tmat = amaterials[j-materialsCount];
-        qDebug() << "Material " << j <<" "<< *tmat.name;
+        if(Game::debugOutput) qDebug() << "Material " << j <<" "<< *tmat.name;
 
-        qDebug() << (qint32)tmat.count153;
+        if(Game::debugOutput) qDebug() << (qint32)tmat.count153;
         for(int i = 0; i < tmat.count153; i++){
 
-            qDebug() << "- "<< i << " " << *tmat.tex[i]
+            if(Game::debugOutput) qDebug() << "- "<< i << " " << *tmat.tex[i]
             << " " << (qint32)tmat.atex[i][0]
             << " " << (qint32)tmat.atex[i][1];
         }
 
-        qDebug() << (qint32)tmat.count155;
+        if(Game::debugOutput) qDebug() << (qint32)tmat.count155;
         for(int i = 0; i < tmat.count155; i++){
-            qDebug() << "+ "<< i << " " << (qint32)tmat.itex[i][0]
+            if(Game::debugOutput) qDebug() << "+ "<< i << " " << (qint32)tmat.itex[i][0]
             << " " << (qint32)tmat.itex[i][1]
             << " " << (qint32)tmat.itex[i][2]
             << " " << (qint32)tmat.itex[i][3];

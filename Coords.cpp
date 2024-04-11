@@ -55,7 +55,7 @@ void Coords::render(GLUU* gluu, float * playerT, float* playerW, float playerRot
         punkty[ptr++] = 0;
         punkty[ptr++] = 0;
         punkty[ptr++] = 0;
-        punkty[ptr++] = 30;
+        punkty[ptr++] = Game::markerHeight;   /// EFO 
         punkty[ptr++] = 0;
 
         simpleMarkerObjP->setMaterial(1.0, 0.0, 1.0);
@@ -117,11 +117,11 @@ void Coords::render(GLUU* gluu, float * playerT, float* playerW, float playerRot
                     simpleMarkerObjP->render();
                 else
                     simpleMarkerObjL->render();
-                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, 0, 30, 0);
+                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, 0, Game::markerHeight, 0);
                 gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
                 txt = nameGl[markerList[i].name.toStdString()];
                 if(txt == NULL){
-                    txt = new TextObj(markerList[i].name, 16, 1.0);
+                    txt = new TextObj(markerList[i].name, 16, Game::markerText);
                     txt->setColor(0,0,0);
                     nameGl[markerList[i].name.toStdString()] = txt;
                 } 

@@ -25,7 +25,7 @@ SoundListItem::~SoundListItem() {
 
 void SoundList::loadSoundSources(QString path){
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -36,7 +36,7 @@ void SoundList::loadSoundSources(QString path){
     SoundListItem* s;
     int id = 0;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        //qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("sound")) {
             s = new SoundListItem();
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
@@ -53,13 +53,13 @@ void SoundList::loadSoundSources(QString path){
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#sound - undefined token " << sh;
+                if(Game::debugOutput) qDebug() << "#sound - undefined token " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#SoundSources - undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#SoundSources - undefined token " << sh;
         ParserX::SkipToken(data);
     }
 
@@ -68,7 +68,7 @@ void SoundList::loadSoundSources(QString path){
 }
 void SoundList::loadSoundRegions(QString path){
     path.replace("//", "/");
-    qDebug() << path;
+    // qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;

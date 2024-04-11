@@ -245,6 +245,11 @@ void TransferObj::render(GLUU* gluu, float lod, float posx, float posz, float* p
     }
 };
 
+void TransferObj::reload(){
+
+}
+
+
 void TransferObj::drawShape(int selectionColor){
 
     if (!init) {
@@ -348,10 +353,10 @@ void TransferObj::drawShape(int selectionColor){
         if((esdAlternativeTexture & Game::TextureFlags[Game::season]) != 0)
             seasonPath = Game::season.toLower() + "/";
 
-        if(Game::season == "Winter" || Game::season == "AutumnSnow" || Game::season == "WinterSnow" || Game::season == "SpringSnow" ){
-            if(esdAlternativeTexture & Game::TextureFlags["Snow"] != 0)
+        if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnow" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
+            if(esdAlternativeTexture & Game::TextureFlags["snow"] != 0)
                 seasonPath = "snow/";
-            if(esdAlternativeTexture & Game::TextureFlags["SnowTrack"] != 0)
+            if(esdAlternativeTexture & Game::TextureFlags["snowtrack"] != 0)
                 seasonPath = "snow/";
         }
         

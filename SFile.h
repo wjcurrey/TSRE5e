@@ -198,6 +198,8 @@ public:
     float size;
     float bound[6];
     
+    QString evaluatePathId();   /// EFO to fix relative paths
+    
     SFile();
     SFile(QString pathid, QString name, QString texp );
     SFile(const SFile& orig);
@@ -225,6 +227,8 @@ public:
     void fillShapeTextureInfo(QHash<int, ShapeTextureInfo*> &list, unsigned int stateId = 0);
     void fillShapeHierarchyInfo(ShapeHierarchyInfo* info, unsigned int stateId = 0);
     void fillContentHierarchyInfo(QVector<ContentHierarchyInfo*> &list, int parent);
+    void altPathFix(QString pathid);
+    
 private:
     struct State {
         bool animated = false; 

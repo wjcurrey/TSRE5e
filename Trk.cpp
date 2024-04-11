@@ -69,7 +69,7 @@ Trk::~Trk() {
 void Trk::load(){
     QString path = Game::root + "/routes/" + Game::route + "/" + Game::trkName + ".trk";
     path.replace("//", "/");
-    qDebug() << "# TRK file: " <<path;
+    if(Game::debugOutput) qDebug() << "# TRK file: " <<path;
     load(path);
 }
 
@@ -285,13 +285,13 @@ void Trk::loadUtf16Data(FileBuffer* data){
                     continue;
                 }
 
-                qDebug() << "#TRK tr_routefile - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#TRK tr_routefile - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#TRK - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#TRK - undefined token: " << sh;
         ParserX::SkipToken(data);
     }
 

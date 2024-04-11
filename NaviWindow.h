@@ -63,6 +63,7 @@ private:
     QLineEdit zBox;
     QLineEdit pxBox;
     QLineEdit pyBox;
+    QLineEdit pyBoxx;    
     QLineEdit pzBox;
     QLabel tileInfo;
     QString lastEdit = "";

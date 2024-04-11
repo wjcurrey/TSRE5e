@@ -19,6 +19,7 @@
 #include "Route.h"
 #include "RouteEditorGLWidget.h"
 #include "ShapeLib.h"
+#include "Trk.h"
 
 NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     this->setWindowFlags(Qt::WindowType::Tool);
@@ -28,7 +29,6 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     this->setWindowTitle(tr("Navi Window"));
     QStringList winPos = Game::naviPos.split(","); 
     if(winPos.count() > 1) this->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
-
     
     markerFiles.setStyleSheet("combobox-popup: 0;");
     markerFiles.view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -50,6 +50,7 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     QLabel *lonLabel = new QLabel("lon", this);
     QLabel *empty = new QLabel(" ", this);
     
+    /*
     /// EFO New
     status1.setText("");
     status2.setText("");
@@ -60,7 +61,7 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     status2.setEnabled(false);
     status3.setEnabled(false);
     status4.setEnabled(false);
-    
+  */  
     ///
     
     QLabel *label1 = new QLabel("Position:");
@@ -75,7 +76,8 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     
     QGridLayout *vbox = new QGridLayout;
 
-
+/*
+ * 
 /// EFO    
     vbox->setSpacing(2);
     vbox->setContentsMargins(3,0,1,0);    
@@ -86,22 +88,33 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     vbox->addWidget(&status4,1,1);
     v->addItem(vbox);    
 
-    
+
+ 
     vbox = new QGridLayout;
     /// EFO end
+ */     
     
     vbox->setSpacing(2);
     vbox->setContentsMargins(3,0,1,0);    
     vbox->addWidget(pointerPosLabel,0,0);
-    vbox->addWidget(pxLabel,0,1);
-    vbox->addWidget(&pxBox,0,2);
-    vbox->addWidget(pyLabel,0,3);
-    vbox->addWidget(&pyBox,0,4);
-    vbox->addWidget(pzLabel,0,5);
-    vbox->addWidget(&pzBox,0,6);
+    vbox->addWidget(pxLabel, 0,1);
+    vbox->addWidget(&pxBox,  0,2);
+    vbox->addWidget(pyLabel, 0,3);
+    vbox->addWidget(&pyBox,  0,4);
+    vbox->addWidget(pzLabel, 0,5);
+    vbox->addWidget(&pzBox,  0,6);
+
+    
     pxBox.setEnabled(false);
-    pyBox.setEnabled(false);
+    pyBox.setEnabled(false);   
     pzBox.setEnabled(false);
+    
+    if(Game::convertUnit != 'm')
+    {
+      pyBoxx.setEnabled(false);    
+      vbox->addWidget(&pyBoxx, 0,7);
+    }
+
     vbox->addWidget(cameraPosLabel,1,0);
     vbox->addWidget(xLabel,1,1);
     vbox->addWidget(&xBox,1,2);
@@ -206,6 +219,7 @@ void NaviWindow::naviInfo(int all, int hidden){
 void NaviWindow::pointerInfo(float* coords){
     this->pxBox.setText(QString::number(coords[0]));
     this->pyBox.setText(QString::number(coords[1]));
+    this->pyBoxx.setText(QString::number(coords[1] * Game::convertHeight) + " " + Game::convertUnit );
     this->pzBox.setText(QString::number(-coords[2]));
 }
 
@@ -231,23 +245,32 @@ void NaviWindow::posInfo(PreciseTileCoordinate* coords){
 
 void NaviWindow::mkrList(QMap<QString, Coords*> list){
     mkrFiles = list;
+    QString routeid = Game::route.toLower() + ".mkr";
     for (auto it = list.begin(); it != list.end(); ++it ){
-        if(it.value() == NULL)
+        if(it.value() == NULL)            
             continue;
         if(!it.value()->loaded)
             continue;
         markerFiles.addItem(it.key());
+       }
+    
+    if(markerFiles.count() > 0) {
+        if(markerFiles.findText(routeid))
+            {
+                markerFiles.setCurrentIndex(markerFiles.findText(routeid));
+                mkrFilesSelected(routeid);                
+            }
+        else
+                mkrFilesSelected(markerFiles.itemText(0));
     }
-    if(markerFiles.count() > 0)
-        mkrFilesSelected(markerFiles.itemText(0));
 }
 
 void NaviWindow::mkrFilesSelected(QString item){
     Coords* c = mkrFiles[item];
-    if(c == NULL) return;
+    qDebug() << "Coords Item ----->" << item ;
+    if(c == NULL) return;    
     this->sendMsg("mkrFile", item);
-    this->mkrPlaces.clear();
-    
+    this->mkrPlaces.clear();    
     QStringList hash;
 
     for(int i = 0; i < c->markerList.size(); i++){
@@ -274,13 +297,10 @@ void NaviWindow::hideEvent(QHideEvent *e){
     emit windowClosed();
 }
 
+
 void NaviWindow::recStatus(QString statName, QString statVal ){   
     //qDebug() << "status: " << statVal;
     // this->status1->setText(QString(statVal));
 
-    if(statName.contains("Stat1"))    { status1.setText(statVal); }    
-    if(statName.contains("Stat2")) { status2.setText(statVal); }
-    if(statName.contains("Stat3"))    { status3.setText(statVal); }
-    if(statName.contains("Stat4"))    { status4.setText(statVal); }
 }
-    
+  

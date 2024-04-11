@@ -206,6 +206,13 @@ public:
     static int pyramid;
     static int maxAutoPlacement;
     static int imageMapsZoomOffset;
+    static float railProfile[];
+    static float convertHeight;
+    static QString convertUnit;
+    static int markerHeight;
+    static int markerText;
+    static float lastElev;
+    static float sigOffset;
 private:
     //static RouteEditorWindow* window;
     //static LoadWindow* loadWindow;

@@ -64,7 +64,7 @@ void TDB::loadTdb(){
     if(this->road) extension = "rdb";
     QString path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << "Loading TDB File: " << path;
+    if(Game::debugOutput) qDebug() << "Loading TDB File: " << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -74,7 +74,7 @@ void TDB::loadTdb(){
     data->skipBOM();
     ParserX::NextLine(data);
     iTRnodes = 0;
-    
+  
     // EFO Adds
     lwireLineHeight = Game::wireLineHeight;
     lsectionLineHeight = Game::sectionLineHeight;
@@ -86,7 +86,7 @@ void TDB::loadTdb(){
             continue;
             
         }
-        qDebug() << "#TDB undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#TDB undefined token " << sh;
         ParserX::SkipToken(data);
     }
     
@@ -101,13 +101,13 @@ void TDB::loadTdb(){
             old = trackItems[trackNodes[i]->trItemRef[j]]->getTrackPosition();
         }
     }*/
-    if(!this->road){
-        loadTit();
-        checkTrSignalRDirs();
-        this->speedPostDAT = new SpeedPostDAT();
-        this->sigCfg = new SigCfg();
+    if(!this->road){      
+        loadTit();       
+        checkTrSignalRDirs();     
+        this->speedPostDAT = new SpeedPostDAT(); 
+        this->sigCfg = new SigCfg(); 
         //checkSignals();
-    }
+    }  
     //save();
     loaded = true;
 }
@@ -119,14 +119,17 @@ void TDB::loadUtf16Data(FileBuffer *data){
     bool ok;
     QString sh;
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
+            qDebug() << sh;    
                 if(sh == "tracknodes"){
                     iTRnodes = (int) ParserX::GetNumber(data); //odczytanie ilosci sciezek
-                    qDebug() << "TDB TrackNodes count " << iTRnodes;
+                    if(Game::debugOutput) qDebug() << "TDB TrackNodes count " << iTRnodes;
 
+                    int prevnode = 1;
                     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                         if(sh == "tracknode"){
                             t = (int) ParserX::GetNumber(data); // odczytanie numeru sciezki
                             trackNodes[t] = new TRnode();
+                            if (t>(prevnode+1)) qDebug() << "TDB132: Node out of sequence: expecting " << prevnode << " got " << t;  prevnode = t;  /// EFO 
                             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                                 if(sh == "trendnode"){
                                     trackNodes[t]->typ = 0; //typ endnode
@@ -145,7 +148,7 @@ void TDB::loadUtf16Data(FileBuffer *data){
                                                     for (ii = 0; ii < 16; ii++) {
                                                         xx = ParserX::GetNumber(data);
                                                         if(std::isnan(xx)){
-                                                            qDebug() << "#TrackDB: NAN found in tracknode: "<<t;
+                                                            if(Game::debugOutput) qDebug() << "#TrackDB: NAN found in tracknode: "<<t;
                                                         }
                                                         trackNodes[t]->trVectorSection[j].param[ii] = xx;
                                                     }
@@ -167,7 +170,7 @@ void TDB::loadUtf16Data(FileBuffer *data){
                                             ParserX::SkipToken(data);
                                             continue;
                                         }
-                                        qDebug() << "#TDB TrVectorNode - undefined token " << sh;
+                                        if(Game::debugOutput) qDebug() << "#TDB TrVectorNode - undefined token " << sh;
                                         ParserX::SkipToken(data);
                                     }
                                     ParserX::SkipToken(data);
@@ -197,21 +200,21 @@ void TDB::loadUtf16Data(FileBuffer *data){
                                     for (ii = 0; ii < 12; ii++) {
                                         xx = ParserX::GetNumber(data);
                                         if(std::isnan(xx)){
-                                            qDebug() << "#TrackDB: NAN found in tracknode: "<<t;
+                                            if(Game::debugOutput) qDebug() << "#TrackDB: NAN found in tracknode: "<<t;
                                         }
                                         trackNodes[t]->UiD[ii] = xx;
                                     }
                                     ParserX::SkipToken(data);
                                     continue;              
                                 }
-                                qDebug() << "#TDB TrackNode - undefined token " << sh;
+                                if(Game::debugOutput) qDebug() << "#TDB TrackNode - undefined token " << sh;
                                 //trackNodes[t] = NULL;
                                 ParserX::SkipToken(data);
                             }
                             ParserX::SkipToken(data);
                             continue;
                         }
-                        qDebug() << "#TDB TrackNodes - undefined token " << sh;
+                        if(Game::debugOutput) qDebug() << "#TDB TrackNodes - undefined token " << sh;
                         ParserX::SkipToken(data);
                     }
                     ParserX::SkipToken(data);
@@ -232,7 +235,7 @@ void TDB::loadUtf16Data(FileBuffer *data){
                             nowy->tdbId = 1;
                         
                         if(!nowy->init(sh)){
-                            qDebug() << "#TDB TrItemTable undefined token " << sh;
+                            if(Game::debugOutput) qDebug() << "#TDB TrItemTable undefined token " << sh;
                             ParserX::SkipToken(data);
                             continue;
                         }
@@ -249,7 +252,7 @@ void TDB::loadUtf16Data(FileBuffer *data){
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#TDB trackdb undefined token " << sh;
+                if(Game::debugOutput) qDebug() << "#TDB trackdb undefined token " << sh;
                 ParserX::SkipToken(data);
             }
 }
@@ -310,7 +313,7 @@ void TDB::loadTit(){
     if(this->road) extension = "rit";
     QString path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -329,7 +332,7 @@ void TDB::loadTit(){
             while (!((sh = ParserX::NextTokenInside(bufor).toLower()) == "")) {
                 //qDebug() <<"ssh2 "<< sh;
                 if(!nowy->init(sh)){
-                    qDebug() << "#TIT TrItemTable undefined token " << sh;
+                    if(Game::debugOutput) qDebug() << "#TIT TrItemTable undefined token " << sh;
                     ParserX::SkipToken(bufor);
                     continue;
                 }
@@ -340,7 +343,7 @@ void TDB::loadTit(){
                 }
                 
                 if(this->trackItems[nowy->trItemId] == NULL){
-                    qDebug() << "#TIT tdb fail" << nowy->trItemId;
+                    if(Game::debugOutput) qDebug() << "#TIT tdb fail" << nowy->trItemId;
                 } else {
                     if(nowy->trSignalDirs > 0){
                         this->trackItems[nowy->trItemId]->trSignalRDir = new float[nowy->trSignalDirs * 6];
@@ -352,7 +355,7 @@ void TDB::loadTit(){
             ParserX::SkipToken(bufor);
             continue;
         }
-        qDebug() << "#TIT undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#TIT undefined token " << sh;
         ParserX::SkipToken(bufor);
     }
     return;
@@ -364,18 +367,18 @@ void TDB::mergeTDB(TDB *secondTDB, float offsetXYZ[3], unsigned int& trackNodeOf
     
     // Merge TrackSection file
     if(!road){
-        qDebug() << "merge tsc";
+        if(Game::debugOutput) qDebug() << "merge tsc";
         this->tsection->mergeTSection(secondTDB->tsection, fixedSectionIds, fixedShapeIds);
-        qDebug() << "update tdb";
+        if(Game::debugOutput) qDebug() << "update tdb";
         secondTDB->updateSectionAndShapeIds(fixedSectionIds, fixedShapeIds);
     }
     
     // Add new trackNodes
-    qDebug() << "merge tdb";
+    if(Game::debugOutput) qDebug() << "merge tdb";
     for(int i = 1; i <= secondTDB->iTRnodes; i++){
         TRnode *n = secondTDB->trackNodes[i];
         if(n == NULL){
-            qDebug() << "TRnode NULL" << i;
+            if(Game::debugOutput) qDebug() << "TRnode NULL" << i;
             continue;
         }
         //qDebug() << "o";
@@ -384,14 +387,14 @@ void TDB::mergeTDB(TDB *secondTDB, float offsetXYZ[3], unsigned int& trackNodeOf
         n->addTrackNodeItemOffset(trackNodeOffset, trackItemOffset);
         this->trackNodes[++iTRnodes] = n;
     }
-    qDebug() << "new tracknodes" << secondTDB->iTRnodes;
+    if(Game::debugOutput) qDebug() << "new tracknodes" << secondTDB->iTRnodes;
     
     // Add new trackItems
     for(int i = 0; i < secondTDB->iTRitems; i++){
         //qDebug() << i;
         TRitem *n = secondTDB->trackItems[i];
         if(n == NULL){
-            qDebug() << "TRitem NULL" << i;
+            if(Game::debugOutput) qDebug() << "TRitem NULL" << i;
             continue;
         }
         //qDebug() << "addPositionOffset";
@@ -400,7 +403,7 @@ void TDB::mergeTDB(TDB *secondTDB, float offsetXYZ[3], unsigned int& trackNodeOf
         n->addTrackNodeItemOffset(trackNodeOffset, trackItemOffset);
         this->trackItems[iTRitems++] = n;
     }
-    qDebug() << "tdb end";
+    if(Game::debugOutput) qDebug() << "tdb end";
 }
 
 void TDB::checkTrSignalRDirs(){
@@ -414,30 +417,30 @@ void TDB::checkTrSignalRDirs(){
             continue;
         
         if (it->trSignalDirs > 1){
-            qDebug() << "# WARNING - signal dirs more than 1" << i;
+            if(Game::debugOutput) qDebug() << "# WARNING - signal dirs more than 1" << i;
         }
         
         if (it->trSignalDir == NULL){ 
             //FAIL, remove link
-            qDebug() << "# FAIL - remove link" << i;
+            if(Game::debugOutput) qDebug() << "# FAIL - remove link" << i;
             it->trSignalDirs = 0;
             continue;
         }
         
         if (it->trSignalRDir == NULL){
             // Regen trSignalRDir
-            qDebug() << "# Regen trSignalRDir " << i;
+            if(Game::debugOutput) qDebug() << "# Regen trSignalRDir " << i;
             int jid = it->trSignalDir[0];
             TRnode *n = trackNodes[jid];
             if(n == NULL){
                 //FAIL, remove link
-                qDebug() << "# FAIL - remove link" << i;
+                if(Game::debugOutput) qDebug() << "# FAIL - remove link" << i;
                 it->trSignalDirs = 0;
                 it->trSignalDir = NULL;
             }
             if(n->typ == 1){
                 //FAIL, remove link
-                qDebug() << "# FAIL - remove link" << i;
+                if(Game::debugOutput) qDebug() << "# FAIL - remove link" << i;
                 it->trSignalDirs = 0;
                 it->trSignalDir = NULL;
             }
@@ -524,7 +527,7 @@ void TDB::fillDynTrack(DynTrackObj* track){
             }
         }
     }
-    qDebug() << "foundIdx "<<foundIdx;
+    if(Game::debugOutput) qDebug() << "foundIdx "<<foundIdx;
     if(foundIdx == -1){
         newRShape = new TrackShape::SectionIdx[1];
         newRShape->n = count;
@@ -636,11 +639,11 @@ int TDB::appendTrack(int id, int* ends, int r, int sect, int uid) {
         int kierunek = endNode->TrPinK[0];
         TRnode* n = trackNodes[endNode->TrPinS[0]];
         if (n->typ != 1) {
-            qDebug() << "tdb error";
+            if(Game::debugOutput) qDebug() << "tdb error";
             return -1;
         }
 
-        qDebug() << kierunek;
+        if(Game::debugOutput) qDebug() << kierunek;
         n->iTrv++;
         TRnode::TRSect *newV = new TRnode::TRSect[n->iTrv];
 
@@ -769,7 +772,7 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     /////////////////////////////////////////////////////
     this->trackNodes[vecId] = new TRnode();
     newNode = this->trackNodes[vecId];
-    qDebug() << vecId;
+    if(Game::debugOutput) qDebug() << vecId;
     newNode->typ = 1;
     newNode->iTrv = 1;
     newNode->trVectorSection = new TRnode::TRSect[newNode->iTrv];
@@ -797,9 +800,9 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     newNode->TrPinS[1] = end2Id;
     newNode->TrPinK[1] = 1;
     /////////////////////////////////////////////////////
-    qDebug() << sect;
+    if(Game::debugOutput) qDebug() << sect;
     float dlugosc = this->tsection->sekcja[sect]->getDlugosc();
-    qDebug() << dlugosc;
+    if(Game::debugOutput) qDebug() << dlugosc;
     Vector3f aa;
     this->tsection->sekcja[sect]->getDrawPosition(&aa, dlugosc);
     //if(qe[1] > M_PI)
@@ -829,7 +832,7 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     newNode->UiD[5] = zz;
     newNode->UiD[6] = pp[0];
     newNode->UiD[7] = pp[1];
-    qDebug() << "uid7" << newNode->UiD[7];
+    if(Game::debugOutput) qDebug() << "uid7" << newNode->UiD[7];
     newNode->UiD[8] = pp[2];
     newNode->UiD[9] = qe[0];
     newNode->UiD[10] = qe[1] + angle;
@@ -904,9 +907,9 @@ int TDB::joinTracks(int iendp) {
                 if (j == iendp)
                     continue;
                 if (endp->equals(n)) {
-                    qDebug() << "polacze " << iendp << " " << j;
-                    qDebug() << n->TrPinS[0] << " " << n->TrPinK[0];
-                    qDebug() << endp->TrPinS[0] << " " << endp->TrPinK[0];
+                    if(Game::debugOutput) qDebug() << "polacze " << iendp << " " << j;
+                    if(Game::debugOutput) qDebug() << n->TrPinS[0] << " " << n->TrPinK[0];
+                    if(Game::debugOutput) qDebug() << endp->TrPinS[0] << " " << endp->TrPinK[0];
                     joinVectorSections(endp->TrPinS[0], n->TrPinS[0]);
                     return 0;
                 }
@@ -919,7 +922,7 @@ int TDB::joinTracks(int iendp) {
                 if (j == iendp)
                     continue;
                 if (endp->equalsIgnoreType(n)) {
-                    qDebug() << "polacze rozjazd " << iendp << " " << j;
+                    if(Game::debugOutput) qDebug() << "polacze rozjazd " << iendp << " " << j;
                     appendToJunction(j, iendp, 0);
                     return 0;
                 }
@@ -935,7 +938,7 @@ int TDB::joinTracks(int iendp) {
                 if (j == iendp)
                     continue;
                 if (endp->equalsIgnoreType(n)) {
-                    qDebug() << "polacze rozjazd " << iendp << " " << j;
+                    if(Game::debugOutput) qDebug() << "polacze rozjazd " << iendp << " " << j;
                     appendToJunction(iendp, j, 0);
                     return 0;
                 }
@@ -965,25 +968,25 @@ int TDB::joinVectorSections(int id1, int id2) {
     TRnode* section2e2 = trackNodes[section2->TrPinS[1]];
     
     if (section1e2->equals(section2e1)) {
-        qDebug() << "ok";
+        if(Game::debugOutput) qDebug() << "ok";
     }
     else if (section2e2->equals(section1e1)) {
-        qDebug() << "switch";
+        if(Game::debugOutput) qDebug() << "switch";
         return joinVectorSections(id2, id1);
     }
     else if (section1e2->equals(section2e2)) {
-        qDebug() << "rot2";
+        if(Game::debugOutput) qDebug() << "rot2";
         rotate(id2);
         return joinVectorSections(id1, id2);
     }
     else if (section1e1->equals(section2e1)) {
-        qDebug() << "rot1";
+       if(Game::debugOutput)  qDebug() << "rot1";
         rotate(id1);
         return joinVectorSections(id1, id2);
     }
 
     if(section2->iTri > 0){
-        qDebug() << "przeniose " << section2->iTri << " items z " << id2 << " do " << id1;
+        if(Game::debugOutput) qDebug() << "przeniose " << section2->iTri << " items z " << id2 << " do " << id1;
     }
     moveItemsFrom2to1(id2, id1);
     
@@ -1030,12 +1033,12 @@ void TDB::moveItemsFrom2to1(int id2, int id1){
     
     // update items
     float d = getVectorSectionLength(id1);
-    qDebug() << "d: " << d;
+    if(Game::debugOutput) qDebug() << "d: " << d;
     TRitem* trit;
     for(int i = 0; i < section2->iTri; i++){
         trit = this->trackItems[section2->trItemRef[i]];
         if(trit == NULL){
-            qDebug() << "NULL Item: " << i << " " << section2->trItemRef[i];
+            if(Game::debugOutput) qDebug() << "NULL Item: " << i << " " << section2->trItemRef[i];
         } else {
             trit->addToTrackPos(d);
         }
@@ -1200,12 +1203,12 @@ void TDB::deleteJunction(int id){
     int count = 0;
     int vecId = 0;
     for(int i = 0; i < 3; i++){
-        qDebug() << junction->TrPinS[i];
+       if(Game::debugOutput)  qDebug() << junction->TrPinS[i];
         if(junction->TrPinS[i] != 0) count++;
     }
-    qDebug() << count;
+    if(Game::debugOutput) qDebug() << count;
     if(count > 1){
-        qDebug() << "junction delete fail";
+        if(Game::debugOutput) qDebug() << "junction delete fail";
         return;
     }
     if(count == 0){
@@ -1227,7 +1230,7 @@ void TDB::deleteJunction(int id){
         TRnode* vect = trackNodes[vecId];
         
         if(!vect->isLikedTo(id)){
-            qDebug() << "FAIL, TrackNode not linked to this juction!";
+            if(Game::debugOutput) qDebug() << "FAIL, TrackNode not linked to this juction!";
             trackNodes[id] = NULL;
             updateTrNode(id);
             return;
@@ -1289,13 +1292,13 @@ bool TDB::deleteAllTrItemsFromVectorSection(int id){
     if(vect->iTri > 0){
         TRitem* trit;
         for(int i = 0; i < vect->iTri; i++){
-            qDebug() << vect->trItemRef[i];
+            if(Game::debugOutput) qDebug() << vect->trItemRef[i];
             trit = this->trackItems[vect->trItemRef[i]];
             if(trit == NULL){
                 continue;
             }
             // item delete
-            qDebug() << "item delete " << vect->trItemRef[i]<< " "<<trit->trItemId;
+            if(Game::debugOutput) qDebug() << "item delete " << vect->trItemRef[i]<< " "<<trit->trItemId;
             deleteTrItem(trit->trItemId);
             i--;
         }
@@ -1333,9 +1336,9 @@ bool TDB::deleteFromVectorSection(int id, int j){
                     continue;
                 trit->addToTrackPos(-sectDlugosc);
                 if(trit->getTrackPosition() < 0){
-                    qDebug() << "delete item? - before section";
+                    if(Game::debugOutput) qDebug() << "delete item? - before section";
                     // item delete
-                    qDebug() << "item delete " << trit->trItemId;
+                    if(Game::debugOutput) qDebug() << "item delete " << trit->trItemId;
                     this->deleteTrItem(trit->trItemId);
                     i--;
                 }
@@ -1386,9 +1389,9 @@ bool TDB::deleteFromVectorSection(int id, int j){
                 if(trit == NULL) 
                     continue;
                 if(trit->getTrackPosition() > vectDlugosc){
-                    qDebug() << "delete item? - behind section";
+                    if(Game::debugOutput) qDebug() << "delete item? - behind section";
                     // item delete
-                    qDebug() << "item delete " << trit->trItemId;
+                    if(Game::debugOutput) qDebug() << "item delete " << trit->trItemId;
                     this->deleteTrItem(trit->trItemId);
                     i--;
                 }
@@ -1497,7 +1500,7 @@ int TDB::rotate(int id){
     
     // update items
     float d = getVectorSectionLength(id);
-    qDebug() << "d: " << d;
+    if(Game::debugOutput) qDebug() << "d: " << d;
     for(int i = 0; i < vect->iTri; i++){
         this->trackItems[vect->trItemRef[i]]->flipTrackPos(d);
     }
@@ -1557,7 +1560,7 @@ bool TDB::findPosition(int &x, int &z, float* p, float* q, float* endp, int sect
     qe[2] = 0;
     int findValue = findNearestNode(x, z, p, (float*) &qe);
     if(findValue < 0) return false;
-    qDebug() << findValue;
+    if(Game::debugOutput) qDebug() << findValue;
     
     bool b;
     
@@ -1568,14 +1571,14 @@ bool TDB::findPosition(int &x, int &z, float* p, float* q, float* endp, int sect
     }
     
     TrackShape* shp = this->tsection->shape[sectionIdx];
-    qDebug() << shp->filename;
+    if(Game::debugOutput) qDebug() << shp->filename;
     float startPos[3];
      
     while(defaultEnd >= shp->numpaths*2){
         defaultEnd -= shp->numpaths*2;
     }
     
-    qDebug() << "defaultEnd" << defaultEnd;
+    if(Game::debugOutput) qDebug() << "defaultEnd" << defaultEnd;
     
     int startEnd = defaultEnd/2;
     int endend = defaultEnd - (startEnd)*2;
@@ -1646,8 +1649,8 @@ bool TDB::findPosition(int &x, int &z, float* p, float* q, float* endp, int sect
     if(endend == 1)
         endp[3] = -1;
     
-    qDebug() << "ccc";
-    qDebug() << startPos[0] << " " << startPos[2];
+    if(Game::debugOutput) qDebug() << "ccc";
+    if(Game::debugOutput) qDebug() << startPos[0] << " " << startPos[2];
     
     return true;
 }
@@ -1657,7 +1660,7 @@ bool TDB::fillJNodePosn(int x, int z, int uid, QVector<std::array<float, 5>> *jN
         return false;
     jNodePosn->clear();
     z = -z;
-    qDebug() << "fill jnodeposn " << x << " " << z << " " << uid; 
+    if(Game::debugOutput) qDebug() << "fill jnodeposn " << x << " " << z << " " << uid; 
     
     TRnode *n;
     int count = 0;
@@ -1669,7 +1672,7 @@ bool TDB::fillJNodePosn(int x, int z, int uid, QVector<std::array<float, 5>> *jN
                 if(n->UiD[0] == x)
                     if(n->UiD[1] == z)
                         if(n->UiD[2] == uid){
-                            qDebug() << "jest j";
+                            if(Game::debugOutput) qDebug() << "jest j";
                             count++;
                             jNodePosn->push_back(std::array<float,5>());
                             jNodePosn->back()[0] = n->UiD[0];
@@ -1716,7 +1719,7 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
     qe[2] = 0;
     
     TrackShape* shp = this->tsection->shape[sectionIdx];
-    qDebug() << shp->filename;
+    if(Game::debugOutput) qDebug() << shp->filename;
     float pp[3];
     float qee[3];
     int endp;
@@ -1773,7 +1776,7 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
         
         if(isJunction[ends[0]] == 1){
             isJunction[ends[0]] = 0;
-            qDebug() << "rozjazd" << jNodePosn;
+            if(Game::debugOutput) qDebug() << "rozjazd" << jNodePosn;
             if(jNodePosn != NULL){
                 jNodePosn->push_back(std::array<float,5>());
                 jNodePosn->back()[0] = x;
@@ -1794,7 +1797,7 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
         }
         
         if(junctionId[ends[0]] != 0){
-            qDebug() << "append to junction";
+            if(Game::debugOutput) qDebug() << "append to junction";
             appendToJunction(junctionId[ends[0]], start, 1);
             joinTracks(junctionId[ends[0]]);
         } else {
@@ -1818,12 +1821,12 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
             cPos.add(p);
             
             this->findNearestPositionsOnTDB(posT, (float*)&cPos, cPoints, 0.2);
-            qDebug() << "crossover";
-            qDebug() << cPos.x<<cPos.y<<cPos.z;
+            if(Game::debugOutput) qDebug() << "crossover";
+            if(Game::debugOutput) qDebug() << cPos.x<<cPos.y<<cPos.z;
             if(cPoints.size() != 2)
                 continue;
             //qDebug() << cPoints.size();
-            qDebug() << cPoints[0].idx << cPoints[0].m << cPoints[1].idx << cPoints[1].m;
+            if(Game::debugOutput) qDebug() << cPoints[0].idx << cPoints[0].m << cPoints[1].idx << cPoints[1].m;
             this->newCrossOverObject(cPoints[0].idx, cPoints[0].m, cPoints[1].idx, cPoints[1].m, sectionIdx);
         }
     }
@@ -1834,7 +1837,7 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
 
 bool TDB::removeTrackFromTDB(int x, int y, int UiD){
     y = -y;
-    qDebug() << "usune Track " << x << " " << y << " " << UiD; 
+    if(Game::debugOutput) qDebug() << "usune Track " << x << " " << y << " " << UiD; 
     
     bool ok = false;
     TRnode *n;
@@ -1848,7 +1851,7 @@ bool TDB::removeTrackFromTDB(int x, int y, int UiD){
                         if(n->trVectorSection[j].param[3] == y)
                             if(n->trVectorSection[j].param[4] == UiD){
                                 ok = true;
-                                qDebug() << "jest";
+                                if(Game::debugOutput) qDebug() << "jest";
                                 if(deleteFromVectorSection(i, j))
                                     j = -1;
                     }
@@ -1863,7 +1866,7 @@ bool TDB::removeTrackFromTDB(int x, int y, int UiD){
                     if(n->UiD[1] == y)
                         if(n->UiD[2] == UiD){
                             ok = true;
-                            qDebug() << "jest j";
+                            if(Game::debugOutput) qDebug() << "jest j";
                             deleteJunction(i);
                 }
             }
@@ -1912,7 +1915,7 @@ bool TDB::ifTrackExist(int x, int y, int UiD){
                     if(n->trVectorSection[j].param[2] == x)
                         if(n->trVectorSection[j].param[3] == y)
                             if(n->trVectorSection[j].param[4] == UiD){
-                                qDebug() << "jest";
+                                if(Game::debugOutput) qDebug() << "jest";
                                 return true;
                     }
             }
@@ -2627,7 +2630,7 @@ bool TDB::getSegmentIntersectionPositionOnTDB(float* posT, float* segment, float
     int length = 0;
     getLines(lineBuffer, length, posT);
     
-    qDebug() << "lines length" << length;
+    if(Game::debugOutput) qDebug() << "lines length" << length;
     float best[7];
     best[0] = 99999;
     float dist = 0;
@@ -2648,8 +2651,8 @@ bool TDB::getSegmentIntersectionPositionOnTDB(float* posT, float* segment, float
                 intersectionPoint[0], intersectionPoint[2]
             );
             if(!ok) continue;
-            qDebug() << "intersection";
-            qDebug() <<  lineBuffer[i]<< " " << lineBuffer[i + 2]<< " " <<
+            if(Game::debugOutput) qDebug() << "intersection";
+            if(Game::debugOutput) qDebug() <<  lineBuffer[i]<< " " << lineBuffer[i + 2]<< " " <<
                 lineBuffer[i+6 + 0]<< " " << lineBuffer[i+6 + 2]<< " -- " <<
                 segment [ j + 0]<< " " << segment [ j + 2]<< " " <<
                 segment [ j+6 + 0]<< " " << segment [ j+6 + 2]<< " " ;
@@ -2670,7 +2673,7 @@ bool TDB::getSegmentIntersectionPositionOnTDB(float* posT, float* segment, float
             }
         }
     }
-    qDebug() << "item pos: " << best[0] << " " << best[1] << " " << best[2] << " " << best[3];
+    if(Game::debugOutput) qDebug() << "item pos: " << best[0] << " " << best[1] << " " << best[2] << " " << best[3];
     if(best[0] == 99999) return false;
     
     //TRnode* n = trackNodes[(int)best[1]];
@@ -2699,7 +2702,7 @@ bool TDB::getSegmentIntersectionPositionOnTDB(QVector<TDB::IntersectionPoint> &i
     int length = 0;
     getLines(lineBuffer, length, posT);
     
-    qDebug() << "lines length" << length;
+    if(Game::debugOutput) qDebug() << "lines length" << length;
     float best[7];
     best[0] = 99999;
     float dist = 0;
@@ -2724,8 +2727,8 @@ bool TDB::getSegmentIntersectionPositionOnTDB(QVector<TDB::IntersectionPoint> &i
                 intersectionPoint[0], intersectionPoint[2]
             );
             if(!ok) continue;
-            qDebug() << "intersection";
-            qDebug() <<  lineBuffer[i]<< " " << lineBuffer[i + 2]<< " " <<
+            if(Game::debugOutput) qDebug() << "intersection";
+            if(Game::debugOutput) qDebug() <<  lineBuffer[i]<< " " << lineBuffer[i + 2]<< " " <<
                 lineBuffer[i+6 + 0]<< " " << lineBuffer[i+6 + 2]<< " -- " <<
                 segment [ j + 0]<< " " << segment [ j + 2]<< " " <<
                 segment [ j+6 + 0]<< " " << segment [ j+6 + 2]<< " " ;
@@ -2750,7 +2753,7 @@ bool TDB::getSegmentIntersectionPositionOnTDB(QVector<TDB::IntersectionPoint> &i
                 metry = segmentTDB->getVectorSectionLengthToIdx(p->sidx, segment[j+4]);
                 p->sm = metry + segment[j+5] + (segment[j+11] - segment[j+5])*dist1;
             }
-            qDebug() << "item p: " << p->distance << " " << p->idx << " " << p->m<< " " << p->sidx << " " << p->sm;
+            if(Game::debugOutput) qDebug() << "item p: " << p->distance << " " << p->idx << " " << p->m<< " " << p->sidx << " " << p->sm;
             //ipoints.push_back(p);
         }
     }
@@ -2796,7 +2799,7 @@ void TDB::getVectorSectionPoints(int x, int y, int uid, QVector<float> &ptr){
             if (n->typ == 1) {
                 for (int i = 0; i < n->iTrv; i++) {
                     if(n->trVectorSection[i].param[2] == x && n->trVectorSection[i].param[3] == y && n->trVectorSection[i].param[4] == uid ){
-                        qDebug() << "mam";
+                        if(Game::debugOutput) qDebug() << "mam";
                         getVectorSectionPoints(x, y, j, i, ptr);
                     }
                 }
@@ -2825,7 +2828,7 @@ void TDB::getVectorSectionPoints(int x, int y, int nId, int sId, QVector<float> 
     Mat4::rotate(matrix, matrix, n->trVectorSection[sId].param[13], 1, 0, 0);
     //Mat4::fromRotationTranslation(matrix, q, objMatrix);
     if(tsection->sekcja[(int) n->trVectorSection[sId].param[0]] == NULL){
-        qDebug() << "nie ma sekcji " << (int) n->trVectorSection[sId].param[0];
+        if(Game::debugOutput) qDebug() << "nie ma sekcji " << (int) n->trVectorSection[sId].param[0];
     }
     tsection->sekcja[(int) n->trVectorSection[sId].param[0]]->getPoints(ptr, matrix);
     return;
@@ -3316,7 +3319,7 @@ void TDB::deleteVectorSection(int x, int y, int UiD){
             }
         }
     if(tid > 0){
-        qDebug() << "mam id: " << tid;
+        if(Game::debugOutput) qDebug() << "mam id: " << tid;
         deleteVectorSection(tid);
     }
     TDB::refresh();
@@ -3342,7 +3345,7 @@ void TDB::deleteTree(int x, int y, int UiD){
             }
         }
     if(tid > 0){
-        qDebug() << "mam id: " << tid;
+        if(Game::debugOutput) qDebug() << "mam id: " << tid;
         deleteTree(tid);
     }
 }
@@ -3362,16 +3365,16 @@ void TDB::deleteTree(int d) {
         for(int i = 1; i <= iTRnodes; i++){
             if(drzewo[i] == 1) w++;
         }
-        qDebug() << "Ilosc elementów w tym drzewie: " << w;
+        if(Game::debugOutput) qDebug() << "Ilosc elementów w tym drzewie: " << w;
         
         if(w > 1000) {
-            qDebug() << "Za duzo elementow do usuniecia, lepiej nie usuwac";
+            if(Game::debugOutput) qDebug() << "Za duzo elementow do usuniecia, lepiej nie usuwac";
             return;
         }
 
         for(int i = 1; i <= iTRnodes; i++){
             if(drzewo[i] == 1){
-                qDebug() << "Usuwam " << i;
+                if(Game::debugOutput) qDebug() << "Usuwam " << i;
                 deleteAllTrItemsFromVectorSection(i);
                 trackNodes[i] = NULL;
             }
@@ -3394,22 +3397,22 @@ void TDB::addToDeletedTree(int* drzewo, int d){
 bool TDB::deleteNulls() {
         for(int i = 1; i <= iTRnodes; i++){
             if(trackNodes[i] == NULL){
-                qDebug() << "Removing NULL TrackNode at: "<<i;
+                if(Game::debugOutput) qDebug() << "Removing NULL TrackNode at: "<<i;
                 int stare = findBiggest();
                 if(stare <= i) {
-                    qDebug() << "There is no more NULL TrackNodes.";
+                    if(Game::debugOutput) qDebug() << "There is no more NULL TrackNodes.";
                     iTRnodes = stare;
                     return false;
                 }
                 trackNodes[i] = trackNodes[stare];
                 trackNodes[stare] = NULL;
-                qDebug() << i << "Replaced by: " << stare;
+                if(Game::debugOutput) qDebug() << i << "Replaced by: " << stare;
                 
                 for(int j = 0; j < 3; j++){
                     if(trackNodes[i]->TrPinS[j] == 0) 
                         continue;
                     if(trackNodes[trackNodes[i]->TrPinS[j]] == NULL)
-                        qDebug() << "Fail, unexpected NULL TrackNode found!" << trackNodes[i]->TrPinS[j];
+                        if(Game::debugOutput) qDebug() << "Fail, unexpected NULL TrackNode found!" << trackNodes[i]->TrPinS[j];
                     else
                         trackNodes[trackNodes[i]->TrPinS[j]]->podmienTrPin(stare, i);
                 }
@@ -3417,7 +3420,7 @@ bool TDB::deleteNulls() {
                 return true;
             }
         }
-        qDebug() << "There is no more NULL TrackNodes.";
+        if(Game::debugOutput) qDebug() << "There is no more NULL TrackNodes.";
         return false;
     }
 
@@ -3445,7 +3448,7 @@ void TDB::replaceSignalDirJunctionId(int oldId, int newId){
             for(int j = 0; j < trackItems[i]->trSignalDirs*4; j+=4){
                 if(trackItems[i]->trSignalDir[j+0] == oldId){
                     trackItems[i]->trSignalDir[j+0] = newId;
-                    qDebug() << "trSignalDir trndoe id replaced: "<<oldId<<" "<<newId;
+                    if(Game::debugOutput) qDebug() << "trSignalDir trndoe id replaced: "<<oldId<<" "<<newId;
                 }
             }
         }
@@ -3467,11 +3470,11 @@ void TDB::saveEmpty(bool road) {
     if(road) extension = "rdb";
     path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(8);
+    out.setRealNumberPrecision(7);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
     out << "SIMISA@@@@@@@@@@JINX0T0t______\n\n";
@@ -3500,30 +3503,31 @@ void TDB::updateTrackShape(int id){
 void TDB::save() {
     if(!Game::writeEnabled) return;
     if(!Game::writeTDB) return;
-    
-    while(deleteNulls());
+    qDebug() << "Deleting Nulls Skipped";
+    // while(deleteNulls());  /// EFO this is where it's crapping out
+    qDebug() << "Sorting TR Items";
     sortItemRefs();
     this->isInitLines = false;
-    
+    qDebug() << "TDB 3509";
     QString sh;
     QString path;
     QString extension = "tdb";
     if(this->road) extension = "rdb";
     path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << path;
+    qDebug() << "opening " << path;
     QFile file(path);
 
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(8);
+    out.setRealNumberPrecision(7);  //// EFO Let's see if this blows up vectors at (7) was (8)
     //out.setRealNumberNotation(QTextStream::FixedNotation);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
     out << "SIMISA@@@@@@@@@@JINX0T0t______\n\n";
     saveToStream(out);
     file.close();
-
+    qDebug() << "TDB Complete";
     saveTit();
     if(!this->road) 
         this->tsection->saveRoute();
@@ -3537,14 +3541,14 @@ int TDB::updateTrNodeData(FileBuffer *data){
     TRnode *nowy = NULL;
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("id")) {
             nid = ParserX::GetNumber(data);
             ParserX::SkipToken(data);
             continue;
         }
         if (sh == ("remove")) {
-            qDebug() << "remove trnode" << nid;
+            if(Game::debugOutput) qDebug() << "remove trnode" << nid;
             trackNodes[nid] = NULL;
             ParserX::SkipToken(data);
             continue;
@@ -3573,7 +3577,7 @@ TRitem *TDB::updateTrItemData(FileBuffer *data){
         nowy->tdbId = 1;
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("id")) {
             nid = ParserX::GetNumber(data);
             nowy->trItemId = nid;
@@ -3581,13 +3585,13 @@ TRitem *TDB::updateTrItemData(FileBuffer *data){
             continue;
         }
         if (sh == ("remove")) {
-            qDebug() << "remove tritem" << nid;
+            if(Game::debugOutput) qDebug() << "remove tritem" << nid;
             trackItems[nid] = NULL;
             ParserX::SkipToken(data);
             continue;
         }
         if(!nowy->init(sh)){
-            qDebug() << "#TDB TrItemTable undefined token " << sh;
+            if(Game::debugOutput) qDebug() << "#TDB TrItemTable undefined token " << sh;
             ParserX::SkipToken(data);
             continue;
         } else {
@@ -3611,7 +3615,7 @@ void TDB::updateTrackShapeData(FileBuffer *data){
     TrackShape *nowy = new TrackShape();
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("trackshape")) {
             nowy->loadUtf16Data(data);
             this->tsection->shape[nowy->id] = nowy;
@@ -3630,7 +3634,7 @@ void TDB::updateTrackSectionData(FileBuffer *data){
     TSection *nowy = new TSection();
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("tracksection")) {
             nowy->loadUtf16Data(data);
             this->tsection->sekcja[nowy->id] = nowy;
@@ -3652,7 +3656,7 @@ void TDB::saveToStream(QTextStream &out){
     out << "	Serial ( " << this->serial << " )\n";
     if(this->iTRnodes > 0){
     out << "	TrackNodes ( " << (this->iTRnodes) << "\n";
-
+    qDebug() << "TDB 3657";
     for (int i = 1; i <= this->iTRnodes; i++) {
         if (trackNodes[i] == NULL) 
             continue;
@@ -3716,7 +3720,7 @@ void TDB::saveToStream(QTextStream &out){
     }
     out << "	)\n";
     }
-    
+    qDebug() << "TDB 3721";
     if(this->iTRitems > 0){
         out << "	TrItemTable ( " << (this->iTRitems) << "\n";
         for (int i = 0; i <= this->iTRitems; i++) {
@@ -3725,7 +3729,7 @@ void TDB::saveToStream(QTextStream &out){
         }
         out << "	)\n";
     }
-
+    qDebug() << "TDB 3730";
     out << ")";
 
 }
@@ -3733,23 +3737,23 @@ void TDB::saveToStream(QTextStream &out){
 void TDB::saveTit() {
     if(!Game::writeEnabled) return;
     if(!Game::writeTDB) return;
-    
+    qDebug() << "TDB 3738";
     QString path;
     QString extension = "tit";
     if(this->road) extension = "rit";
     path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
-
+    qDebug() << "TDB 3746";
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(8);
+    out.setRealNumberPrecision(7);   //// EFO this might fix some of the node issues... was (8) now (7)
     //out.setRealNumberNotation(QTextStream::FixedNotation);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
     out << "SIMISA@@@@@@@@@@JINX0T0t______\n\n";
-
+    qDebug() << "TDB 3754";
     bool tit = true;
     if(this->iTRitems > 0){
         out << "TrItemTable ( " << (this->iTRitems) << "\n";
@@ -3762,7 +3766,7 @@ void TDB::saveTit() {
     
 
     file.close();
-
+    qDebug() << "TDB 3767";
     //qDebug() << "TIT Saved";
 }
 
@@ -3789,7 +3793,7 @@ void TDB::checkSignals(){
             }
         }
     }
-    qDebug() << "suma: "<<trtype[0]<<" "<<trtype[1]<<" "<<trtype[2]<<" "<<trtype[3];
+    if(Game::debugOutput) qDebug() << "suma: "<<trtype[0]<<" "<<trtype[1]<<" "<<trtype[2]<<" "<<trtype[3];
 }
 
 TDB::TDB(const TDB& o) {
@@ -3859,7 +3863,7 @@ void TDB::getUsedTileList(QMap<int, QPair<int, int>*> &tileList, int radius, int
     QMapIterator<int, QPair<int, int>*> i(tileList2);
     int x, z;
     radius *= step;
-    qDebug() << "radius" << radius;
+    if(Game::debugOutput) qDebug() << "radius" << radius;
     while (i.hasNext()) {
         i.next();
         if(i.value() == NULL)

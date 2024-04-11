@@ -24,15 +24,15 @@
 #include "GeoCoordinates.h"
 
 CoordsGpx::CoordsGpx(QString path) {
-    qDebug() << "gpx!";
+    if(Game::debugOutput) qDebug() << "gpx!";
     loaded = false;
 
     QFile file(path);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        qDebug() << "no file" << file.errorString();
+        if(Game::debugOutput) qDebug() << "no file" << file.errorString();
         return;
     }
-    qDebug() <<  "file";
+    if(Game::debugOutput) qDebug() <<  "file";
     QByteArray data = file.readAll();
     
     bool placemark = false;

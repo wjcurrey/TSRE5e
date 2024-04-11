@@ -90,7 +90,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag"<<"*.eot");
     if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
-        qDebug() << "Path not exist" << path;
+        if(Game::debugOutput) qDebug() << "Path not exist" << path;
     dir.setFilter(QDir::Dirs);
     if(Game::debugOutput) qDebug() << dir.count() <<" dirs";
     unsigned long long timeNow = QDateTime::currentMSecsSinceEpoch();
@@ -114,7 +114,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     trainDir.setFilter(QDir::Files);
     if(Game::debugOutput) qDebug() << path2;
     if(!dir2.exists())
-        qDebug() << "Path not exist" << path2;
+        if(Game::debugOutput) qDebug() << "Path not exist" << path2;
     dir2.setFilter(QDir::Dirs);
     if(Game::debugOutput) qDebug() << dir2.count() <<" dirs2";
     foreach(QString dirFile, dir2.entryList()){

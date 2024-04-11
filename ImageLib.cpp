@@ -13,6 +13,7 @@
 #include <QString>
 #include <QImage>
 #include <QOpenGLShaderProgram>
+#include "Game.h"
 
 bool ImageLib::IsThread = true;
 
@@ -24,7 +25,7 @@ void ImageLib::run(){
 
     if(img.isNull() && !IsThread) {
         texture->missing = true;
-        qDebug() << "IMG: not exist " << texture->pathid;
+        if(Game::debugOutput) qDebug() << "IMG: not exist " << texture->pathid;
         return;
     }
     

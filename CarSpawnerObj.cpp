@@ -37,7 +37,7 @@ QVector<CarSpawnerObj::CarSpawnerList> CarSpawnerObj::carSpawnerList;
 void CarSpawnerObj::LoadCarSpawnerList(){
     QString path = Game::root + "/routes/" + Game::route + "/carspawn.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile *file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly))
         return;
@@ -51,7 +51,7 @@ void CarSpawnerObj::LoadCarSpawnerList(){
     
     path = Game::root + "/routes/" + Game::route + "/openrails/carspawn.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly))
         return;
@@ -61,7 +61,7 @@ void CarSpawnerObj::LoadCarSpawnerList(){
     ParserX::NextLine(data);
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("carspawnerlist")) {
             parseCarList(data);
             ParserX::SkipToken(data);
@@ -77,10 +77,10 @@ void CarSpawnerObj::parseCarList(FileBuffer* data){
     carSpawnerList.push_back(CarSpawnerList());
     carSpawnerList.back().name = "DEFAULT";
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("listname")) {
             carSpawnerList.back().name = ParserX::GetString(data);
-            qDebug() << carSpawnerList.back().name;
+            if(Game::debugOutput) qDebug() << carSpawnerList.back().name;
             ParserX::SkipToken(data);
             continue;
         }
@@ -340,7 +340,7 @@ void CarSpawnerObj::translate(float px, float py, float pz){
     
     int id = tdb->findTrItemNodeId(this->trItemId[this->selectionValue]);
     if (id < 0) {
-        qDebug() << "fail id";
+        if(Game::debugOutput) qDebug() << "fail id";
         return;
     }
     
@@ -522,7 +522,7 @@ void CarSpawnerObj::renderTritems(GLUU* gluu, int selectionColor){
             tdb = Game::roadDB;
         int id = tdb->findTrItemNodeId(this->trItemId[1]);
         if (id < 1) {
-            qDebug() << "platform fail id "<<id;
+            if(Game::debugOutput) qDebug() << "platform fail id "<<id;
             this->loaded = false;
             return;
         }
@@ -531,7 +531,7 @@ void CarSpawnerObj::renderTritems(GLUU* gluu, int selectionColor){
         drawPositionB = new float[7];
         bool ok = tdb->getDrawPositionOnTrNode(drawPositionB, id, tdb->trackItems[this->trItemId[1]]->getTrackPosition());
         if(!ok){
-            qDebug() << "platform fail tdb "<<id;
+            if(Game::debugOutput) qDebug() << "platform fail tdb "<<id;
             this->loaded = false;
             return;
         }
@@ -544,14 +544,14 @@ void CarSpawnerObj::renderTritems(GLUU* gluu, int selectionColor){
             tdb = Game::roadDB;
         int id = tdb->findTrItemNodeId(this->trItemId[3]);
         if (id < 1) {
-            qDebug() << "platform fail id";
+            if(Game::debugOutput) qDebug() << "platform fail id";
             this->loaded = false;
             return;
         }
         drawPositionE = new float[7];
         bool ok = tdb->getDrawPositionOnTrNode(drawPositionE, id, tdb->trackItems[this->trItemId[3]]->getTrackPosition());
         if(!ok){
-            qDebug() << "platform fail tdb "<<id;
+            if(Game::debugOutput) qDebug() << "platform fail tdb "<<id;
             this->loaded = false;
             return;
         }

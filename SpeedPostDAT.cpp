@@ -20,14 +20,14 @@ SpeedPostDAT::SpeedPostDAT() {
     QString sh;
     QString path = Game::root + "/routes/" + Game::route + "/speedpost.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
     FileBuffer* bufor = ReadFile::read(&file);
     bufor->off += 46+16;
 
-    qDebug() << "speedpost.dat!";
+    if(Game::debugOutput) qDebug() << "speedpost.dat!";
     while (!((sh = ParserX::NextTokenInside(bufor).toLower()) == "")) {
         if (sh == "speed_warning_sign_shape") {
             this->speed_Warning_Sign_Shape = ParserX::GetString(bufor);
@@ -55,7 +55,7 @@ SpeedPostDAT::SpeedPostDAT() {
             ParserX::SkipToken(bufor);
             continue;
         }
-        qDebug() <<"#speedpost.dat - undefined token: "<< sh;
+        if(Game::debugOutput) qDebug() <<"#speedpost.dat - undefined token: "<< sh;
         ParserX::SkipToken(bufor);
         continue;
     }

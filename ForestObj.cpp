@@ -65,7 +65,7 @@ ForestObj::~ForestObj() {
 void ForestObj::LoadForestList(){
     QString path = Game::root + "/routes/" + Game::route + "/forests.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -76,7 +76,7 @@ void ForestObj::LoadForestList(){
     //ParserX::szukajsekcji1(sh, data);
     //ParserX::GetNumber(data);
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        qDebug() << sh;
+        if(Game::debugOutput) qDebug() << sh;
         if (sh == ("forest")) {
             ForestObj::forestList.push_back(ForestObj::ForestList());
             ForestObj::forestList.back().name = ParserX::GetString(data);
@@ -123,7 +123,7 @@ void ForestObj::set(QString sh, QString val){
 
 void ForestObj::set(QString sh, long long int val) {
     if (sh == ("ref_value")) {
-        qDebug() << val;
+        if(Game::debugOutput) qDebug() << val;
         int val2        = val & 0xFFFF;
         int tareax      = (val >> 16) & 0xFFF;
         int tareaz      = (val >> 28) & 0xFFF;
@@ -398,7 +398,7 @@ void ForestObj::drawShape(){
                 bBox[1] += position[0];
                 bBox[2] += position[2];
                 bBox[3] += position[2];            
-                qDebug() << bBox[0] << bBox[1] << bBox[2] << bBox[3];
+                if(Game::debugOutput) qDebug() << bBox[0] << bBox[1] << bBox[2] << bBox[3];
             
                 if(Game::trackDB != NULL)
                     Game::trackDB->fillNearestSquaredDistanceToTDBXZ(posT, fpoints, bBox);
@@ -462,8 +462,23 @@ void ForestObj::drawShape(){
                     }
                 }
             }
+
+
+/// EFO trying to add seasonal support for forest objects             
             
-        texturePath = new QString(resPath.toLower()+"/"+treeTexture.toLower());
+        QString seasonPath = "";
+        //qDebug() << esdAlternativeTexture << this->TextureFlags[Game::season];
+        //qDebug() << (esdAlternativeTexture & this->TextureFlags[Game::season]);
+
+        if((Game::TextureFlags[Game::season]) != 0)
+            seasonPath = "/" + Game::season.toLower();
+
+        if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnown" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
+            if(Game::TextureFlags["snow"] != 0)
+                seasonPath = "/snow";
+        }
+                        
+        texturePath = new QString(resPath.toLower() + seasonPath +"/"+treeTexture.toLower());
         shape.setMaterial(texturePath);
         shape.init(punkty, ptr, RenderItem::VNTA, GL_TRIANGLES);
         /*shape.VAO.create();

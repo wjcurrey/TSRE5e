@@ -217,8 +217,8 @@ void ActivityTrafficProperties::serviceActoionListSelected(QString val){
 }
 
 void ActivityTrafficProperties::eTimeSelected(QTime val){
-    if(traffic == NULL)
-        return;
+    if(traffic == NULL) return;
+    if(lServcies.currentItem() == NULL) return;
     ActivityTimetable* s = traffic->service[lServcies.currentItem()->type()];
     if(s == NULL)
         return;

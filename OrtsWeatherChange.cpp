@@ -44,7 +44,7 @@ OrtsWeatherChange::~OrtsWeatherChange() {
 void OrtsWeatherChange::LoadList(){
     QString path = Game::root + "/routes/" + Game::route + "/weathertransitions.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
@@ -67,13 +67,13 @@ void OrtsWeatherChange::LoadList(){
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#OrtsWeatherChangeList - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#OrtsWeatherChangeList - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#WeatherTransitions.dat  - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#WeatherTransitions.dat  - undefined token: " << sh;
         ParserX::SkipToken(data);
     }
 }
@@ -115,7 +115,7 @@ void OrtsWeatherChange::load(FileBuffer* data) {
             continue;
         }
         
-        qDebug() << "#OrtsWeatherChange - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#OrtsWeatherChange - undefined token: " << sh;
         ParserX::SkipToken(data);
         continue;
     }

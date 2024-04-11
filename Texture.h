@@ -54,6 +54,8 @@ public:
     void fillData(unsigned char* data);
     unsigned char * getImageData(int width, int height);
     void delVBO();
+    QString evaluatePathId();
+    
 private:
 
 };

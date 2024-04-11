@@ -59,6 +59,7 @@ void PropertiesActivityPath::showObj(GameObj* obj){
     this->eName.setText(pathObj->displayName);
     this->ePathStart.setText(pathObj->trPathStart);
     this->ePathEnd.setText(pathObj->trPathEnd);
+    
 }
 
 bool PropertiesActivityPath::support(GameObj* obj){

@@ -427,14 +427,16 @@ void ShapeViewerGLWidget::resetRot(){
 
 
 void ShapeViewerGLWidget::showEng(Eng *e){
-    eng = e;
+    if(Game::debugOutput) qDebug() << "SVGLW 429: engObj " ;
+    eng = e;    
     con = NULL;
     renderItem = 2;
 }
 
 void ShapeViewerGLWidget::showEng(QString path, QString name){
+    if(Game::debugOutput) qDebug() << "SVGLW 436:" << path << " " << name;
     int idx = Game::currentEngLib->addEng(path, name);
-    qDebug() << "eng id "<< idx;
+    if(Game::debugOutput) qDebug() << "eng id "<< idx;
     eng = Game::currentEngLib->eng[idx];
     con = NULL;
     renderItem = 2;

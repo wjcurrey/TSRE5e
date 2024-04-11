@@ -49,6 +49,7 @@ public slots:
     void show();
     void createPaths();
     void reloadRef();
+    void refreshErrors();
     void about();
     void terrainCamera(bool val);
     void mstsShadows(bool val);
@@ -60,6 +61,7 @@ public slots:
     void hideShowToolWidget(bool show);
     void hideShowPropertiesWidget(bool show);
     void hideShowNaviWidget(bool);
+    void hideShowStatWidget(bool);    
     void hideShowShapeViewWidget(bool);
     void hideShowErrorMsgWidget(bool);
     void viewWorldGrid(bool show);
@@ -79,9 +81,12 @@ public slots:
     void showToolsTerrain(bool show);
     void showToolsGeo(bool show);
     void showToolsActivity(bool show);
+
+    
     void showTerrainTreeEditr();
     void showWorldObjPivotPointsEnabled(bool show);
     void naviWindowClosed();
+    void statusWindowClosed();    
     void errorMessagesWindowClosed();
     void shapeVeiwWindowClosed();
     void viewUnselectAll();
@@ -89,12 +94,16 @@ public slots:
     void showActivityServiceEditor();
     void showActivityTrafficEditor();
     void showActivityTimetableEditor();
+    void exitToLoadWindow();
 
     
 signals:
     void exitNow();
     void sendMsg(QString text);
     void reloadRefFile();
+    void refreshErrorList();
+   /// EFO Status updates
+    void updStatus(QString statName, QString statValue);    
     
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -124,6 +133,7 @@ private:
     QAction *saveAction;
     QAction *createPathsAction;
     QAction *reloadRefAction;
+    QAction *closeAction;
     QAction *exitAction;
     QAction *rebuildAction;
     
@@ -136,6 +146,7 @@ private:
     QAction *mstsShadowsAction;
     QAction *propertiesAction;
     QAction *naviAction;
+    QAction *statAction;
     QAction *shapeViewAction;
     QAction *errorViewAction;
     QAction *toolsAction;

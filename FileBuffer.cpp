@@ -142,11 +142,11 @@ bool FileBuffer::insertFile(QString incPath, QString alternativePath, QString* l
             incPath = alternativePath;
             file.setFileName(incPath);
             if (!file.open(QIODevice::ReadOnly)){
-                qDebug() << incPath << "not exist";
+                if(Game::debugOutput) qDebug() << incPath << "not exist";
                 return false;
             }
         } else {
-            qDebug() << incPath << "not exist";
+            if(Game::debugOutput) qDebug() << incPath << "not exist";
             return false;
         }
     }

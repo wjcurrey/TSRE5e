@@ -23,13 +23,18 @@ Texture::Texture() {
 
 Texture::Texture(QString pathid) {
     this->pathid = pathid;
+    
+ //       pathid = evaluatePathId();  
+//
+  
+    
     this->hashid.push_back(pathid);
     //temp fix for dds/ace loading
     // Openrails uses .dds textures instead of .ace
     QString tType = pathid.toLower().split(".").last();
     if(tType == "dds"){
-        hashid.push_back(pathid.left(pathid.length() - 3)+"ace");
-         qDebug() << " dds found: " << pathid.toLower();
+     //   hashid.push_back(pathid.left(pathid.length() - 3)+"ace");   /// EFO ehy is this overriding to ACE???
+        if(Game::debugOutput)    qDebug() << " dds found: " << pathid.toLower();
     }
 }
     
@@ -398,5 +403,20 @@ void Texture::delVBO() {
     missing = false;
     error = false;
     //gl.glDeleteTextures(1, tex, 0);
+}
+
+QString Texture::evaluatePathId() {   //// EFO fixing relative paths which have folders between Trainset and /../    
+    int trainsetPos = pathid.indexOf("trainset");
+    int parentDirPos = pathid.indexOf("/../");
+    if (trainsetPos != -1 && parentDirPos != -1 && trainsetPos < parentDirPos) {        
+        if(Game::debugOutput) qDebug() << "Before APF:" << pathid;
+        // Replace everything between "trainset" and "/../" with empty string
+        pathid = pathid.mid(0, trainsetPos+8) + pathid.mid(parentDirPos + 3);                
+        if(Game::debugOutput) qDebug() << "After AFP: " << pathid;
+        return pathid;        
+    } else {
+        // Pathid doesn't contain the specific pattern or "trainset" comes after "/../"
+        return pathid;
+    }
 }
 

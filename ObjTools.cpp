@@ -241,8 +241,7 @@ void ObjTools::refreshObjLists(){
 }
 
 void ObjTools::routeLoaded(Route* a){
-    this->route = a;
-            
+    this->route = a;       
     autoPlacementTarget.setCurrentIndex(2);
     route->placementAutoTargetType = 2;
     route->snapableOnlyRotation = Game::snapableOnlyRot;
@@ -485,7 +484,7 @@ void ObjTools::refListSelected(QListWidgetItem * item){
 
 void ObjTools::lastItemsListSelected(QListWidgetItem * item){
     refList.clearSelection();
-    qDebug() << item->type() << " " << item->text();
+    if(Game::debugOutput) qDebug() << item->type() << " " << item->text();
     route->ref->selected = lastItemsPtr[item->type()];
 }
 
@@ -524,7 +523,11 @@ void ObjTools::autoPlacementDeleteLastEnabled(){
     emit sendMsg("autoPlacementDeleteLast");
 }
 
-void ObjTools::itemSelected(Ref::RefItem* item){
+void ObjTools::itemSelected(Ref::RefItem* item){     /// EFO Item selected on the list
+    if(Game::debugOutput)
+    {QString selectedFilename = item->currentFilename;
+    if(Game::debugOutput) qDebug() << "selected: " << selectedFilename;    
+    }   
     QString text;
     if(item->description.length() > 1) 
         text = item->description;
@@ -535,12 +538,15 @@ void ObjTools::itemSelected(Ref::RefItem* item){
     
     //Avoid duplicates
     QList<QListWidgetItem*> found = lastItems.findItems(text, Qt::MatchExactly);
-        qDebug() << "found : "<< found.length();
+       if(Game::debugOutput)  qDebug() << "found : "<< found.length();
     
-    if (found.length() == 0){
+    if ((found.length() == 0)   ){    //// Added a check for placed=true    && (item->placed)
 
-    lastItemsPtr.push_back(item);
+    // here's where it gets put on the recent list    
+        
+    lastItemsPtr.push_back(item);  
     
+    /// calculating the item age and order
     new QListWidgetItem ( text, &lastItems, lastItemsPtr.size() - 1 );
     if(lastItems.count() > Game::numRecentItems){
         int val = 2147483646;
@@ -627,7 +633,7 @@ void ObjTools::autoSnapableRadiusEnabled(QString val){
     float v;
     bool ok = false;
     v = val.toFloat(&ok);
-    qDebug()<< "Game::snapableRadius"<<v;
+    if(Game::debugOutput) qDebug()<< "Game::snapableRadius"<<v;
     if(ok)
         Game::snapableRadius = v;
 }

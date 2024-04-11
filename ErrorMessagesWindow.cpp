@@ -92,6 +92,8 @@ void ErrorMessagesWindow::refreshErrorList(){
     errorList.clear();
     QList<QTreeWidgetItem *> items;
     QStringList list;
+    qDebug() << "Errors:";
+    
     for(int i = ErrorMessagesLib::ErrorMessages.size() - 1; i >= 0 ; i-- ){
         if(ErrorMessagesLib::ErrorMessages[i] == NULL)
             continue;
@@ -107,6 +109,8 @@ void ErrorMessagesWindow::refreshErrorList(){
         list.append(ErrorMessage::SourceNames[msg->source]);
         list.append(msg->description);
         QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, list, i );
+        // Send items in the error log window to the logfile:
+        qDebug() << "Route Error Msg " << i << ": " << ErrorMessage::TypeNames[msg->type] << ":" <<  ErrorMessage::SourceNames[msg->source] << ":" << msg->description  ;
         //item->setCheckState(0, Qt::Unchecked);
         //item->setCheckState(1, Qt::Unchecked);
         //item->setCheckState(2, Qt::Unchecked);

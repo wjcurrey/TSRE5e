@@ -13,6 +13,7 @@
 #include "TexLib.h"
 #include "TransferObj.h"
 #include "Game.h"
+#include "EditFileNameDialog.h"    //// EFO Added
 
 PropertiesTransfer::PropertiesTransfer() {
     QVBoxLayout *vbox = new QVBoxLayout;
@@ -48,16 +49,24 @@ PropertiesTransfer::PropertiesTransfer() {
     this->fileName.setDisabled(true);
     this->fileName.setAlignment(Qt::AlignCenter);
     vbox->addWidget(&this->fileName);
-    QPushButton *copyF = new QPushButton("Copy FileName", this);
-    vbox->addWidget(copyF);
+    
+    /// EFO added
+    QPushButton *editF = new QPushButton("Edit", this);   
+    QObject::connect(editF, SIGNAL(released()),
+                      this, SLOT(editFileNameEnabled()));
+    
+    vbox->addWidget(editF);
+
+//    QPushButton *copyF = new QPushButton("Copy FileName", this);
+//    vbox->addWidget(copyF);
     vbox->addWidget(texPreviewLabel);
     vbox->setAlignment(texPreviewLabel, Qt::AlignHCenter);
-    QPushButton *texLoad = new QPushButton("Load Texture", this);
-    QPushButton *texPick = new QPushButton("Pick This", this);
-    QPushButton *texPut = new QPushButton("Put Here", this);
-    vbox->addWidget(texLoad);
-    vbox->addWidget(texPick);
-    vbox->addWidget(texPut);
+//    QPushButton *texLoad = new QPushButton("Load Texture", this);
+//    QPushButton *texPick = new QPushButton("Pick This", this);
+//    QPushButton *texPut = new QPushButton("Put Here", this);
+//    vbox->addWidget(texLoad);
+//    vbox->addWidget(texPick);
+//    vbox->addWidget(texPut); 
     
     QLabel * label = new QLabel("Size:");
     label->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
@@ -78,6 +87,7 @@ PropertiesTransfer::PropertiesTransfer() {
     QObject::connect(&sizeY, SIGNAL(textEdited(QString)),
                       this, SLOT(sizeEnabled(QString)));
     
+
     label = new QLabel("Position & Rotation:");
     label->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
     label->setContentsMargins(3,0,0,0);
@@ -134,7 +144,12 @@ PropertiesTransfer::PropertiesTransfer() {
     posRotList->addWidget(qRot90, 3, 1);
     posRotList->addWidget(transform, 4, 0, 1, 2);
     vbox->addItem(posRotList);
-        
+
+    QPushButton *reload = new QPushButton("Reload", this);
+    QObject::connect(reload, SIGNAL(released()),
+                      this, SLOT(reloadEnabled()));
+//    vbox->addWidget(reload);    
+    
     vbox->addStretch(1);
     this->setLayout(vbox);
 }
@@ -206,4 +221,28 @@ bool PropertiesTransfer::support(GameObj* obj){
     if(((WorldObj*)obj)->type == "transfer")
         return true;
     return false;
+}
+
+void PropertiesTransfer::editFileNameEnabled(){
+    if(transferObj == NULL)
+        return;
+    EditFileNameDialog eWindow;
+    eWindow.name.setText(transferObj->texture);
+    eWindow.exec();
+    //qDebug() << waterWindow->changed;
+    if(eWindow.isOk){
+        Undo::SinglePushWorldObjData(transferObj);
+        transferObj->texture = eWindow.name.text();
+        transferObj->fileName = eWindow.name.text();
+        transferObj->position[2] = -transferObj->position[2];
+        transferObj->qDirection[2] = -transferObj->qDirection[2];
+        transferObj->load(transferObj->x, transferObj->y);
+        transferObj->modified = true;
+    }
+
+}
+
+void PropertiesTransfer::reloadEnabled(){
+    if(transferObj == NULL)
+        return;    
 }

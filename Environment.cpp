@@ -71,19 +71,19 @@ Environment::Environment(QString path) {
                             ParserX::SkipToken(data);
                             continue;
                         }
-                        qDebug() << "#world_water_layers - undefined token: " << sh;
+                        if(Game::debugOutput) qDebug() << "#world_water_layers - undefined token: " << sh;
                         ParserX::SkipToken(data);
                     }
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#world - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#world - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#ENV - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#ENV - undefined token: " << sh;
         ParserX::SkipToken(data);
     }
     delete data;
@@ -116,7 +116,7 @@ void Environment::loadWaterLayer(FileBuffer* data){
                                     ParserX::SkipToken(data);
                                     continue;
                                 }
-                                qDebug() << "#terrain_texslots - undefined token: " << sh;
+                                if(Game::debugOutput) qDebug() << "#terrain_texslots - undefined token: " << sh;
                                 ParserX::SkipToken(data);
                             }
                             ParserX::SkipToken(data);
@@ -128,25 +128,25 @@ void Environment::loadWaterLayer(FileBuffer* data){
                                     ParserX::SkipToken(data);
                                     continue;
                                 }
-                                qDebug() << "#terrain_uvcalc - undefined token: " << sh;
+                                if(Game::debugOutput) qDebug() << "#terrain_uvcalc - undefined token: " << sh;
                                 ParserX::SkipToken(data);
                             }
                             ParserX::SkipToken(data);
                             continue;
                         }
-                        qDebug() << "#world_anim_shader - undefined token: " << sh;
+                        if(Game::debugOutput) qDebug() << "#world_anim_shader - undefined token: " << sh;
                         ParserX::SkipToken(data);
                     }
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#world_anim_shader - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#world_anim_shader - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#world_water_layer - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#world_water_layer - undefined token: " << sh;
         ParserX::SkipToken(data);
         continue;
     }

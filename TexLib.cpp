@@ -16,6 +16,7 @@
 #include "Texture.h"
 #include <QDebug>
 #include <QFile>
+#include "Game.h"
 
 int TexLib::jesttextur = 0;
 std::unordered_map<int, Texture*> TexLib::mtex;
@@ -112,7 +113,16 @@ int TexLib::addTex(QString pathid, bool reload) {
             pathid = pathid.left(pathid.length() - 3)+"dds";
         }
         //qDebug() << "Using DDS";
-        qDebug() << " dds sub: " << pathid.toLower();
+        if(Game::debugOutput) qDebug() << " dds sub: " << pathid.toLower();
+    }
+
+    if(tType == "dds"){     /// is this why it's missing?
+        if(Game::debugOutput) qDebug() << "Texture path: " << pathid;
+        QFile file(pathid);
+        if (!file.exists()){
+            tType = "dds";
+            pathid = pathid.left(pathid.length() - 3)+"dds";
+        }
     }
     
     int texId = 0;

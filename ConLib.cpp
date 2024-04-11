@@ -10,6 +10,7 @@
 
 #include "ConLib.h"
 #include "Consist.h"
+#include "Game.h"
 #include <QDebug>
 #include <QFile>
 #include <QDir>
@@ -62,10 +63,10 @@ int ConLib::loadAll(QString gameRoot, bool gui){
     QDir trainDir;
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList()<<"*.con");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
-        qDebug() << "not exist";
-    qDebug() << dir.count() <<" con files";
+        if(Game::debugOutput) qDebug() << "not exist";
+    if(Game::debugOutput) qDebug() << dir.count() <<" con files";
     
     QProgressDialog *progress = NULL;
     if(gui){
@@ -82,7 +83,7 @@ int ConLib::loadAll(QString gameRoot, bool gui){
             QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
         }
     }
-    qDebug() << "loaded";
+    if(Game::debugOutput) qDebug() << "loaded";
     delete progress;
     return 0;
 }
@@ -97,12 +98,12 @@ int ConLib::loadSimpleList(QString gameRoot, bool reload){
     QDir trainDir;
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList()<<"*.con");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
-        qDebug() << "not exist";
-    qDebug() << dir.count() <<" con files";
+        if(Game::debugOutput) qDebug() << "not exist";
+    if(Game::debugOutput) qDebug() << dir.count() <<" con files";
     foreach(QString engfile, dir.entryList())
         ConLib::conFileList.push_back(path.toLower()+engfile.toLower());
-    qDebug() << "loaded";
+    if(Game::debugOutput) qDebug() << "loaded";
     return 0;
 }

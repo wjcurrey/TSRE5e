@@ -33,7 +33,7 @@ void QuadTree::load() {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "quad tree file not exist    " << path;
+        if(Game::debugOutput) qDebug() << "quad tree file not exist    " << path;
         return;
     }
     FileBuffer* data = ReadFile::read(&file);
@@ -68,7 +68,7 @@ void QuadTree::load(FileBuffer *data, bool loadtd){
                             if (sh == "tdfile") {
                                 int x = ParserX::GetNumber(data);
                                 int y = ParserX::GetNumber(data);
-                                qDebug() << sh << " " << x << " " << y;
+                                if(Game::debugOutput) qDebug() << sh << " " << x << " " << y;
                                 loadTD(x, y);
                                 ParserX::SkipToken(data);
                             }
@@ -77,13 +77,13 @@ void QuadTree::load(FileBuffer *data, bool loadtd){
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#QuadTree terrain_desc - undefined token " << sh;
+                if(Game::debugOutput) qDebug() << "#QuadTree terrain_desc - undefined token " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#QuadTree - undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#QuadTree - undefined token " << sh;
         ParserX::SkipToken(data);
     }
 }
@@ -91,7 +91,7 @@ void QuadTree::load(FileBuffer *data, bool loadtd){
 void QuadTree::createNew(int tileX, int tileY) {
     int qx = floor((float) tileX / 512.0);
     int qy = floor((float) tileY / 512.0);
-    qDebug() << "td xy " << qx << " " << qy;
+    if(Game::debugOutput) qDebug() << "td xy " << qx << " " << qy;
     int tx = qx * 512;
     int ty = qy * 512;
     TdFile* ttd = new TdFile();
@@ -108,7 +108,7 @@ void QuadTree::createNew(int tileX, int tileY) {
 }
 
 void QuadTree::listNames() {
-    qDebug() << "#QuadTree Populated Terrain Tiles:";
+    if(Game::debugOutput) qDebug() << "#QuadTree Populated Terrain Tiles:";
     QHashIterator<int, TdFile*> i2(td);
     while (i2.hasNext()) {
         i2.next();
@@ -160,7 +160,7 @@ void QuadTree::fillTerrainInfo(int tileX, int tileY, TerrainInfo* info) {
 void QuadTree::addTile(int tileX, int tileY) {
     int qx = floor((float) tileX / 512.0);
     int qy = floor((float) tileY / 512.0);
-    qDebug() << "td xy " << qx << " " << qy;
+    if(Game::debugOutput) qDebug() << "td xy " << qx << " " << qy;
     int tx = qx * 512;
     int ty = qy * 512;
 
@@ -173,7 +173,7 @@ void QuadTree::addTile(int tileX, int tileY) {
     int dLevel = 1;
     if(low)
         dLevel = 16;
-    qDebug() << "dLevel" << dLevel;
+    if(Game::debugOutput) qDebug() << "dLevel" << dLevel;
     td[tx * 100000 + ty]->qt->addTile(tileX, tileY, dLevel);
     td[tx * 100000 + ty]->modified = true;
     save();
@@ -194,9 +194,9 @@ int QuadTree::QuadTile::listNames() {
                 //qDebug() ;
                 outCount++;
                 if(count == 0)
-                    qDebug() << level << prefix << i << j << (i * 2 + (i^j)) << x << y << "[visible] QuadTile name: " << PrefixString[prefix]+QString::number(tn, 16);
+                    if(Game::debugOutput) qDebug() << level << prefix << i << j << (i * 2 + (i^j)) << x << y << "[visible] QuadTile name: " << PrefixString[prefix]+QString::number(tn, 16);
                 else
-                    qDebug() << level << prefix << i << j << (i * 2 + (i^j)) << x << y << "[hidden]  QuadTile name: " << PrefixString[prefix]+QString::number(tn, 16);
+                    if(Game::debugOutput) qDebug() << level << prefix << i << j << (i * 2 + (i^j)) << x << y << "[hidden]  QuadTile name: " << PrefixString[prefix]+QString::number(tn, 16);
             }
             
         }
@@ -466,7 +466,7 @@ void QuadTree::loadTD(int x, int y) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "w file not exist    " << path;
+        if(Game::debugOutput) qDebug() << "w file not exist    " << path;
         return;
     }
     FileBuffer* data = ReadFile::read(&file);
@@ -494,9 +494,9 @@ void QuadTree::saveTD(int x, int y) {
         path = Game::root + "/routes/" + Game::route + "/td/" + getNameXY(x) + "" + getNameXY(y) + ".td";
     path.replace("//", "/");
     QFile *file = new QFile(path);
-    qDebug() << "zapis .td " << path;
+    if(Game::debugOutput) qDebug() << "zapis .td " << path;
     if (!file->open(QIODevice::WriteOnly)) {
-        qDebug() << "td write fail";
+        if(Game::debugOutput) qDebug() << "td write fail";
         return;
     }
     QDataStream out(file);

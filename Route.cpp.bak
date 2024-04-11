@@ -1251,19 +1251,19 @@ float Route::getDistantTerrainYOffset(){
 
 WorldObj* Route::placeObject(int x, int z, float* p) {
     float* q = new float[4];
-    Quat::fill((float*)q); 
-    return placeObject(x, z, p, (float*) q, 0, ref->selected); qDebug() << "ROUTE 1255";
+    Quat::fill((float*)q);
+    return placeObject(x, z, p, (float*) q, 0, ref->selected);
 }
 
 WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev) {
-    return placeObject(x, z, p, q, elev, ref->selected);  qDebug() << "ROUTE 1259";
+    return placeObject(x, z, p, q, elev, ref->selected);
 }
 
 WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::RefItem* r) {
     if(r == NULL) 
         return NULL;
     Game::check_coords(x, z, p);
-    qDebug() << "ROUTE 1266";
+
     // pozycja wzgledem TDB:
     int itemTrackType = WorldObj::isTrackObj(r->type);
     
@@ -1285,11 +1285,11 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
             Quat::copy(tq2, q);
             int ok = -1;
             if(placementAutoTargetType == 0) {
-                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, tpos); qDebug() << "ROUTE 1288";
+                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, tpos);
             } else if(placementAutoTargetType == 1) {
-                ok = this->roadDB->findNearestPositionOnTDB(playerT, tp, tq, tpos); qDebug() << "ROUTE 1290";
+                ok = this->roadDB->findNearestPositionOnTDB(playerT, tp, tq, tpos);
             } else if(placementAutoTargetType == 2) {
-                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, tpos);  qDebug() << "ROUTE 1292";
+                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, tpos);
                 int ok2 = this->roadDB->findNearestPositionOnTDB(playerT2, tp2, tq2, tpos);
                 if(ok2 >= 0)
                     if(ok < 0 || ok2 < ok){
@@ -1311,15 +1311,15 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
     if(itemTrackType == 1){
         tpos = new float[3];
         float* playerT = Vec2::fromValues(x, z);
-        int ok = this->trackDB->findNearestPositionOnTDB(playerT, p, q, tpos); qDebug() << "ROUTE 1314";
-        if(ok < 0) return NULL;      
+        int ok = this->trackDB->findNearestPositionOnTDB(playerT, p, q, tpos);
+        if(ok < 0) return NULL;
         x = playerT[0];
         z = playerT[1];
     }
     if(itemTrackType == 2){
         tpos = new float[3];
         float* playerT = Vec2::fromValues(x, z);
-        int ok = this->roadDB->findNearestPositionOnTDB(playerT, p, q, tpos); qDebug() << "ROUTE 1322";
+        int ok = this->roadDB->findNearestPositionOnTDB(playerT, p, q, tpos);
         if(ok < 0) return NULL;
         x = playerT[0];
         z = playerT[1];
@@ -1327,7 +1327,7 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
     if(itemTrackType == 3){
         tpos = new float[3];
         float* playerT = Vec2::fromValues(x, z);
-        int ok = this->roadDB->findNearestPositionOnTDB(playerT, p, q, tpos); qDebug() << "ROUTE 1330";
+        int ok = this->roadDB->findNearestPositionOnTDB(playerT, p, q, tpos);
         if(ok < 0) return NULL;
         float* buffer;
         int len;
@@ -1346,7 +1346,7 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
     
     int snapableSide = -1;
     if(placementStickToTarget && placementAutoTargetType == 3){
-        snapableSide = tTile->getNearestSnapablePosition(p, q);  
+        snapableSide = tTile->getNearestSnapablePosition(p, q);
     }
         
     float endp[5];
@@ -1354,7 +1354,7 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
     endp[3] = 1;
     float firstPos[3];
     if ((r->type == "trackobj" || r->type == "dyntrack" )) {
-        if(r->type == "dyntrack"){   qDebug() << "ROUTE 1357";
+        if(r->type == "dyntrack"){
             this->roadDB->setDefaultEnd(0);
             this->trackDB->setDefaultEnd(0);
         }
@@ -1365,7 +1365,7 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
         if(this->tsection->isRoadShape(r->value))
             this->roadDB->findPosition(x, z, p, q, endp, r->value);
         else
-            this->trackDB->findPosition(x, z, p, q, endp, r->value); qDebug() << "ROUTE 1368";
+            this->trackDB->findPosition(x, z, p, q, endp, r->value);
         Game::check_coords(x, z, p);
         firstPos[0] -= (x-oldx)*2048;
         firstPos[2] -= (z-oldz)*2048;
@@ -1375,23 +1375,22 @@ WorldObj* Route::placeObject(int x, int z, float* p, float* q, float elev, Ref::
         if(tTile->loaded != 1) return NULL;
     }
 
-    if(r->type == "signal") { qDebug() << "trying to modify"; p[1] = p[1]+5; }
+    WorldObj* nowy = tTile->placeObject(p, q, r, tpos);
 
-    
-    WorldObj* nowy = tTile->placeObject(p, q, r, tpos);   qDebug() << "ROUTE 1378" << nowy->typeObj << "/" << nowy->type;  
     if ((r->type == "trackobj" || r->type == "dyntrack" )&& nowy != NULL) {
         if(nowy->endp == 0) nowy->endp = new float[5];
         memcpy(nowy->endp, endp, sizeof(float)*5);
         Vec3::copy(nowy->firstPosition,firstPos);
     }   
     nowy->snapped(snapableSide);
-    if(nowy->typeID == nowy->sstatic){        
+    if(nowy->typeID == nowy->sstatic){
         moveWorldObjToTile(nowy->x, nowy->y, nowy);
     }
 
     if(elev !=0)
         nowy->rotate(elev, 0, 0);
-    Undo::PushWorldObjPlaced(nowy);  qDebug() << "ROUTE 1394";
+
+    Undo::PushWorldObjPlaced(nowy); 
     return nowy;
 }
 
@@ -1411,12 +1410,12 @@ float* Route::getPointerPosition(float* out, int &x, int &z, float* pos){
             Vec3::copy(tp2, pos);
             int ok = -1;
             if(placementAutoTargetType == 0) {
-                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos); qDebug() << "ROUTE 1413";
+                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos);
             } else if(placementAutoTargetType == 1) {
-                ok = this->roadDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos); qDebug() << "ROUTE 1415";
+                ok = this->roadDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos);
             } else if(placementAutoTargetType == 2) {
-                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos);   qDebug() << "ROUTE 1417";
-                int ok2 = this->roadDB->findNearestPositionOnTDB(playerT2, tp2, tq2, ttpos); qDebug() << "ROUTE 1418";
+                ok = this->trackDB->findNearestPositionOnTDB(playerT, tp, tq, ttpos);
+                int ok2 = this->roadDB->findNearestPositionOnTDB(playerT2, tp2, tq2, ttpos);
                 if(ok2 >= 0)
                     if(ok < 0 || ok2 < ok){
                         ok = ok2;
@@ -1528,9 +1527,9 @@ void Route::dragWorldObject(WorldObj* obj, int x, int z, float* pos){
 
 TRitem *Route::getTrackItem(int TID, int UID){
     if(TID == 0)
-        return trackDB->trackItems[UID];  qDebug() << "ROUTE 1530";
+        return trackDB->trackItems[UID];
     if(TID == 1)
-        return roadDB->trackItems[UID]; qDebug() << "ROUTE 1532";
+        return roadDB->trackItems[UID];
     return NULL;
 }
 
@@ -1794,7 +1793,7 @@ WorldObj* Route::autoPlaceObject(int x, int z, float* p, int mode) {
 }
 
 void Route::fillWorldObjectsByTrackItemIds(QHash<int,QVector<WorldObj*>> &objects, int tdbId){
-    foreach (Tile* tTile, tile){ qDebug() << "ROUTE 1796";
+    foreach (Tile* tTile, tile){
         if (tTile == NULL) continue;
         if (tTile->loaded == 1) {
             tTile->fillWorldObjectsByTrackItemIds(objects, tdbId);
@@ -1803,7 +1802,7 @@ void Route::fillWorldObjectsByTrackItemIds(QHash<int,QVector<WorldObj*>> &object
 }
 
 void Route::fillWorldObjectsByTrackItemId(QVector<WorldObj*> &objects, int tdbId, int id){
-    foreach (Tile* tTile, tile){  qDebug() << "ROUTE 1805";
+    foreach (Tile* tTile, tile){
         if (tTile == NULL) continue;
         if (tTile->loaded == 1) {
             tTile->fillWorldObjectsByTrackItemId(objects, tdbId, id);
@@ -1845,7 +1844,7 @@ void Route::replaceWorldObjPointer(WorldObj* o, WorldObj* n){
         return;
     int x = o->x;
     int z = o->y;
-    qDebug() << "ROUTE 1847";
+    
     Tile *tTile;
     tTile = tile[((x)*10000 + z)];
     if (tTile == NULL)
@@ -1973,11 +1972,9 @@ void Route::toggleToTDB(WorldObj* obj) {
     }
     if(roadDB->ifTrackExist(obj->x, obj->y, obj->UiD) || trackDB->ifTrackExist(obj->x, obj->y, obj->UiD)){
         removeTrackFromTDB(obj);
-        obj->setModified();   //// EFO added to account for unsaved on TDB edits only
         return;
     }
     addToTDB(obj);
-    obj->setModified();   //// EFO added to account for unsaved on TDB edits only
 }
 
 void Route::addToTDBIfNotExist(WorldObj* obj) {

@@ -22,9 +22,9 @@ Ref::Ref(QString path) {
 }
 
 void Ref::loadFile(QString path){
-    qDebug() << "Wczytywanie pliku ref: " << path;
+    if(Game::debugOutput) qDebug() << "Loading Ref File: " << path;
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;

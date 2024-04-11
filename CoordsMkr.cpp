@@ -25,7 +25,7 @@
 
 CoordsMkr::CoordsMkr(QString path) {
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile *file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly))
         return;

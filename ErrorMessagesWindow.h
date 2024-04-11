@@ -24,7 +24,6 @@ class ErrorMessagesWindow : public QWidget {
 public:
     ErrorMessagesWindow(QWidget* parent);
     virtual ~ErrorMessagesWindow();
-    void refreshErrorList();
     
 public slots:
     void show();
@@ -32,6 +31,7 @@ public slots:
     void errorListSelected(QTreeWidgetItem* item, int column);
     void jumpRequestReceived(PreciseTileCoordinate *c);
     void selectRequestReceived(GameObj *o);
+    void refreshErrorList();
     
 signals:
     void windowClosed();

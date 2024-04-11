@@ -375,13 +375,13 @@ ConEditorWindow::ConEditorWindow() : QMainWindow() {
     QObject::connect(engSetAddFlipButton, SIGNAL(released()),
         this, SLOT(engSetFlipAndAddSelected()));
     
-    if(!Game::ceWindowLayout.contains("C"))
+    if(!Game::ceWindowLayout.toUpper().contains("C"))
         vConList->trigger();
     if(!Game::ceWindowLayout.contains("1"))
         vEngList1->trigger();
     if(!Game::ceWindowLayout.contains("2"))
         vEngList2->trigger();
-    if(!Game::ceWindowLayout.contains("U"))
+    if(!Game::ceWindowLayout.toUpper().contains("U"))
         vConUnits->trigger();
 }
 
@@ -408,7 +408,7 @@ void ConEditorWindow::eFindConsistsByEng(){
 void ConEditorWindow::cOpenInExternalEditor(){
     if(currentCon == NULL) return;
     QFileInfo fileInfo(currentCon->pathid);
-    qDebug() << currentCon->pathid;
+    if(Game::debugOutput) qDebug() << currentCon->pathid;
     if(fileInfo.exists())
         QDesktopServices::openUrl(QUrl::fromLocalFile(currentCon->pathid));
 }
@@ -457,7 +457,7 @@ void ConEditorWindow::saveImgShapeView(){
     if(glShapeWidget->screenShot != NULL){
         QImage img = glShapeWidget->screenShot->mirrored(false, true);
         QString path = QFileDialog::getSaveFileName(this, "Save File", "./", "Images (*.png *.jpg)");
-        qDebug() << path;
+        if(Game::debugOutput) qDebug() << path;
         if(path.length() < 1) return;
         QFile file(path);
         file.open(QIODevice::WriteOnly);
@@ -619,7 +619,7 @@ void ConEditorWindow::viewConView(bool show){
 
 void ConEditorWindow::setCurrentEng(int id, int engSetId){
     currentEng = englib->eng[id];
-    qDebug() << currentEng->engName;
+    if(Game::debugOutput) qDebug() << "CEW622: " << currentEng->engName;
 
     engSets.clear();
     con1->getEngSets(currentEng, engSets);
@@ -792,7 +792,7 @@ void ConEditorWindow::engListSelected(int id){
     else
         setCurrentEng(id, -1);
     //currentEng = englib->eng[id];
-    qDebug() << currentEng->engName;
+    if(Game::debugOutput) qDebug() << "CEW795: " << currentEng->engName;
     //float pos = -currentEng->sizez-1;
     //if(pos > -15) pos = -15;
     //engCamera->setPos(pos,2.5,0);

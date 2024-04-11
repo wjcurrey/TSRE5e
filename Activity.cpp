@@ -115,7 +115,7 @@ void Activity::load() {
     if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
-        qDebug() << pathid << "not exist";
+        if(Game::debugOutput) qDebug() << pathid << "not exist";
         return;
     }
 

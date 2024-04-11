@@ -63,15 +63,15 @@ void SoundManager::InitAl() {
 	}
         
         ///////////////////////
-	qDebug("make default context");
+	//qDebug("make default context");
 
 	/* set orientation */
 	alListener3f(AL_POSITION, 0.0f, 0, 0.0f);
-	qDebug("listener position");
+	//qDebug("listener position");
     	alListener3f(AL_VELOCITY, 0, 0, 0);
-	qDebug("listener velocity");
+	//qDebug("listener velocity");
 	alListenerfv(AL_ORIENTATION, listenerOri);
-	qDebug("listener orientation");
+	//qDebug("listener orientation");
 
         
                 

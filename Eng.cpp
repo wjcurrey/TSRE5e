@@ -29,6 +29,8 @@
 #include "TrainNetworkEng.h"
 #include "GeoCoordinates.h"
 #include "ContentHierarchyInfo.h"
+#include <QRegExp>
+#include <QStringList>
 
 Eng::Eng() {
     
@@ -135,7 +137,7 @@ void Eng::load(){
         incpath = path.toLower();
         file = new QFile(pathid);
         if (!file->open(QIODevice::ReadOnly)){
-            qDebug() << pathid << "not exist";
+            if(Game::debugOutput) qDebug() << pathid << "not exist";
             return;
         } else {
             if(Game::debugOutput) qDebug() << pathid;
@@ -154,6 +156,13 @@ void Eng::load(){
     
     /// Reading the input file
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
+        /// Local vars for this wagon or engine
+        bool loaddoublestacker= false;        
+        float loadoroffset[] = {0,0,0};
+        int loadcontainers = 0;
+        float loadarealength = 0;
+        float loadbase = 2.6;
+        
         //qDebug() << sh;
         if (sh == ("simisa@@@@@@@@@@jinx0d0t______")) {    /// Header Record
             continue;
@@ -252,7 +261,9 @@ void Eng::load(){
                     ParserX::SkipToken(data);
                     continue;
                 }
+
                 if (sh == ("ortsfreightanims")) {
+                    loaddoublestacker= false;        
                     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                         //qDebug() << "orts " << sh;
                         if (sh == ("mstsfreightanimenabled")) {
@@ -263,6 +274,134 @@ void Eng::load(){
                             ParserX::SkipToken(data);
                             continue;
                         }
+
+                        if (sh == ("offset")) {
+                            loadoroffset[0] = ParserX::GetNumber(data);
+                            loadoroffset[1] = ParserX::GetNumber(data);
+                            loadoroffset[2] = ParserX::GetNumber(data);
+                             ParserX::SkipToken(data);
+                             continue;
+                         }
+                        
+                        if (sh == ("loadingarealength")) {
+                            loadarealength = ParserX::GetNumber(data);
+                             ParserX::SkipToken(data);
+                             continue;                            
+                        }
+                        if (sh == ("doublestacker")) {
+                             loaddoublestacker = true;
+                             ParserX::SkipToken(data);
+                             continue;                            
+                        }
+
+                        if (sh == ("loaddata")){
+                        //// Load OR exception handling needed.  It's faux JSON
+                            /// This is structured like a consist file with three parts
+                            QString loadname = ParserX::GetString(data).toLower().trimmed();
+                            QString loaddir = ParserX::GetString(data).toLower().trimmed();
+                            QString loadpos = ParserX::GetString(data).toLower().trimmed();
+                            
+                            ParserX::SkipToken(data);                                                       
+                            
+                            QString loadpath = Game::root + "/TRAINS/TRAINSET/" + loaddir + "/" + loadname + ".load-or";                                    
+                                                        
+                            /// This is JSON so it's handled in the moment....
+                            // QFile file(loadpath);
+                            
+                            qDebug() << "Load-OR Attributes: " << loadpath;
+                            
+                            QFile file(loadpath);
+                            if (!file.open(QIODevice::ReadOnly)) {
+                                qDebug() << "Error opening file:" << file.errorString();
+                            }
+                                QTextStream stream(&file);
+                                QStringList contents;
+                                while (!stream.atEnd()) {
+                                    contents.append(stream.readLine());
+                                }
+                                file.close();
+
+                                contents.replaceInStrings("\t", " ");
+                                contents.replaceInStrings("\n", " ");
+                                contents.replaceInStrings("\r", " ");
+                                contents.replaceInStrings("\"", " ");                                
+                                contents.replaceInStrings("[", " ");                                                                
+                                contents.replaceInStrings("]", " ");                                
+                                contents.replaceInStrings(",", " ");                                
+                                
+                                if(Game::debugOutput) qDebug() << "Load-OR JSON: " << contents.size();
+
+                                /// placeholders for the string parsing
+                                QString loadtag;
+                                QString loadvalue;
+                                QStringList tempstring;
+                                        
+                                /// values to pass to the freight animation
+                                QString loadcontainertype;
+                                float loadoffset[3];
+                                QString loadshape;
+                                float loadcontainerlen;
+                                        
+                                for (int li = 0; li < contents.size(); ++li) {
+                                    // qDebug() << "Line " << li;
+                                    if(contents[li].contains(":"))
+                                    {
+                                     QStringList loadparts = contents[li].split(":");
+                                     loadtag = loadparts[0].trimmed().toLower();
+                                     loadvalue = loadparts[1].trimmed().toLower();
+
+                                     if(loadtag == "shape"){ loadshape = loadvalue; }
+                                     if(loadtag == "containertype"){ loadcontainertype = loadvalue; }
+                                     if(loadtag == "intrinsicshapeoffset")
+                                        { 
+                                         tempstring = loadvalue.split(" ");  /// can't split the string without a stringlist
+                                         loadoffset[0] = tempstring[0].toFloat();
+                                         loadoffset[1] = tempstring[1].toFloat();
+                                         loadoffset[2] = tempstring[2].toFloat(); 
+                                        }
+                                      // qDebug() << "Line " << li << ": " << loadparts[0] << " : " << loadparts[1];
+                                    } 
+                                }
+                                
+                                /// Apply the lenght & height per the ORTS code -- this may require maintenance at some point
+                                /// if new trailer types are defined.  Maybe refactor this into a flatfile import?
+                                                                
+                                     if(loadcontainertype == "c20ft")     { loadcontainerlen = 6.095; loadbase = 2.6; }
+                                else if(loadcontainertype ==  "c40ft")    { loadcontainerlen = 12.19; loadbase = 2.6; }
+                                else if(loadcontainertype ==  "c45ft")    { loadcontainerlen = 13.7 ; loadbase = 2.6; }
+                                else if(loadcontainertype ==  "c48ft")    { loadcontainerlen = 14.6 ; loadbase = 2.9; }
+                                else if(loadcontainertype ==  "c53ft")    { loadcontainerlen = 16.15; loadbase = 2.9; }
+                                else if(loadcontainertype ==  "c40fthc")  { loadcontainerlen = 12.19; loadbase = 2.9; }
+                                else if(loadcontainertype ==  "c45fthc")  { loadcontainerlen = 13.7 ; loadbase = 2.9; }                                    
+                                  else                                    { loadcontainerlen = 12.19; loadbase = 2.6; };
+
+                                /// Adjust the height of the stack by loadbase (which is derived from loadcontainertype)
+                                if(loadpos == "above") loadoffset[1] = loadoffset[1] + loadbase;
+
+                                /// Send values to the eng sub-shape pointer                                
+                                freightanimShape.push_back(EngShape());
+                                freightanimShape.back().name = "../" + loadshape ;
+                                freightanimShape.back().altpath =  loaddir;
+                                    
+                                freightanimShape.back().x = loadoroffset[0] + loadoffset[0];                                    
+                                freightanimShape.back().y = loadoroffset[1] + loadoffset[1];
+                                freightanimShape.back().z = loadoroffset[2] + loadoffset[2];                                                                                                                                  
+
+                                qDebug() << "loadarealength    : " << loadarealength;
+                                qDebug() << "loaddoublestacker : " << loaddoublestacker;
+                                qDebug() << "loadshape         : " << loadshape;
+                                qDebug() << "loadcontainertype : " << loadcontainertype;
+                                qDebug() << "loadcontainerlen  : " << loadcontainerlen;
+                                qDebug() << "loadpos           : " << loadpos;
+                                qDebug() << "loadbase          : " << loadbase;
+                                qDebug() << "loadoffset        : " << loadoffset[0] << "-" << loadoffset[1] << "-" << loadoffset[2] ;
+                                qDebug() << "loadoroffset      : " << loadoroffset[0] << "-" << loadoroffset[1] << "-" << loadoroffset[2] ;
+
+                                
+                            continue;
+                        //// End of the Load OR exception handling                                                            
+                        }
+                        
                         if (sh == ("freightanimstatic")) {
                             freightanimShape.push_back(EngShape());
                             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
@@ -274,7 +413,7 @@ void Eng::load(){
                                 if (sh == ("freightweight")) {
                                     ParserX::SkipToken(data);
                                     continue;
-                                }
+                                }                                
                                 if (sh == ("shape")) {
                                     freightanimShape.back().name = ParserX::GetString(data);
                                     //qDebug() << QString::fromStdString(freightanimShapeName.back();
@@ -298,7 +437,7 @@ void Eng::load(){
                     }
                     ParserX::SkipToken(data);
                     continue;
-                }
+                }                               
                 if (sh == ("type")) {
                     type = ParserX::GetString(data);
                     //qDebug() << "type "<< type;
@@ -711,10 +850,27 @@ void Eng::render(int aktwx, int aktwz, int selectionColor) {
             shape.id[shapeLibId] = -1;
     }
 
-    for(int i = 0; i < freightanimShape.size(); i++){
+for(int i = 0; i < freightanimShape.size(); i++){   /// EFO heres where I might be able to override the path for textures
         if(!freightanimShape[i].id.keys().contains(shapeLibId)){
             if(freightanimShape[i].name.length() > 1)
+            {
+                qDebug() << "788: " << freightanimShape[i].altpath.length();
+                int lastslash = path.lastIndexOf("/");
+                QString altroot = path.left(lastslash);
+                lastslash = freightanimShape[i].name.lastIndexOf("/");
+                // QString altpath = freightanimShape[i].name.left(lastslash);
+                // altpath = altpath.replace("../","/");
+                
+                if(freightanimShape[i].altpath.length() > 5)
+                {
+                freightanimShape[i].id[shapeLibId] = Game::currentShapeLib->addShape(path +"/"+ freightanimShape[i].name, altroot +"/"+ freightanimShape[i].altpath);
+                }
+                else
+                {
                 freightanimShape[i].id[shapeLibId] = Game::currentShapeLib->addShape(path +"/"+ freightanimShape[i].name, path);
+                }
+             qDebug() << "797 Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << altroot + freightanimShape[i].altpath;   
+            }
             else 
                 freightanimShape[i].id[shapeLibId] = -1;
         }
@@ -854,8 +1010,10 @@ void Eng::renderOnTrack(GLUU* gluu, float* playerT, int selectionColor) {
 
     for(int i = 0; i < freightanimShape.size(); i++){
         if(!freightanimShape[i].id.keys().contains(shapeLibId)){
-            if(freightanimShape[i].name.length() > 1)
+            if(freightanimShape[i].name.length() > 1){
                 freightanimShape[i].id[shapeLibId] = Game::currentShapeLib->addShape(path +"/"+ freightanimShape[i].name, path);
+                         qDebug() << "932 Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << freightanimShape[i].altpath;   
+            }
             else 
                 freightanimShape[i].id[shapeLibId] = -1;
         }
@@ -1005,3 +1163,30 @@ void Eng::fillContentHierarchyInfo(QVector<ContentHierarchyInfo*>& list, int par
         }
     }
 }
+
+
+/*
+ 
+void Eng::loadORPosition() {
+  
+ * foot value * 0.3048 = meters 
+  
+    ContainerType.C20ft     :  LengthM = 6.095f;  HeightM = 2.6f;
+    ContainerType.C40ft     :  LengthM = 12.19f;  HeightM = 2.6f;
+    ContainerType.C45ft     :  LengthM = 13.7f;   HeightM = 2.6f;
+ *  
+    ContainerType.C48ft     :  LengthM = 14.6f;   HeightM = 2.9f;
+    ContainerType.C53ft     :  LengthM = 16.15f;  HeightM = 2.9f;
+    ContainerType.C40ftHC   :  LengthM = 12.19f;  HeightM = 2.9f;
+    ContainerType.C45ftHC   :  LengthM = 13.7f;   HeightM = 2.9f;
+
+   
+    LoadPosition.Center     :  zOffset = 0;
+    LoadPosition.CenterRear :  zOffset += container.LengthM / 2;
+    LoadPosition.CenterFront:  zOffset -= container.LengthM / 2;
+    LoadPosition.Rear       :  zOffset += (LoadingAreaLength - container.LengthM) / 2;
+    LoadPosition.Front      :  zOffset -= (LoadingAreaLength - container.LengthM) / 2;
+
+
+*/    
+    

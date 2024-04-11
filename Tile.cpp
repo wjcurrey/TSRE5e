@@ -67,11 +67,11 @@ Tile::Tile(int xx, int zz, FileBuffer *data) {
     inUse = false;
     x = xx;
     z = zz;
-    qDebug() << xx << zz;
+    if(Game::debugOutput) qDebug() << xx << zz;
     jestObiektow = 0;
     vDbIdCount = 0;
     loadUtf16Data(data);
-    qDebug() << obiekty.size();
+    if(Game::debugOutput) qDebug() << obiekty.size();
     loaded = 0;
     wczytajObiekty();
 }
@@ -184,7 +184,7 @@ void Tile::loadInit(){
 void Tile::updateTrackSectionInfo(QHash<unsigned int, unsigned int> shapes, QHash<unsigned int, unsigned int> sect){
     int count = 0;
     for (auto it = obiekty.begin(); it != obiekty.end(); ++it) {
-        qDebug() << "Tile-UpdTrackSectInfo ";
+        if(Game::debugOutput) qDebug() << "Tile-UpdTrackSectInfo ";
         WorldObj* obj = (WorldObj*) it->second;
         if(obj == NULL) 
             continue;
@@ -230,7 +230,7 @@ void Tile::load() {
     
     QFile *file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly)){
-        qDebug() << "W file: not exist " << path;
+        if(Game::debugOutput) qDebug() << "W file: not exist " << path;
         return;
     }
     FileBuffer* data = ReadFile::read(file);
@@ -238,7 +238,7 @@ void Tile::load() {
     data->setTokenOffset(261844);
     data->off = 32;
     if (data->getToken() != 375){
-        qDebug() << "w file uncompressed " << path;
+        if(Game::debugOutput) qDebug() << "w file uncompressed " << path;
         data->off = 0;
         ParserX::NextLine(data);
         while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
@@ -247,11 +247,11 @@ void Tile::load() {
                 ParserX::SkipToken(data);
                 continue;
             }
-            qDebug() << "#Tile - undefined token" << sh;
+            if(Game::debugOutput) qDebug() << "#Tile - undefined token" << sh;
             ParserX::SkipToken(data);
         }
     } else {
-        qDebug() << "w file compressed   " << path;
+        if(Game::debugOutput) qDebug() << "w file compressed   " << path;
         data->off+=5;
         int offset, offsetO;
         int idx, idxO;
@@ -299,7 +299,7 @@ void Tile::load() {
             data->off = offset;
        }
     }
-    qDebug() << obiekty.size();
+    if(Game::debugOutput) qDebug() << obiekty.size();
     loaded = 0;
     wczytajObiekty();
     checkForErrors();
@@ -338,13 +338,14 @@ void Tile::loadUtf16Data(FileBuffer *data){
                         //qDebug() << nowy->type;
                         while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                             nowy->set(sh, data);
+                            
                             ParserX::SkipToken(data);
                         }
                         obiekty[jestObiektow++] = nowy;
                         ParserX::SkipToken(data);
                         continue;
                     }
-                    qDebug() << "#tr_worldfile - undefined token " << sh;
+                    if(Game::debugOutput) qDebug() << "#tr_worldfile - undefined token " << sh;
                     ParserX::SkipToken(data);
                 }
     return;
@@ -372,7 +373,7 @@ void Tile::loadWS() {
     data->setTokenOffset(261844);
     data->off = 32;
     if (data->getToken() != 375){
-        qDebug() << "ws file uncompressed " << path;
+        if(Game::debugOutput) qDebug() << "ws file uncompressed " << path;
         ParserX::NextLine(data);
     
         QString sh = "";
@@ -393,17 +394,17 @@ void Tile::loadWS() {
                         ParserX::SkipToken(data);
                         continue;
                     }
-                    qDebug() << "#tr_wrldsoundfile - undefined token " << sh;
+                    if(Game::debugOutput) qDebug() << "#tr_wrldsoundfile - undefined token " << sh;
                     ParserX::SkipToken(data);
                 }
                 ParserX::SkipToken(data);
                 continue;
             }
-            qDebug() << "#TileWS - undefined token" << sh;
+            if(Game::debugOutput) qDebug() << "#TileWS - undefined token" << sh;
             ParserX::SkipToken(data);
         }
     } else {
-        qDebug() << "ws file compressed   " << path;
+        if(Game::debugOutput) qDebug() << "ws file compressed   " << path;
         data->off+=5;
         int offset, offsetO;
         int idx, idxO;
@@ -431,7 +432,7 @@ void Tile::loadWS() {
             data->off = offset;
        }
     }
-    qDebug() <<"WS size: "<< obiekty.size();
+    if(Game::debugOutput) qDebug() <<"WS size: "<< obiekty.size();
 }
 
 WorldObj* Tile::getObj(int id) {
@@ -483,7 +484,7 @@ void Tile::ViewDbSphere::set(QString sh, FileBuffer* data){
             }
         return;
     }
-    qDebug() << "viewdbsphere unknown:" << sh;
+    if(Game::debugOutput) qDebug() << "viewdbsphere unknown:" << sh;
 }
 
 void Tile::ViewDbSphere::set(int sh, FileBuffer* data){
@@ -506,7 +507,7 @@ void Tile::ViewDbSphere::set(int sh, FileBuffer* data){
             viewDbSphere.back().set(idx, data);
         }
     } else {
-        qDebug() << "viewdbsphere unknown:" << sh;
+        if(Game::debugOutput) qDebug() << "viewdbsphere unknown:" << sh;
     }
     data->off = offset;
 }
@@ -579,7 +580,7 @@ WorldObj* Tile::placeObject(float* p, float* q, Ref::RefItem* itemData, float* t
     WorldObj* nowy = WorldObj::createObj(itemData->type);
     if(nowy == NULL) return NULL;
     if(!nowy->allowNew()) {
-        qDebug() << itemData->type << " <- object not supported yet ";
+        if(Game::debugOutput) qDebug() << itemData->type << " <- object not supported yet ";
         return NULL;
     }
 
@@ -609,7 +610,7 @@ WorldObj* Tile::placeObject(float* p, float* q, Ref::RefItem* itemData, float* t
         nowy->UiD = ++maxUiDWS;
     else
         nowy->UiD = ++maxUiD;
-    qDebug() << itemData->type << " " << itemShapeName << nowy->UiD;
+    if(Game::debugOutput) qDebug() << itemData->type << " " << itemShapeName << nowy->UiD;
     //nowy->fileName = itemData->filename;
     nowy->load(x, z);
 
@@ -629,7 +630,7 @@ void Tile::saveEmpty(int nx, int nz) {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(nx) + "" + getNameXY(nz) + ".w";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     if(file.exists()) return;
     
@@ -663,7 +664,7 @@ void Tile::save() {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(x) + "" + getNameXY(-z) + ".w";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     
     file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -725,7 +726,7 @@ void Tile::saveWS() {
     
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(x) + "" + getNameXY(-z) + ".ws";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     
     int countWS = 0;
@@ -733,9 +734,9 @@ void Tile::saveWS() {
         if(obiekty[i] == NULL) continue;
         if(this->obiekty[i]->isSoundItem() && this->obiekty[i]->loaded) countWS++;
     }
-    qDebug() << countWS;
+    if(Game::debugOutput) qDebug() << countWS;
     if(countWS == 0){
-        qDebug() << "delete ws file if exist";
+        if(Game::debugOutput) qDebug() << "delete ws file if exist";
         file.remove();
         return;
     }

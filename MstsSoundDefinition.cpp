@@ -43,7 +43,7 @@ MstsSoundDefinition::MstsSoundDefinition(QString p, QString n) {
     qDebug() << "SMS" << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
-        qDebug() << pathid << "not exist";
+        if(Game::debugOutput) qDebug() << pathid << "not exist";
         return;
     }
 
@@ -591,22 +591,22 @@ void SoundDefinitionGroup::Stream::updatePosition(){
 
 void SoundDefinitionGroup::Stream::bindTo(int i){
     alSourcei(alSid, AL_BUFFER, i);
-    //qDebug("buffer binding");
+    ////qDebug("buffer binding");
 }
 
 void SoundDefinitionGroup::Stream::init(QString path, bool stereo){
 
     alGenSources((ALuint)1, (ALuint*)&alSid);
-    qDebug("source generation");
+    ////qDebug("source generation");
 
     float pitch = 1.0;
     //if(stereo)
     //    pitch = 2.0;
         
     alSourcef(alSid, AL_PITCH, pitch);
-    qDebug("source pitch");
+    ////qDebug("source pitch");
     alSourcef(alSid, AL_GAIN, 1.0);
-    qDebug("source gain");
+   // //qDebug("source gain");
         
     alSourcei(alSid, AL_SOURCE_RELATIVE, AL_FALSE);
         
@@ -615,11 +615,11 @@ void SoundDefinitionGroup::Stream::init(QString path, bool stereo){
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
         
     alSource3f(alSid, AL_POSITION, 0, 0, 0);
-    qDebug("source position");
+    ////qDebug("source position");
     alSource3f(alSid, AL_VELOCITY, 0, 0, 0);
-    qDebug("source velocity");
+   // //qDebug("source velocity");
     alSourcei(alSid, AL_LOOPING, AL_TRUE);
-    qDebug("source looping");
+  //  //qDebug("source looping");
 
 
     for(int i = 0; i < trigger.size(); i++){
@@ -628,7 +628,7 @@ void SoundDefinitionGroup::Stream::init(QString path, bool stereo){
         if(trigger[i]->mode != Trigger::LOOPSTART_MODE && trigger[i]->mode != Trigger::ONESHOT_MODE )
             continue;
         alGenBuffers(1, (ALuint*)&trigger[i]->alBid);
-        qDebug("buffer generation");
+      //  //qDebug("buffer generation");
         QString filepath = path + "/" + trigger[i]->files.first();
         filepath.replace("//", "/");
         QFile file(filepath);
@@ -701,9 +701,9 @@ void SoundDefinitionGroup::Stream::init(QString path, bool stereo){
                 formatinfo = AL_FORMAT_MONO16;
         alBufferData(trigger[i]->alBid, formatinfo, bufferData, dataChunkSize, sampleRate);
 
-	qDebug("loading wav file");
+	////qDebug("loading wav file");
 
-	qDebug("buffer copy");
+	////qDebug("buffer copy");
 
     }
     

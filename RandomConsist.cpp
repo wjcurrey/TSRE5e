@@ -68,7 +68,7 @@ void RandomConsist::loadSets(){
     dir.setNameFilters(QStringList()<<"*.con");
     qDebug() << path;
     if(!dir.exists())
-        qDebug() << "not exist";
+        if(Game::debugOutput) qDebug() << "not exist";
     qDebug() << dir.count() <<" con files";
     foreach(QString engfile, dir.entryList()){
         Consist *c = new Consist(path, engfile);

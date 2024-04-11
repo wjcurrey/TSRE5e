@@ -59,7 +59,7 @@ void Service::load(){
     if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
-        qDebug() << pathid << "not exist";
+        if(Game::debugOutput) qDebug() << pathid << "not exist";
         return;
     }
 
@@ -144,25 +144,25 @@ void Service::load(){
                                     ParserX::SkipToken(data);
                                     continue;
                                 }
-                                qDebug() << "#stationstop - undefined token: " << sh;
+                                if(Game::debugOutput) qDebug() << "#stationstop - undefined token: " << sh;
                                 ParserX::SkipToken(data);
                             }
                             ParserX::SkipToken(data);
                             continue;
                         }
-                        qDebug() << "#timetable - undefined token: " << sh;
+                        if(Game::debugOutput) qDebug() << "#timetable - undefined token: " << sh;
                         ParserX::SkipToken(data);
                     }
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#service_definition - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#service_definition - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#SRV - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#SRV - undefined token: " << sh;
         ParserX::SkipToken(data);
     }
     loaded = 1;
