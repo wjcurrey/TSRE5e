@@ -213,6 +213,14 @@ public:
     static int markerText;
     static float lastElev;
     static float sigOffset;
+    static QStringList markerFiles;
+    static bool reload;
+    static QString MapAPIKey;    
+    static bool imageSubstitution;
+    static bool imageUpgrade;
+    static int convertThreshold;
+    static int convertDivisor;
+
 private:
     //static RouteEditorWindow* window;
     //static LoadWindow* loadWindow;

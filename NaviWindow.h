@@ -35,6 +35,7 @@ public slots:
     void mkrList(QMap<QString, Coords*> list);
     void mkrFilesSelected(QString item);
     void mkrListSelected(QString item);
+    void reloadMkrLists();
 
     void recStatus(QString statName, QString statVal );       
     

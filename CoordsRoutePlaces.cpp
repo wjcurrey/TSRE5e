@@ -17,6 +17,7 @@
 #include "TRitem.h"
 #include "GeoCoordinates.h"
 
+
 CoordsRoutePlaces::~CoordsRoutePlaces() {
 }
 
@@ -41,11 +42,11 @@ CoordsRoutePlaces::CoordsRoutePlaces(TDB *tdb, QString place) {
                 markerList.back().tileX.push_back(n->trItemRData[3]);
                 markerList.back().tileZ.push_back(n->trItemRData[4]);
                 markerList.back().x.push_back(n->trItemRData[0]);
-                markerList.back().z.push_back(n->trItemRData[2]);
+                markerList.back().z.push_back(-n->trItemRData[2]);    /// EFO negative this also?
                 
                 coords.TileX = n->trItemRData[3];
                 coords.TileZ = n->trItemRData[4];
-                coords.setWxyz(n->trItemRData[0], 0, -n->trItemRData[2]);
+                coords.setWxyz(n->trItemRData[0], 0, -n->trItemRData[2]);    /// EFO this is negative
                 Game::GeoCoordConverter->ConvertToInternal(&coords, &igh);
                 Game::GeoCoordConverter->ConvertToLatLon(&igh, &latlon);
                 markerList.back().lat = latlon.Latitude;
@@ -61,16 +62,33 @@ CoordsRoutePlaces::CoordsRoutePlaces(TDB *tdb, QString place) {
                 markerList.back().tileX.push_back(n->trItemRData[3]);
                 markerList.back().tileZ.push_back(n->trItemRData[4]);
                 markerList.back().x.push_back(n->trItemRData[0]);
-                markerList.back().z.push_back(n->trItemRData[2]);
+                markerList.back().z.push_back(-n->trItemRData[2]);     /// EFO negative this also ?
                 
                 coords.TileX = n->trItemRData[3];
                 coords.TileZ = n->trItemRData[4];
-                coords.setWxyz(n->trItemRData[0], 0, -n->trItemRData[2]);
+                coords.setWxyz(n->trItemRData[0], 0, -n->trItemRData[2]);   /// EFO this is negative
                 Game::GeoCoordConverter->ConvertToInternal(&coords, &igh);
                 Game::GeoCoordConverter->ConvertToLatLon(&igh, &latlon);
                 markerList.back().lat = latlon.Latitude;
                 markerList.back().lon = latlon.Longitude;
             }
+        }        
+        if (n->type == "speedpostitem" && place == "speedposts"){
+                markerList.push_back(Marker());
+                markerList.back().name = (QString::number(n->speedpostTrItemData[1]) + " \t " + QString::number(n->trItemRData[3]) + "/" + QString::number(n->trItemRData[4]));
+                markerList.back().type = 0;
+                markerList.back().tileX.push_back(n->trItemRData[3]);
+                markerList.back().tileZ.push_back(n->trItemRData[4]);
+                markerList.back().x.push_back(n->trItemRData[0]);
+                markerList.back().z.push_back(-n->trItemRData[2]);   /// EFO negative this also?
+                
+                coords.TileX = n->trItemRData[3];
+                coords.TileZ = n->trItemRData[4];
+                coords.setWxyz(n->trItemRData[0], 0, -n->trItemRData[2]);   /// EFO this is negative
+                Game::GeoCoordConverter->ConvertToInternal(&coords, &igh);
+                Game::GeoCoordConverter->ConvertToLatLon(&igh, &latlon);
+                markerList.back().lat = latlon.Latitude;
+                markerList.back().lon = latlon.Longitude;                        
         }
     }
     if (markerList.size() > 0)

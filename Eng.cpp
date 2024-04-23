@@ -31,6 +31,7 @@
 #include "ContentHierarchyInfo.h"
 #include <QRegExp>
 #include <QStringList>
+#include <QString>
 
 Eng::Eng() {
     
@@ -137,14 +138,16 @@ void Eng::load(){
         incpath = path.toLower();
         file = new QFile(pathid);
         if (!file->open(QIODevice::ReadOnly)){
-            if(Game::debugOutput) qDebug() << pathid << "not exist";
+            // if(Game::debugOutput) qDebug() << "Eng 140:" << pathid << "not exist";
+            pathid = pathid.replace("../","/");
+            addToFileList(pathid);
             return;
         } else {
-            if(Game::debugOutput) qDebug() << pathid;
+            // if(Game::debugOutput) qDebug() << "Eng 144: addToFileList: " << pathid;
             addToFileList(pathid);
         }
     } else {
-        if(Game::debugOutput) qDebug() << orpathid;
+        if(Game::debugOutput) if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Base Engine \t \t" << orpathid;
         addToFileList(orpathid);
     }
 
@@ -169,8 +172,12 @@ void Eng::load(){
         }
         if (sh == ("include")) {
             QString incPath = ParserX::GetStringInside(data).toLower();
+            QString incPathb = ParserX::GetStringInside(data).toLower();
+            incPathb = incPathb.replace("../","/"); //// EFO trying to fix older files - will it break newer?
             ParserX::SkipToken(data);
-            if(data->insertFile(incpath + "/" + incPath, mstsincpath + "/" + incPath, &loadedPath))
+            if(data->insertFile(incpath + "/" + incPath, mstsincpath + "/" + incPath, &loadedPath))   /// legacy path
+                addToFileList(loadedPath);
+            if(data->insertFile(incpath + "/" + incPathb, mstsincpath + "/" + incPathb, &loadedPath))  //// alternate path
                 addToFileList(loadedPath);
             continue;
         }
@@ -223,9 +230,35 @@ void Eng::load(){
                     continue;
                 }
                 if (sh == ("mass")) {
-                    mass = ParserX::GetNumberInside(data);
+                    float temp;
+                    QString temp1;
+                    QString temp0;
+                    QString unit;
+                    float convunit = 1.0;
+                    
+                    temp1 = ParserX::GetString(data);
+                    temp0 = temp1;
+                    if(temp1.endsWith("kg"))  { unit = "KG";   convunit = 1000.0;    temp1 = temp1.replace("kg"  ,"");  }
+                    if(temp1.endsWith("t")) { unit = "MET";    convunit = 1.0;       temp1 = temp1.replace("t"   ,"");  }
+                    if(temp1.endsWith("t-us")) { unit = "UST"; convunit = 1.10231 ;  temp1 = temp1.replace("t-us","");  }
+                    if(temp1.endsWith("t-uk")) { unit = "UKT"; convunit = 0.984207 ; temp1 = temp1.replace("t-uk","");  }
+                    if(temp1.endsWith("lb")) { unit = "LB";    convunit = 2204.6; ;  temp1 = temp1.replace("lb"  ,"");  }
+                    
+                    temp = (temp1.toFloat()/convunit);
+                    
+                    //if (temp > Game::convertThreshold) temp = (temp/Game::convertDivisor) ; 
+                    mass = temp;
+                    if (temp1.toFloat() != temp) // if(Game::debugOutput) 
+                        {
+                            qDebug().noquote() << __FILE__ << __LINE__ << shape.name << " Adjusted Mass: \t" "" << mass << " was " << temp0;
+                            
+                        }
+                       //     qDebug() << __FILE__ << __LINE__ << shape.name << " Adjusted Mass: \t" "" << mass << " was " << temp1 << " " << unit;
+
                     ParserX::SkipToken(data);
                     continue;
+                    
+                    
                 }
                 if (sh == ("coupling")) {
                     coupling.push_back(Coupling());
@@ -308,11 +341,11 @@ void Eng::load(){
                             /// This is JSON so it's handled in the moment....
                             // QFile file(loadpath);
                             
-                            qDebug() << "Load-OR Attributes: " << loadpath;
+                            // if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Load-OR Attributes: " << loadpath;
                             
                             QFile file(loadpath);
                             if (!file.open(QIODevice::ReadOnly)) {
-                                qDebug() << "Error opening file:" << file.errorString();
+                                if(Game::debugOutput) qDebug() << __FILE__ << __LINE__<< ": Error opening file:" << file.errorString();
                             }
                                 QTextStream stream(&file);
                                 QStringList contents;
@@ -329,7 +362,7 @@ void Eng::load(){
                                 contents.replaceInStrings("]", " ");                                
                                 contents.replaceInStrings(",", " ");                                
                                 
-                                if(Game::debugOutput) qDebug() << "Load-OR JSON: " << contents.size();
+                                // if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Load-OR JSON: " << contents.size();
 
                                 /// placeholders for the string parsing
                                 QString loadtag;
@@ -387,15 +420,15 @@ void Eng::load(){
                                 freightanimShape.back().y = loadoroffset[1] + loadoffset[1];
                                 freightanimShape.back().z = loadoroffset[2] + loadoffset[2];                                                                                                                                  
 
-                                qDebug() << "loadarealength    : " << loadarealength;
-                                qDebug() << "loaddoublestacker : " << loaddoublestacker;
-                                qDebug() << "loadshape         : " << loadshape;
-                                qDebug() << "loadcontainertype : " << loadcontainertype;
-                                qDebug() << "loadcontainerlen  : " << loadcontainerlen;
-                                qDebug() << "loadpos           : " << loadpos;
-                                qDebug() << "loadbase          : " << loadbase;
-                                qDebug() << "loadoffset        : " << loadoffset[0] << "-" << loadoffset[1] << "-" << loadoffset[2] ;
-                                qDebug() << "loadoroffset      : " << loadoroffset[0] << "-" << loadoroffset[1] << "-" << loadoroffset[2] ;
+                               // if(Game::debugOutput) qDebug() << "loadarealength    : " << loadarealength;
+                               // if(Game::debugOutput) qDebug() << "loaddoublestacker : " << loaddoublestacker;
+                               // if(Game::debugOutput) qDebug() << "loadshape         : " << loadshape;
+                               // if(Game::debugOutput) qDebug() << "loadcontainertype : " << loadcontainertype;
+                               // if(Game::debugOutput) qDebug() << "loadcontainerlen  : " << loadcontainerlen;
+                               // if(Game::debugOutput) qDebug() << "loadpos           : " << loadpos;
+                               // if(Game::debugOutput) qDebug() << "loadbase          : " << loadbase;
+                               // if(Game::debugOutput) qDebug() << "loadoffset        : " << loadoffset[0] << "-" << loadoffset[1] << "-" << loadoffset[2] ;
+                               // if(Game::debugOutput) qDebug() << "loadoroffset      : " << loadoroffset[0] << "-" << loadoroffset[1] << "-" << loadoroffset[2] ;
 
                                 
                             continue;
@@ -854,7 +887,7 @@ for(int i = 0; i < freightanimShape.size(); i++){   /// EFO heres where I might 
         if(!freightanimShape[i].id.keys().contains(shapeLibId)){
             if(freightanimShape[i].name.length() > 1)
             {
-                qDebug() << "788: " << freightanimShape[i].altpath.length();
+                if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << freightanimShape[i].altpath.length();
                 int lastslash = path.lastIndexOf("/");
                 QString altroot = path.left(lastslash);
                 lastslash = freightanimShape[i].name.lastIndexOf("/");
@@ -869,7 +902,7 @@ for(int i = 0; i < freightanimShape.size(); i++){   /// EFO heres where I might 
                 {
                 freightanimShape[i].id[shapeLibId] = Game::currentShapeLib->addShape(path +"/"+ freightanimShape[i].name, path);
                 }
-             qDebug() << "797 Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << altroot + freightanimShape[i].altpath;   
+             if(Game::debugOutput) qDebug() << __FILE__ << __LINE__<<  " Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << altroot + freightanimShape[i].altpath;   
             }
             else 
                 freightanimShape[i].id[shapeLibId] = -1;
@@ -1012,7 +1045,7 @@ void Eng::renderOnTrack(GLUU* gluu, float* playerT, int selectionColor) {
         if(!freightanimShape[i].id.keys().contains(shapeLibId)){
             if(freightanimShape[i].name.length() > 1){
                 freightanimShape[i].id[shapeLibId] = Game::currentShapeLib->addShape(path +"/"+ freightanimShape[i].name, path);
-                         qDebug() << "932 Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << freightanimShape[i].altpath;   
+                         if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << " Defining FreightAnim: " << freightanimShape[i].name << " / PATH = " << path << " / ALTPATH= " << freightanimShape[i].altpath;   
             }
             else 
                 freightanimShape[i].id[shapeLibId] = -1;
@@ -1141,7 +1174,7 @@ void Eng::initOnTrack(float *tpos, int direction, QMap<int, int>* junctionDirect
     //    qDebug() << "fail";
     //    this->loaded = -1;
     this->loaded = 1;
-    if(Game::debugOutput) qDebug() << "ok";
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "ok";
 }
 
 void Eng::fillContentHierarchyInfo(QVector<ContentHierarchyInfo*>& list, int parent){

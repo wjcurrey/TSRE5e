@@ -57,6 +57,9 @@ public:
     int getTrackBegItemId();
     int getDefaultDetailLevel();
     void render(GLUU* gluu, float lod, float posx, float posz, float* playerW, float* target, float fov, int selectionColor, int renderMode);
+    
+    
+
 private:
     unsigned int platformData = 0;
     int trItemId[4];

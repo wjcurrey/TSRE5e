@@ -37,14 +37,16 @@ int ConLib::addCon(QString path, QString name) {
         if (((Consist*) it->second)->pathid.length() == pathid.length())
             if (((Consist*) it->second)->pathid == pathid) {
                 ((Consist*) it->second)->ref++;
-                qDebug() <<"conid "<< pathid;
+                if (it->second->mass > 0) qDebug() <<"ConLib 40 : "<< pathid << " ~ emass: " << it->second->emass << " ~ mass: " << it->second->mass;
                 return (int)it->first;
             }
     }
-    qDebug() << "New " << jestcon << " con: " << pathid;
+    // qDebug() << "New " << jestcon << " con: " << pathid;
 
     con[jestcon] = new Consist(pathid, path, name);
 
+    
+    if (con[jestcon]->mass > 0)  if(Game::debugOutput) qDebug() << "ConLib 49 : "<< pathid << " ~ emass: " << con[jestcon]->emass   << " ~ mass: " << con[jestcon]->mass;
     return jestcon++;
 }
 

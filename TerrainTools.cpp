@@ -676,12 +676,12 @@ void TerrainTools::updateTexPrev(){
 }
 
 void TerrainTools::texPreviewEnabled(int val){
-    qDebug() << val;
+    qDebug() << "TerrTools679:" << val;
     if(val == 6){
         nextBrushShape();
         return;
     }
-    qDebug() <<texLastItems.size() ;
+    qDebug() << "TerrTools684:" <<texLastItems.size() ;
     int idx = texLastItems.size() - val - 1;
     if(idx > texLastItems.size() - 1) return;
     if(idx < 0) return;

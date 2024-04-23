@@ -418,8 +418,27 @@ void ObjTools::routeLoaded(Route* a){
     refOther.addItem("SpeedResume");
     refOther.addItem("SpeedWarning");
     refOther.addItem("Milepost");
+    refOther.addItem("Route/Shapes Directory");
     refOther.addItem("TSRE Tools");
     refOther.setMaxVisibleItems(35);
+    
+    /// EFO add un-indexed shapes
+    
+    hash.clear();
+    
+    QDir routeShapes(Game::root + "/routes/" + Game::route + "/shapes" );
+    routeShapes.setFilter(QDir::Files);          
+    foreach(QString dirFile, routeShapes.entryList()){
+        if(dirFile.endsWith(".s", Qt::CaseInsensitive))                {
+          
+            Ref::RefItem item;
+            item.filename.push_back(dirFile);
+            item.description = dirFile;
+            item.clas = "non-indexed";
+            item.type = "static";
+            route->ref->refItems[QString("#TSRE#")+"route/shapes directory"].push_back(item);        
+        }
+    }
 }
 
 void ObjTools::refClassSelected(const QString & text){
@@ -484,7 +503,7 @@ void ObjTools::refListSelected(QListWidgetItem * item){
 
 void ObjTools::lastItemsListSelected(QListWidgetItem * item){
     refList.clearSelection();
-    if(Game::debugOutput) qDebug() << item->type() << " " << item->text();
+    if(Game::debugOutput) qDebug() << "ObjTools506:" << item->type() << " " << item->text();
     route->ref->selected = lastItemsPtr[item->type()];
 }
 
@@ -526,7 +545,7 @@ void ObjTools::autoPlacementDeleteLastEnabled(){
 void ObjTools::itemSelected(Ref::RefItem* item){     /// EFO Item selected on the list
     if(Game::debugOutput)
     {QString selectedFilename = item->currentFilename;
-    if(Game::debugOutput) qDebug() << "selected: " << selectedFilename;    
+    if(Game::debugOutput) qDebug() << "ObjTools548:" << "selected: " << selectedFilename;    
     }   
     QString text;
     if(item->description.length() > 1) 
@@ -538,7 +557,7 @@ void ObjTools::itemSelected(Ref::RefItem* item){     /// EFO Item selected on th
     
     //Avoid duplicates
     QList<QListWidgetItem*> found = lastItems.findItems(text, Qt::MatchExactly);
-       if(Game::debugOutput)  qDebug() << "found : "<< found.length();
+       if(Game::debugOutput)  qDebug() << "ObjTools560:" << "found : "<< found.length();
     
     if ((found.length() == 0)   ){    //// Added a check for placed=true    && (item->placed)
 
@@ -633,7 +652,7 @@ void ObjTools::autoSnapableRadiusEnabled(QString val){
     float v;
     bool ok = false;
     v = val.toFloat(&ok);
-    if(Game::debugOutput) qDebug()<< "Game::snapableRadius"<<v;
+    if(Game::debugOutput) qDebug() << "ObjTools655:" << "Game::snapableRadius"<<v;
     if(ok)
         Game::snapableRadius = v;
 }

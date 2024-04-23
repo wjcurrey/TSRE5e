@@ -133,6 +133,7 @@ CoordsGpx::CoordsGpx(QString path) {
         reader.readNext();
     }
     loaded = true;
+    
 }
 
 CoordsGpx::~CoordsGpx() {

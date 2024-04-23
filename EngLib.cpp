@@ -52,6 +52,7 @@ int EngLib::addEng(QString path, QString name) {
     //qDebug() << "Nowy " << jesteng << " eng: " << pathid;
 
     eng[jesteng] = new Eng(pathid, path, name);
+    // qDebug() << "EngLib 49 : "<< pathid << " ~ emass: " << eng[jesteng]->mass ;
 
     return jesteng++;
 }
@@ -121,7 +122,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
         //qDebug() << dirFile;
         trainDir.setPath(path2+dirFile);
         foreach(QString engfile, trainDir.entryList()){
-            qDebug() << path2 << dirFile <<"/"<< engfile;
+            if(Game::debugOutput) qDebug() << path2 << dirFile <<"/"<< engfile;
             //addEng(path+dirFile,engfile);
             dirPaths.push_back(path2+dirFile);
             engPaths.push_back(engfile);
@@ -143,7 +144,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
             QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
         }
     }
-    qDebug() << "loaded" << (QDateTime::currentMSecsSinceEpoch() - timeNow)/1000<< "s";
+    if(Game::debugOutput) qDebug() << "loaded" << (QDateTime::currentMSecsSinceEpoch() - timeNow)/1000<< "s";
     delete progress;
     return 0;
 }

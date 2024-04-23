@@ -105,25 +105,47 @@ int TexLib::addTex(QString pathid, bool reload) {
     
     QString tType = pathid.toLower().split(".").last();
     
-    // Openrails uses .dds textures instead of .ace
-    if(tType == "ace"){
-        QFile file(pathid);
-        if (!file.exists()){
-            tType = "dds";
-            pathid = pathid.left(pathid.length() - 3)+"dds";
+    QFile file(pathid);
+        if (!file.exists() && (tType == "ace" || tType == "dds"))
+        {
+            qWarning() << "Missing texture: " << pathid.toLower();
         }
-        //qDebug() << "Using DDS";
-        if(Game::debugOutput) qDebug() << " dds sub: " << pathid.toLower();
-    }
+    /// EFO there's no good reason to swap DDS and ACE files... 
+    /// This allows it to be done, default is NOT to
+    if(Game::imageSubstitution)
+    {
+        /// If DDS doesn't exist but ACE does
+        if(tType == "dds"){   
+            QFile file(pathid);
+            if (!file.exists()){  
+                tType = "ace";
+                pathid = pathid.left(pathid.length() - 3)+"ace";
+            }
+        }
 
-    if(tType == "dds"){     /// is this why it's missing?
-        if(Game::debugOutput) qDebug() << "Texture path: " << pathid;
-        QFile file(pathid);
-        if (!file.exists()){
-            tType = "dds";
-            pathid = pathid.left(pathid.length() - 3)+"dds";
+        /// if ACE doesn't exist but DDS does
+        if(tType == "ace"){            
+            QFile file(pathid);
+            if (!file.exists()){
+                tType = "dds";
+                pathid = pathid.left(pathid.length() - 3)+"dds";
+            }
         }
     }
+    
+    if(Game::imageUpgrade)
+    {
+            if(tType == "ace"){            
+            /// check to see if DDS exists for ACE
+            QFile file(pathid.left(pathid.length() - 3)+"dds");            
+            if (file.exists()){
+                qDebug () << "DDS upgraded for " << pathid;                 
+                tType = "dds";
+                pathid = pathid.left(pathid.length() - 3)+"dds";
+            }
+        }    
+    }        
+        
     
     int texId = 0;
     if(newFile == NULL){

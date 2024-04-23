@@ -173,6 +173,7 @@ CoordsKml::CoordsKml(QString path) {
         reader.readNext();
     }
     loaded = true;
+    
 }
 
 CoordsKml::~CoordsKml() {

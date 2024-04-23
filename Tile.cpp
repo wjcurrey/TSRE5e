@@ -67,11 +67,11 @@ Tile::Tile(int xx, int zz, FileBuffer *data) {
     inUse = false;
     x = xx;
     z = zz;
-    if(Game::debugOutput) qDebug() << xx << zz;
+    if(Game::debugOutput) qDebug() << "tile70: " << xx << zz;
     jestObiektow = 0;
     vDbIdCount = 0;
     loadUtf16Data(data);
-    if(Game::debugOutput) qDebug() << obiekty.size();
+    if(Game::debugOutput) qDebug() << "tile74: " << obiekty.size();
     loaded = 0;
     wczytajObiekty();
 }
@@ -299,7 +299,7 @@ void Tile::load() {
             data->off = offset;
        }
     }
-    if(Game::debugOutput) qDebug() << obiekty.size();
+    if(Game::debugOutput) qDebug() << "tile302: " << obiekty.size();
     loaded = 0;
     wczytajObiekty();
     checkForErrors();
@@ -610,7 +610,7 @@ WorldObj* Tile::placeObject(float* p, float* q, Ref::RefItem* itemData, float* t
         nowy->UiD = ++maxUiDWS;
     else
         nowy->UiD = ++maxUiD;
-    if(Game::debugOutput) qDebug() << itemData->type << " " << itemShapeName << nowy->UiD;
+    if(Game::debugOutput) qDebug() << "tile613: " << itemData->type << " " << itemShapeName << nowy->UiD;
     //nowy->fileName = itemData->filename;
     nowy->load(x, z);
 
@@ -630,7 +630,7 @@ void Tile::saveEmpty(int nx, int nz) {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(nx) + "" + getNameXY(nz) + ".w";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << path;
+    // if(Game::debugOutput) qDebug() << "tile633: " << path;
     QFile file(path);
     if(file.exists()) return;
     
@@ -664,7 +664,7 @@ void Tile::save() {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(x) + "" + getNameXY(-z) + ".w";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << path;
+    // if(Game::debugOutput) qDebug() << "tile667: " << path;
     QFile file(path);
     
     file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -726,7 +726,7 @@ void Tile::saveWS() {
     
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(x) + "" + getNameXY(-z) + ".ws";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << path;
+    // if(Game::debugOutput) qDebug() << "tile726: " << path;
     QFile file(path);
     
     int countWS = 0;
@@ -734,9 +734,9 @@ void Tile::saveWS() {
         if(obiekty[i] == NULL) continue;
         if(this->obiekty[i]->isSoundItem() && this->obiekty[i]->loaded) countWS++;
     }
-    if(Game::debugOutput) qDebug() << countWS;
+    // if(Game::debugOutput) qDebug() << "tile737: " << countWS;
     if(countWS == 0){
-        if(Game::debugOutput) qDebug() << "delete ws file if exist";
+        // if(Game::debugOutput) qDebug() << "delete ws file if exist";
         file.remove();
         return;
     }

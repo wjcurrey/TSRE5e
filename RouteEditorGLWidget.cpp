@@ -132,7 +132,7 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
         
         if(defaultPaintBrush->direction == 1) emit updStatus(QString("brushdir"), QString("Terrain Brush: +")); else emit updStatus(QString("brush"), QString("Terrain Brush: -"));  /// EFO Added to 
 
-        //        if(resizeTool == true) emit updStatus(QString("resize"), QString("Resize: ON")); else emit updStatus(QString("resize"), QString("Resize: OFF"));  /// EFO Added to 
+        //        if(resizeTool == true)  reloadRefFile updStatus(QString("resize"), QString("Resize: ON")); else emit updStatus(QString("resize"), QString("Resize: OFF"));  /// EFO Added to 
         //        emit updStatus(QString("Stat3"), QString(""));           
     }
     
@@ -187,6 +187,7 @@ bool RouteEditorGLWidget::initRoute(){
         if (!route->loaded){ 
             return false;
         }  
+        qDebug() << "Initializing 3D viewer";
         initRoute2();
         return true;
     }  
@@ -347,6 +348,13 @@ void RouteEditorGLWidget::reloadRefFile(){
     route->loadAddons();
     //route->ref = new Ref((Game::root + "/routes/" + Game::route + "/" + Game::routeName + ".ref"));
     emit refreshObjLists();
+}
+
+void RouteEditorGLWidget::reloadMkrFiles(){    
+    if(Game::debugOutput) qDebug() << "route->loadMkrList;";    
+    route->loadMkrList();
+    if(Game::debugOutput) qDebug() << "REGL->emit mkrList(route->getMkrList())";    
+    emit mkrList(route->getMkrList());
 }
 
 void RouteEditorGLWidget::setCameraObject(GameObj* obj){
@@ -666,18 +674,18 @@ void RouteEditorGLWidget::handleSelection() {
         int realy = viewport[3] - (int) y - 1;
         glReadPixels(x, realy, 1, 1, GL_RGBA, GL_FLOAT, &winZ);
 
-        if(Game::debugOutput) qDebug() << "640:" << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
+        // if(Game::debugOutput) qDebug() << "REGLW676:" << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
         int colorHash = (int) (winZ[0]*255)*256 * 256 + (int) (winZ[1]*255)*256 + (int) (winZ[2]*255);
-        if(Game::debugOutput) qDebug() << colorHash;
+        // if(Game::debugOutput) qDebug() << "REGLW678:" << colorHash;
         int ww = (colorHash >> 20) & 0xF;
-        if(Game::debugOutput) qDebug() << "ww"<< ww;
+        // if(Game::debugOutput) qDebug() << "REGLW680:" << "ww"<< ww;
 
         // WorldObj Selected
         if(ww == 0){
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
-                    route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 679";
+                    route->addToTDBIfNotExist((WorldObj*)selectedObj); if(Game::debugOutput) qDebug() << "REGLW 687";
                 setSelectedObj(NULL);
             }
         } else if( ww >= 1 && ww <= 9 ){
@@ -693,8 +701,8 @@ void RouteEditorGLWidget::handleSelection() {
             if (ww == 1 || ww == 4 || ww == 7) wz = camera->pozT[1] - 1;
             if (ww == 2 || ww == 5 || ww == 8) wz = camera->pozT[1];
             if (ww == 3 || ww == 6 || ww == 9) wz = camera->pozT[1] + 1;
-            if(Game::debugOutput) qDebug() << "color data: " << cdata;
-            if(Game::debugOutput) qDebug() << wx << " " << wz << " " << UiD;
+            // if(Game::debugOutput) qDebug() << "REGLW703:" << "color data: " << cdata;
+            // if(Game::debugOutput) qDebug() << "REGLW704:" << wx << " " << wz << " " << UiD;
             WorldObj *selectedWorldObj = (WorldObj*) selectedObj;
             if (keyControlEnabled) {
                 if (selectedWorldObj == NULL){
@@ -718,7 +726,7 @@ void RouteEditorGLWidget::handleSelection() {
                 if (selectedWorldObj != NULL && twobj != selectedWorldObj) {
                     selectedWorldObj->unselect();
                     if (autoAddToTDB) {
-                        route->addToTDBIfNotExist(selectedWorldObj); qDebug() << "REGLW 720";
+                        route->addToTDBIfNotExist(selectedWorldObj); if(Game::debugOutput) qDebug() << "REGLW 728";
                     }
                 }
                 lastSelectedObj = selectedObj;
@@ -733,7 +741,7 @@ void RouteEditorGLWidget::handleSelection() {
             int wx = camera->pozT[0] - 1 + ((colorHash >> 10) & 0x3);
             int wz = camera->pozT[1] - 1 + ((colorHash >> 8) & 0x3);
             int UiD = (colorHash) & 0xFF;
-            if(Game::debugOutput) qDebug() << wx << wz << UiD;
+            // if(Game::debugOutput) qDebug() << "REGLW743:" << wx << wz << UiD;
             if (selectedObj != NULL) {
                 if ((keyControlEnabled || keyShiftEnabled) && selectedObj->typeObj == GameObj::terrainobj ) {
                     Terrain * tt = (Terrain*) selectedObj;
@@ -744,7 +752,7 @@ void RouteEditorGLWidget::handleSelection() {
                 } else {
                     selectedObj->unselect();
                     if (autoAddToTDB)
-                        route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 746";
+                        route->addToTDBIfNotExist((WorldObj*)selectedObj); // if(Game::debugOutput) qDebug() << "REGLW 754";
                     setSelectedObj(NULL);
                 }
             }
@@ -759,12 +767,12 @@ void RouteEditorGLWidget::handleSelection() {
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
-                    route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 761";
+                    route->addToTDBIfNotExist((WorldObj*)selectedObj); if(Game::debugOutput) qDebug() << "REGLW 769";
                 setSelectedObj(NULL);
             }
             int CID = ((colorHash) >> 8) & 0xFFF;
             int EID = ((colorHash)) & 0xFF;
-            if(Game::debugOutput) qDebug() << "REGL 766:  " << CID << EID;
+            if(Game::debugOutput) qDebug() << "REGLW 774:"  << CID << EID;
             setSelectedObj((GameObj*)route->getActivityObject(CID));
             if (selectedObj == NULL) {
                 if(Game::debugOutput) qDebug() << "brak obiektu";
@@ -777,12 +785,12 @@ void RouteEditorGLWidget::handleSelection() {
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
-                    route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 779";
+                    route->addToTDBIfNotExist((WorldObj*)selectedObj); if(Game::debugOutput) qDebug() << "REGLW 787";
                 setSelectedObj(NULL);
             }
             int TID = ((colorHash) >> 19) & 0x1;
             int UID = ((colorHash)) & 0xFFFF;
-            if(Game::debugOutput) qDebug() << "REGL 784:" << TID << UID;
+            if(Game::debugOutput) qDebug() << "REGL 792:" << TID << UID;
             setSelectedObj((GameObj*)route->getTrackItem(TID, UID));
             if (selectedObj == NULL) {
                 if(Game::debugOutput) qDebug() << "brak obiektu";
@@ -793,12 +801,12 @@ void RouteEditorGLWidget::handleSelection() {
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
-                    route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 795";
+                    route->addToTDBIfNotExist((WorldObj*)selectedObj); if(Game::debugOutput) qDebug() << "REGLW 803";
                 setSelectedObj(NULL);
             }
             int CID = ((colorHash) >> 8) & 0xFFF;
             int EID = ((colorHash)) & 0xFF;
-            if(Game::debugOutput) qDebug() << CID << EID;
+            if(Game::debugOutput) qDebug() << "REGLW808:" << CID << EID;
             setSelectedObj((GameObj*)route->getActivityConsist(CID));
             if (selectedObj == NULL) {
                 if(Game::debugOutput) qDebug() << "brak obiektu";
@@ -811,7 +819,7 @@ void RouteEditorGLWidget::handleSelection() {
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
-                    route->addToTDBIfNotExist((WorldObj*)selectedObj); qDebug() << "REGLW 813";
+                    route->addToTDBIfNotExist((WorldObj*)selectedObj); if(Game::debugOutput) qDebug() << "REGLW 821";
                 setSelectedObj(NULL);
             }
         }
@@ -1258,7 +1266,7 @@ void RouteEditorGLWidget::mousePressEvent(QMouseEvent *event) {
     if (!route->loaded) return;
     m_lastPos = event->pos();
     m_lastPos *= Game::PixelRatio;
-    mouseClick = true;  qDebug() << "REGLW 1260";
+    mouseClick = true;  // if(Game::debugOutput) qDebug() << "REGLW 1260";
     if ((event->button()) == Qt::RightButton) {
         mouseRPressed = true;
         camera->MouseDown(event);
@@ -1276,13 +1284,13 @@ void RouteEditorGLWidget::mousePressEvent(QMouseEvent *event) {
         //qDebug() << "placed objName: " << selectedFilename;    
         
         
-         if(Game::debugOutput) qDebug() << "REGLW 1278 placed: " ;     
+         // if(Game::debugOutput) qDebug() << "REGLW 1278 placed: " ;     
             
             if (selectedObj != NULL) {
                 selectedObj->unselect();
                 if (autoAddToTDB)
                     if (selectedObj->typeObj == GameObj::worldobj)
-                        route->addToTDBIfNotExist((WorldObj*) selectedObj);  qDebug() << "REGLW 1284";
+                        route->addToTDBIfNotExist((WorldObj*) selectedObj);  // if(Game::debugOutput) qDebug() << "REGLW 1284";
             }
             Undo::StateBeginIfNotExist();
             lastNewObjPosT[0] = camera->pozT[0];
@@ -1292,7 +1300,7 @@ void RouteEditorGLWidget::mousePressEvent(QMouseEvent *event) {
              lastNewObjPos[2] = aktPointerPos[2];
             float *q = Quat::create();
             Quat::copy(q, this->placeRot);
-            setSelectedObj(route->placeObject((int) camera->pozT[0], (int) camera->pozT[1], aktPointerPos, q, placeElev)); qDebug() << "REGLW 1294";
+            setSelectedObj(route->placeObject((int) camera->pozT[0], (int) camera->pozT[1], aktPointerPos, q, placeElev)); if(Game::debugOutput) qDebug() << "REGLW 1294";
             if (selectedObj != NULL)
                 selectedObj->select();
         }
@@ -1518,7 +1526,7 @@ void RouteEditorGLWidget::mouseMoveEvent(QMouseEvent *event) {
                 Game::terrainLib->toggleWaterDraw((int) camera->pozT[0], (int) camera->pozT[1], aktPointerPos, defaultPaintBrush->direction);
             }
         }
-        if (toolEnabled == "putTerrainTexTool" && mouseLPressed == true) { qDebug() << "Put: " << defaultPaintBrush->tex->pathid;
+        if (toolEnabled == "putTerrainTexTool" && mouseLPressed == true) { if(Game::debugOutput) qDebug() << "Put: " << defaultPaintBrush->tex->pathid;
             if (fabs(lastPointerPos[0] - aktPointerPos[0]) > 32 || fabs(lastPointerPos[2] - aktPointerPos[2]) > 32) {
                 Game::terrainLib->setTerrainTexture(defaultPaintBrush, (int) camera->pozT[0], (int) camera->pozT[1], aktPointerPos);
                 lastPointerPos[0] = aktPointerPos[0];
@@ -1963,7 +1971,7 @@ void RouteEditorGLWidget::tangentOrigin(){
 
             StartObject = selectedObj;
             //if(Game::debugOutput) 
-                qDebug() << "Tangent Start: " << ((WorldObj*)StartObject)->x << " " << ((WorldObj*)StartObject)->y << " " << ((WorldObj*)StartObject)->position[0] << " " << ((WorldObj*)StartObject)->position[1] << " " << ((WorldObj*)StartObject)->position[2];
+                if(Game::debugOutput) qDebug() << "Tangent Start: " << ((WorldObj*)StartObject)->x << " " << ((WorldObj*)StartObject)->y << " " << ((WorldObj*)StartObject)->position[0] << " " << ((WorldObj*)StartObject)->position[1] << " " << ((WorldObj*)StartObject)->position[2];
             
             
             if(EndObject != NULL) tangentMath();
@@ -1976,7 +1984,7 @@ void RouteEditorGLWidget::tangentTarget(){
 
             EndObject = selectedObj;
             // if(Game::debugOutput) 
-                qDebug() << "Tangent End: " << ((WorldObj*)EndObject)->x << " " << ((WorldObj*)EndObject)->y << " " << ((WorldObj*)EndObject)->position[0] << " " << ((WorldObj*)EndObject)->position[1] << " " << ((WorldObj*)EndObject)->position[2];
+                if(Game::debugOutput) qDebug() << "Tangent End: " << ((WorldObj*)EndObject)->x << " " << ((WorldObj*)EndObject)->y << " " << ((WorldObj*)EndObject)->position[0] << " " << ((WorldObj*)EndObject)->position[1] << " " << ((WorldObj*)EndObject)->position[2];
           
             if(StartObject != NULL) tangentMath();
          }
@@ -2000,13 +2008,13 @@ void RouteEditorGLWidget::tangentMath(){
     
 
     float dx = (2048 * (etx - stx)) + epx - spx;
-     qDebug() << "DX: " << dx ;
+     if(Game::debugOutput) qDebug() << "DX: " << dx ;
 
     float dy = epy - spy;
-     qDebug() << "DY: " << dy ;
+     if(Game::debugOutput) qDebug() << "DY: " << dy ;
 
     float dz = -((2048 * (etz - stz)) + epz - spz);    
-     qDebug() << "DZ: " << dz ;
+     if(Game::debugOutput) qDebug() << "DZ: " << dz ;
 
     double heading; // d
     if (abs(dx) > 0)
@@ -2016,24 +2024,24 @@ void RouteEditorGLWidget::tangentMath(){
     }
     else { heading = -90 + copysignf(1.0, dz) * 90; }
 
-     qDebug() << "HD: " << heading ;
+     if(Game::debugOutput) qDebug() << "HD: " << heading ;
 
     double distance = sqrt((dx * dx) + (dy * dy) + (dz * dz)); // d
-     qDebug() << "DI: " << distance ;
+     if(Game::debugOutput) qDebug() << "DI: " << distance ;
 
     double slope; // d
     if (abs(dy / distance) < 0.99999)
     { slope = atan(dy / sqrt(dx * dx + dz * dz)); }
     else { slope = copysignf(1.0, dy / distance) * 1000; }
 
-     qDebug() << "SL: " << slope ;
+     if(Game::debugOutput) qDebug() << "SL: " << slope ;
 
     double slopedeg = 0;  // d
     if (abs(dy / distance) < 0.99999)
     { slope = 180 / M_PI * atan(dy / sqrt(dx * dx + dz * dz)); }
     else { slope = copysignf(1.0, dy / distance) * 90; }
 
-     qDebug() << "SD: " << slopedeg ;
+     if(Game::debugOutput) qDebug() << "SD: " << slopedeg ;
 
     double headingcos = cos(-0.5 * heading * M_PI / 180); // d
     double headingsin = sin(-0.5 * heading * M_PI / 180); // d
@@ -2055,7 +2063,7 @@ void RouteEditorGLWidget::tangentMath(){
             
 
     clipboard->setText(qd);
-    qDebug() << "Final QD:" << qd; 
+    if(Game::debugOutput) qDebug() << "Final QD:" << qd; 
     
 }
 

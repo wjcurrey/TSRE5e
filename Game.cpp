@@ -47,7 +47,7 @@ TerrainLib *Game::terrainLib = NULL;
 
 bool Game::UseWorkingDir = false;
 QString Game::AppName = "TSRE5";
-QString Game::AppVersion = "Trainsim.Com Fork v0.8.003 ";
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.004c ";
 QString Game::AppDataVersion = "0.697";
 QString Game::root = "";
 QString Game::route = "";
@@ -210,7 +210,14 @@ QString Game::convertUnit = "m";
 int   Game::markerHeight = 30;
 int   Game::markerText = 16;
 float Game::lastElev = 0.0;
-float Game::sigOffset = 3.0;
+float Game::sigOffset = 0;
+QStringList Game::markerFiles;
+bool Game::reload;
+QString Game::MapAPIKey = "";
+bool Game::imageSubstitution = true;
+bool Game::imageUpgrade = true;
+int Game::convertThreshold = 999;
+int Game::convertDivisor = 2000;
 
 
 QHash<QString, int> Game::TextureFlags {
@@ -293,6 +300,8 @@ void Game::load() {
 
     qDebug() << "Debug: " << Game::debugOutput;
     
+    if(Game::reload) qDebug() << "Limited Reload In Progress";
+    
     while (!in.atEnd()) {
         line = in.readLine();
         
@@ -325,12 +334,180 @@ void Game::load() {
         if(Game::debugOutput) qDebug() << "Args    : " << args[0].trimmed() << " "<< args[1].trimmed();
         if(Game::debugOutput) qDebug() << "Sets    : " << setname << "=" << setval;        
         
+        //// These are protected and should never be reloaded
+        if(Game::reload == false)
+        {
+            if(setname =="gameroot") 
+                root = setval;
+
+            if(setname =="routename")
+                route = setval;
+
+            if(setname =="starttilex"){
+                Game::start++;
+                startTileX = setval.toInt();
+            }
+            if(setname =="starttiley"){
+                Game::start++;
+                startTileY = setval.toInt();
+            }                        
+
+            if(setname =="writeenabled"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    writeEnabled = true;
+                else
+                    writeEnabled = false;
+            }
+            if(setname =="writetdb"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    writeTDB = true;
+                else
+                    writeTDB = false;
+            }
+
+            if(setname =="tilelod"){
+                tileLod = setval.toInt();
+            }
+            if(setname =="objectlod"){
+                objectLod = setval.toInt();
+            }
+            if(setname =="maxobjlag"){
+                maxObjLag = setval.toInt();
+            }
+            if(setname =="allowobjlag"){
+                allowObjLag = setval.toInt();
+            }
+            if(setname =="fpslimit"){
+                fpsLimit = setval.toInt();
+            }
+            if(setname =="camerafov"){
+                cameraFov = setval.toFloat();
+            }
+            if(setname =="warningbox"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    warningBox = true;
+                else
+                    warningBox = false;
+            }
+            if(setname =="leavetrackshapeafterdelete"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    leaveTrackShapeAfterDelete = true;
+                else
+                    leaveTrackShapeAfterDelete = false;
+            }
+
+            // EFO configure yellow line display height
+            if(setname =="wirelineheight"){
+                wireLineHeight = setval.toFloat();
+            }
+
+            // EFO configure grey line display height
+            if(setname =="sectionlineheight"){
+                sectionLineHeight = setval.toFloat();
+            }
+
+            if(setname =="ogldefaultlinewidth"){
+                oglDefaultLineWidth = setval.toInt();
+            }        
+
+            if(setname =="aasamples"){
+                AASamples = setval.toInt();
+            }
+
+            if(setname =="proceduraltracks"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    proceduralTracks = true;
+                else
+                    proceduralTracks = false; 
+            }
+            if(setname =="fullscreen"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    fullscreen = true;
+                else
+                    fullscreen = false; 
+            }
+
+            if(setname =="usetdbemptyitems"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    useTdbEmptyItems = true;
+                else
+                    useTdbEmptyItems = false; 
+            }
+            if(setname =="useworkingdir"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    UseWorkingDir = true;
+                else
+                    UseWorkingDir = false; 
+            }
+            if(setname =="numrecentitems"){
+                numRecentItems = setval.toInt();
+            }
+
+            if(setname =="loadallwfiles"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    loadAllWFiles = true;
+                else
+                    loadAllWFiles = false; 
+            }
+            if(setname =="autofix"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    autoFix = true;
+                else
+                    autoFix = false; 
+            }
+            if(setname =="useonlypositivequaternions"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    useOnlyPositiveQuaternions = true;
+                else
+                    useOnlyPositiveQuaternions = false; 
+            }
+            if(setname =="routemergestring")
+                routeMergeString = setval;
+            if(setname =="objectsToRemove")
+                objectsToRemove = setval.split(":");
+            if(setname =="serverlogin"){
+                serverLogin = args[1].trimmed();
+            }
+            if(setname =="serverauth"){
+                serverAuth = args[1].trimmed();
+            }
+
+            // EFO Configure WindowPos
+            if(setname =="mainwindow") {
+                mainPos = setval;
+            }
+
+            if(setname =="naviwindow") {
+                naviPos = setval;
+            }      
+
+            if(setname =="statuswindow") {
+                statusPos = setval;
+            }
+
+            if(setname == "markerheight"){
+                    markerHeight = setval.toInt();
+            }       
+
+            if(setname == "markertext"){
+                    markerText = setval.toFloat();
+            }       
+
+            if(setname == "sigoffset"){
+                sigOffset = setval.toFloat();
+            }
+            
+        }
+        
+        //// These should be reload safe
+        
         if(setname =="consoleoutput"){
             if((setval == "true") or (setval == "1") or (setval == "on")) 
                 Game::consoleOutput = true;
             else
                 Game::consoleOutput = false;
         }
+        
         if(setname =="debugoutput"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 Game::debugOutput = true;
@@ -349,22 +526,7 @@ void Game::load() {
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 Game::legacySupport = true;
         }
-
         
-        if(setname =="gameroot")
-            root = setval;
-
-        if(setname =="routename")
-            route = setval;
-
-        if(setname =="starttilex"){
-            Game::start++;
-            startTileX = setval.toInt();
-        }
-        if(setname =="starttiley"){
-            Game::start++;
-            startTileY = setval.toInt();
-        }
         if(setname =="deletetrwatermarks"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 deleteTrWatermarks = true;
@@ -383,18 +545,7 @@ void Game::load() {
             else
                 createNewRoutes = false;
         }
-        if(setname =="writeenabled"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                writeEnabled = true;
-            else
-                writeEnabled = false;
-        }
-        if(setname =="writetdb"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                writeTDB = true;
-            else
-                writeTDB = false;
-        }
+        
         if(setname =="systemtheme"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 systemTheme = true;
@@ -413,53 +564,16 @@ void Game::load() {
             else
                 usenNumPad = false;
         }
-        if(setname =="tilelod"){
-            tileLod = setval.toInt();
-        }
-        if(setname =="objectlod"){
-            objectLod = setval.toInt();
-        }
-        if(setname =="maxobjlag"){
-            maxObjLag = setval.toInt();
-        }
-        if(setname =="allowobjlag"){
-            allowObjLag = setval.toInt();
-        }
-        if(setname =="fpslimit"){
-            fpsLimit = setval.toInt();
-        }
-        if(setname =="camerafov"){
-            cameraFov = setval.toFloat();
-        }
-        if(setname =="warningbox"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                warningBox = true;
-            else
-                warningBox = false;
-        }
-        if(setname =="leavetrackshapeafterdelete"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                leaveTrackShapeAfterDelete = true;
-            else
-                leaveTrackShapeAfterDelete = false;
-        }
+
         if(setname =="rendertritems"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 renderTrItems = true;
             else
                 renderTrItems = false;
         }
+
+
         
-        // EFO configure yellow line display height
-        if(setname =="wirelineheight"){
-            wireLineHeight = setval.toFloat();
-        }
-
-        // EFO configure grey line display height
-        if(setname =="sectionlineheight"){
-            sectionLineHeight = setval.toFloat();
-        }
-
         // EFO configure selectedTerrWidth
         if(setname =="selectedterrwidth"){
             selectedTerrWidth = setval.toInt();
@@ -519,6 +633,7 @@ void Game::load() {
             else
                 sortTileObjects = false;
         }
+        
         if(setname =="ignoremissingglobalshapes"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 ignoreMissingGlobalShapes = true;
@@ -531,9 +646,8 @@ void Game::load() {
             else
                 snapableOnlyRot = false; 
         }
-        if(setname =="ogldefaultlinewidth"){
-            oglDefaultLineWidth = setval.toInt();
-        }        
+        
+        
         if(setname =="shadowsenabled"){
           if((setval == "true") or (setval == "1") or (setval == "on"))  
             shadowsEnabled = 1;
@@ -556,6 +670,7 @@ void Game::load() {
                 shadow2Bias = 0.001;
             }
         }
+        
         if(setname =="texturequality"){
             textureQuality = setval.toInt();
         }
@@ -572,27 +687,14 @@ void Game::load() {
         if(setname =="mapimageresolution"){
             mapImageResolution = setval.toInt();
         }
-        if(setname =="aasamples"){
-            AASamples = setval.toInt();
-        }
+ 
         if(setname =="camerasticktoterrain"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 cameraStickToTerrain = true;
             else
                 cameraStickToTerrain = false; 
         }
-        if(setname =="proceduraltracks"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                proceduralTracks = true;
-            else
-                proceduralTracks = false; 
-        }
-        if(setname =="fullscreen"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                fullscreen = true;
-            else
-                fullscreen = false; 
-        }
+
         if(setname =="soundenabled"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 soundEnabled = true;
@@ -669,21 +771,7 @@ void Game::load() {
         if(setname =="hudscale"){
             hudScale = setval.toFloat();
         }
-        if(setname =="usetdbemptyitems"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                useTdbEmptyItems = true;
-            else
-                useTdbEmptyItems = false; 
-        }
-        if(setname =="useworkingdir"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                UseWorkingDir = true;
-            else
-                UseWorkingDir = false; 
-        }
-        if(setname =="numrecentitems"){
-            numRecentItems = setval.toInt();
-        }
+
         if(setname =="season"){
             season = setval;
         }
@@ -699,47 +787,7 @@ void Game::load() {
             else
                 seasonalEditing = false; 
         }
-        if(setname =="loadallwfiles"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                loadAllWFiles = true;
-            else
-                loadAllWFiles = false; 
-        }
-        if(setname =="autofix"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                autoFix = true;
-            else
-                autoFix = false; 
-        }
-        if(setname =="useonlypositivequaternions"){
-            if((setval == "true") or (setval == "1") or (setval == "on"))
-                useOnlyPositiveQuaternions = true;
-            else
-                useOnlyPositiveQuaternions = false; 
-        }
-        if(setname =="routemergestring")
-            routeMergeString = setval;
-        if(setname =="objectsToRemove")
-            objectsToRemove = setval.split(":");
-        if(setname =="serverlogin"){
-            serverLogin = args[1].trimmed();
-        }
-        if(setname =="serverauth"){
-            serverAuth = args[1].trimmed();
-        }
 
-        // EFO Configure WindowPos
-        if(setname =="mainwindow") {
-            mainPos = setval;
-        }
-
-        if(setname =="naviwindow") {
-            naviPos = setval;
-        }      
-        
-        if(setname =="statuswindow") {
-            statusPos = setval;
-        }
         
         if(setname =="maxautoplacement") {
             maxAutoPlacement = setval.toInt();
@@ -797,21 +845,37 @@ void Game::load() {
                  viewMarkers = false;
         }       
 
-        if(setname == "markerheight"){
-                markerHeight = setval.toInt();
-        }       
+        if(setname =="mapapikey"){
+                MapAPIKey = args[1].trimmed();
+                
+        }
 
-        if(setname == "markertext"){
-                markerText = setval.toFloat();
+        if(setname == "imagesubstitution"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 imageSubstitution = true;
+            else
+                 imageSubstitution = false;
         }       
-            
+        
+        if(setname == "imageupgrade"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 imageUpgrade = true;
+            else
+                 imageUpgrade = false;
+        }       
+        
+        
+        
+        
+        
+        
         if(Game::debugOutput) qDebug() << "Skip: " << skipped;
-        skipped.clear();
-        
-
-        
+        skipped.clear();               
     }
-
+    
+    qDebug() <<  Game::AppVersion ;
+    
+    
 
 }
 /*
@@ -1037,7 +1101,8 @@ void Game::CreateNewSettingsFile(){
     out << "#textureQuality = 4\n";
     out << "ignoreMissingGlobalShapes = true\n";
     out << "snapableOnlyRot = false\n";
-    out << "imageMapsUrl = \n";
+    out << "#imageMapsUrl = \n";
+    out << "#MapAPIKey = \n";
     out << "#AASamples = 16\n";
     out << "#mapImageResolution = 2048\n";
     out << "#cameraStickToTerrain = true\n";

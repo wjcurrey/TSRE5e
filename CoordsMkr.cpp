@@ -73,6 +73,8 @@ CoordsMkr::CoordsMkr(QString path) {
 
     if (markerList.size() > 0)
         loaded = true;
+    
+    
 }
 
 CoordsMkr::~CoordsMkr() {

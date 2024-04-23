@@ -107,6 +107,7 @@ public slots:
     void placeToolStickTerrain();
     void placeToolStickAll();
     void reloadRefFile();
+    void reloadMkrFiles();
     void setCameraObject(GameObj* obj);
     void setMoveStep(float val);
     void paintToolObj();
@@ -140,6 +141,7 @@ signals:
     void flexData(int x, int z, float* p);
     void mkrList(QMap<QString, Coords*> list);
     void refreshObjLists();
+    void reloadMkrLists();
     
     void sendMsg(QString name);
     void sendMsg(QString name, bool val);

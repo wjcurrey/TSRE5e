@@ -54,7 +54,7 @@ bool Path::isModified(){
 void Path::load(){
     QString sh;
     pathid.replace("//", "/");
-    if(Game::debugOutput) qDebug() << pathid;
+    // if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
         if(Game::debugOutput) qDebug() << pathid << "not exist";

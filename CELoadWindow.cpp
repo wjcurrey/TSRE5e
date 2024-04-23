@@ -95,7 +95,7 @@ CELoadWindow::CELoadWindow() {
     //                  this, SLOT(setNewRoute()));
     
     if(Game::checkCERoot(Game::root)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ <<"ok";
         load->show();
         exit->setFixedWidth(100);
         browse->setText(Game::root);
@@ -121,7 +121,7 @@ void CELoadWindow::dirSelected(){
     //nowa->hide();
     exit->setFixedWidth(600);
     if(Game::checkCERoot(directory)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__<<"ok";
         load->show();
         exit->setFixedWidth(100);
         browse->setStyleSheet(QString("color: ")+Game::StyleGreenText);
@@ -144,7 +144,7 @@ void CELoadWindow::handleBrowseButton(){
     if (result)
     {
         directory = fd->selectedFiles()[0];
-        qDebug()<<directory;
+        if(Game::debugOutput) qDebug()<< __FILE__ << __LINE__<<directory;
     }
     //Game::root = directory;
     browse->setText(directory);
@@ -154,7 +154,7 @@ void CELoadWindow::handleBrowseButton(){
     //nowa->hide();
     exit->setFixedWidth(600);
     if(Game::checkCERoot(directory)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug()<< __FILE__ << __LINE__<<"ok";
         load->show();
    
         exit->setFixedWidth(100);
@@ -241,7 +241,7 @@ void CELoadWindow::listRoutes(){
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
-    if(Game::debugOutput) qDebug() << path;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << path;
 
     QTextStream in(&file);
     QString line;

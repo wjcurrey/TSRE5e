@@ -21,6 +21,8 @@
 #include "ShapeLib.h"
 #include "Trk.h"
 
+
+
 NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     this->setWindowFlags(Qt::WindowType::Tool);
     //this->setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -203,10 +205,9 @@ void NaviWindow::jumpTileSelected(){
         aCoords->setWxyz();
         aCoords->wZ = -aCoords->wZ;
         emit jumpTo(aCoords);
-    }
-    
-
+    }   
 }
+
 
 void NaviWindow::naviInfo(int all, int hidden){
     if(all != objCount || hidden != objHidden ){
@@ -243,15 +244,29 @@ void NaviWindow::posInfo(PreciseTileCoordinate* coords){
     }
 }
 
+
+void NaviWindow::reloadMkrLists(){
+    if(Game::debugOutput) qDebug() << "navi ReloadMkrLists";    
+//    markerFiles.clear();        
+    if(Game::debugOutput) qDebug() << "MkrList " << mkrFiles;     
+    if(Game::debugOutput) qDebug() << "Game::MkrList" << Game::markerFiles;     
+}
+
 void NaviWindow::mkrList(QMap<QString, Coords*> list){
+    if(Game::debugOutput) qDebug() << "navi MkrList";    
+    markerFiles.clear();    
     mkrFiles = list;
+   
     QString routeid = Game::route.toLower() + ".mkr";
+    
     for (auto it = list.begin(); it != list.end(); ++it ){
+
         if(it.value() == NULL)            
             continue;
         if(!it.value()->loaded)
             continue;
         markerFiles.addItem(it.key());
+        if(Game::debugOutput) qDebug() << "MKR List----->" << it.key();            
        }
     
     if(markerFiles.count() > 0) {
@@ -267,7 +282,7 @@ void NaviWindow::mkrList(QMap<QString, Coords*> list){
 
 void NaviWindow::mkrFilesSelected(QString item){
     Coords* c = mkrFiles[item];
-    qDebug() << "Coords Item ----->" << item ;
+    if(Game::debugOutput) qDebug() << "Coords Item ----->" << item ;
     if(c == NULL) return;    
     this->sendMsg("mkrFile", item);
     this->mkrPlaces.clear();    
@@ -281,7 +296,7 @@ void NaviWindow::mkrFilesSelected(QString item){
         hash.append(c->markerList[i].name);
     }
     hash.sort(Qt::CaseInsensitive);
-    hash.removeDuplicates();
+     hash.removeDuplicates();    
     markerList.clear();
     markerList.addItems(hash);
     markerList.setMaxVisibleItems(25);

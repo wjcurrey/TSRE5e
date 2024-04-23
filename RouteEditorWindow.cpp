@@ -66,6 +66,8 @@
 #include "LoadWindow.h"
 #include "CELoadWindow.h"
 
+
+
 RouteEditorWindow::RouteEditorWindow() {
 
     objTools = new ObjTools("ObjTools");
@@ -202,11 +204,15 @@ RouteEditorWindow::RouteEditorWindow() {
     reloadRefAction = new QAction(tr("&Reload Ref File"), this);
     QObject::connect(reloadRefAction, SIGNAL(triggered()), this, SLOT(reloadRef()));
     
+    reloadMkrAction = new QAction(tr("&Reload Mkr Files"), this);
+    QObject::connect(reloadMkrAction, SIGNAL(triggered()), this, SLOT(reloadMkr()));
+    
+    reloadSettingsAction = new QAction(tr("&Reload Settings File"), this);
+    QObject::connect(reloadSettingsAction, SIGNAL(triggered()), this, SLOT(reloadSettings()));
+        
     closeAction = new QAction(tr("&Close"), this);
     QObject::connect(closeAction, SIGNAL(triggered()), this, SLOT(close()));
-
-   
-    
+      
     exitAction = new QAction(tr("&Exit"), this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
@@ -222,6 +228,8 @@ RouteEditorWindow::RouteEditorWindow() {
         routeMenu = menuBar()->addMenu(tr("&Route"));
         routeMenu->addAction(saveAction);
         routeMenu->addAction(reloadRefAction);
+        routeMenu->addAction(reloadMkrAction);   
+        routeMenu->addAction(reloadSettingsAction);           
         routeMenu->addAction(createPathsAction);
         routeMenu->addAction(trkEditr);
         //routeMenu->addAction(rebuildAction);    // Not yet ready
@@ -593,6 +601,10 @@ RouteEditorWindow::RouteEditorWindow() {
     
     QObject::connect(this, SIGNAL(reloadRefFile()),
                       glWidget, SLOT(reloadRefFile()));
+
+    /// This connects the menu to the GLWidget where the work happens
+    QObject::connect(this, SIGNAL(reloadMkrFile()),
+                      glWidget, SLOT(reloadMkrFiles()));
     
     QObject::connect(glWidget, SIGNAL(refreshObjLists()),
                       objTools, SLOT(refreshObjLists()));
@@ -609,6 +621,9 @@ RouteEditorWindow::RouteEditorWindow() {
       QObject::connect(this, SIGNAL(updStatus(QString, QString)),     statusWindow, SLOT(recStatus(QString, QString)));   
       QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));   
       QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));         
+ 
+      // connects the GLWidget to the Navi window for marker update
+      QObject::connect(glWidget, SIGNAL(MkrFiles(mkrList(QMap<QString, Coords*> list))), naviWindow, SLOT(mkrList(QMap<QString, Coords*> list)));
 
       /// EFO connect the status buttons to the other windows
       
@@ -685,6 +700,23 @@ void RouteEditorWindow::save(){
 void RouteEditorWindow::reloadRef(){
     emit reloadRefFile();
 }
+
+void RouteEditorWindow::reloadMkr(){
+    /// emit signal to GLW which fires off Route->something
+    emit reloadMkrFile();    
+    if(Game::debugOutput) qDebug() << "Menu triggered ->REW->emit reloadMkrFile";    
+
+    
+}
+
+void RouteEditorWindow::reloadSettings(){
+    /// emit signal to GLW which fires off Route->something
+    Game::reload = true;
+    Game::load();    
+    
+}
+
+
 
 void RouteEditorWindow::refreshErrors(){
     emit refreshErrorList(); 

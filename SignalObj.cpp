@@ -57,7 +57,7 @@ void SignalObj::loadingFixes(){
 SignalObj::SignalObj(const SignalObj& o) : WorldObj(o) {
     subObjSelected = o.subObjSelected;
     signalSubObj = o.signalSubObj;
-    signalUnits = o.signalUnits; qDebug() << "SigOb 60";
+    signalUnits = o.signalUnits; // if(Game::debugOutput) qDebug() << "SigOb 60";
     for(int i = 0; i < 32; i++){
         signalUnit[i].enabled = o.signalUnit[i].enabled;
         signalUnit[i].head = o.signalUnit[i].head;
@@ -79,7 +79,7 @@ SignalObj::~SignalObj() {
 void SignalObj::load(int x, int y) {
     this->shape = Game::currentShapeLib->addShape(resPath +"/"+ fileName);
     this->shapePointer = Game::currentShapeLib->shape[this->shape];
-        qDebug() << "SigOb 82";    ///  fifth stop setting a signal EFO
+        
     this->x = x;
     this->y = y;
     this->position[2] = -this->position[2];
@@ -109,7 +109,7 @@ void SignalObj::load(int x, int y) {
 void SignalObj::loadInit(){
     if(Game::trackDB != NULL)  {
         this->signalShape = Game::trackDB->sigCfg->signalShape[fileName];
-        qDebug() << "SigOb 112";
+        if(Game::debugOutput) qDebug() << "SigOb 112";
     }
 }
 
@@ -190,7 +190,7 @@ ErrorMessage* SignalObj::checkForErrors(){
         }
         
         if(item->trSignalType4.toUpper() != sShape->subObj[i].sigSubSType.toUpper()){
-            qDebug() << "!SS "<< item->trSignalType4<< sShape->subObj[i].sigSubSType;
+            if(Game::debugOutput) qDebug() << "!SS "<< item->trSignalType4<< sShape->subObj[i].sigSubSType;
             ErrorMessage *e = new ErrorMessage(
                 ErrorMessage::Type_Error, 
                 ErrorMessage::Source_World, 
@@ -274,7 +274,7 @@ bool SignalObj::containsTrackItem(int tdbId, int id){
 }
 
 void SignalObj::addTrackItemIdOffset(unsigned int trackOffset, unsigned int roadOffset){
-    for(int i = 0; i < 32; i++){ qDebug() << "SigOb 276";
+    for(int i = 0; i < 32; i++){ // if(Game::debugOutput) qDebug() << "SigOb 276";
         if(this->signalUnit[i].tdbId == 0)
             this->signalUnit[i].itemId += trackOffset;
         if(this->signalUnit[i].tdbId == 1)
@@ -298,9 +298,9 @@ void SignalObj::initTrItems(float* tpos){
         return;
     int trNodeId = tpos[0];
     float metry = tpos[1];
-    qDebug() << "SigOb 300";  // fourth stop setting a signal EFO
+    // if(Game::debugOutput) qDebug() << "SigOb 300";  // fourth stop setting a signal EFO
     TDB* tdb = Game::trackDB;
-    qDebug() <<"new signal  "<<this->fileName;
+    if(Game::debugOutput) qDebug() <<"new signal  "<<this->fileName;
 
     tdb->newSignalObject(this->fileName, this->signalUnit, this->signalUnits, trNodeId, metry, this->typeID);
     
@@ -310,7 +310,7 @@ void SignalObj::initTrItems(float* tpos){
         if(this->signalUnit[i].enabled)
             this->signalSubObj = this->signalSubObj | (1 << i);
     }
-    qDebug() <<"signalUnits  "<<this->signalUnits << this->signalSubObj;
+    if(Game::debugOutput) qDebug() <<"signalUnits  "<<this->signalUnits << this->signalSubObj;
    // this->trItemIdCount = 4;
   //  this->trItemId[0] = isRoad;
    // this->trItemId[1] = trItemId[0];
@@ -325,7 +325,7 @@ void SignalObj::initTrItems(float* tpos){
     }
 }
 
-void SignalObj::set(QString sh, long long int val) { qDebug() << "SigOb 327";  // third stop setting a signal EFO
+void SignalObj::set(QString sh, long long int val) { // if(Game::debugOutput) qDebug() << "SigOb 327";  // third stop setting a signal EFO
     if (sh == ("ref_value")) {
         SignalShape * signal = Game::trackDB->sigCfg->signalShapeById[val];
         fileName = signal->name; 
@@ -335,7 +335,7 @@ void SignalObj::set(QString sh, long long int val) { qDebug() << "SigOb 327";  /
     setModified();
 }
 
-void SignalObj::set(QString sh, QString val){ qDebug() << "SigOb 337";  /// second stop setting a signal EFO
+void SignalObj::set(QString sh, QString val){ // if(Game::debugOutput) qDebug() << "SigOb 337";  /// second stop setting a signal EFO
     if (sh == ("filename")) {
         fileName = val;
         return;
@@ -348,7 +348,7 @@ void SignalObj::set(QString sh, QString val){ qDebug() << "SigOb 337";  /// seco
     return;
 }
 
-void SignalObj::set(int sh, FileBuffer* data) { qDebug() << "SigOb 350";
+void SignalObj::set(int sh, FileBuffer* data) { // if(Game::debugOutput) qDebug() << "SigOb 350";
     if (sh == TS::FileName) {
         data->off++;
         int slen = data->getShort()*2;
@@ -384,7 +384,7 @@ void SignalObj::set(int sh, FileBuffer* data) { qDebug() << "SigOb 350";
     return;
 }
 
-void SignalObj::set(QString sh, FileBuffer* data) { qDebug() << "SigOb 386";
+void SignalObj::set(QString sh, FileBuffer* data) { 
     if (sh == ("filename")) {
         fileName = ParserX::GetString(data);
         return;
@@ -481,7 +481,7 @@ void SignalObj::enableSubObj(int i){
     if(isSubObjEnabled(i)) return;
     if(signalShape == NULL)
         return;
-    qDebug() << "SigOb 483";    
+    if(Game::debugOutput) qDebug() << "SigOb 483";    
     TDB* tdb = Game::trackDB;
     
     // find head item 
@@ -661,7 +661,7 @@ void SignalObj::flip(bool flipShape){
     drawPositions = NULL;
 }
 
-QString SignalObj::getShapePath(){ qDebug() << "SigOb 663";
+QString SignalObj::getShapePath(){ // if(Game::debugOutput) qDebug() << "SigOb 663";
     if (!loaded) return "";
     if (shape < 0) return "";
     return Game::currentShapeLib->shape[shape]->pathid+"|"+Game::currentShapeLib->shape[shape]->texPath;
@@ -891,7 +891,7 @@ int SignalObj::getDefaultDetailLevel(){
     return -6;
 }
 
-Ref::RefItem* SignalObj::getRefInfo(){ qDebug() << "SigOb 893";
+Ref::RefItem* SignalObj::getRefInfo(){ // if(Game::debugOutput) qDebug() << "SigOb 893";
     Ref::RefItem* r = new Ref::RefItem();
     r->type = this->type;
     r->filename.push_back(this->fileName);

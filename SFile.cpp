@@ -74,7 +74,7 @@ void SFile::load() {
 
     
     if (!file->open(QIODevice::ReadOnly)){
-        if(Game::debugOutput) qDebug() << "S Shape: not exist "<<pathid;
+        if(Game::debugOutput) qDebug() << "SFile 77 S Shape: not exist "<<pathid;
         file->close();
         return;
     }
@@ -303,7 +303,8 @@ void SFile::load() {
                                 animations.push_back(Animation());
                                 animations.back().loadX(data);
                                 if(animations.size() > 0){
-                                    if(Game::debugOutput) qDebug() << animations[0].node.size();
+                                    if(Game::debugOutput) qDebug() << "Sfile306:" << animations[0].node.size();
+                                           
                                     /*for(int i = 0; i < animations[0].node.size(); i++){
                                         qDebug() << animations[0].node[i].linearKey.size();
                                         qDebug() << animations[0].node[i].slerpRot.size();
@@ -856,7 +857,7 @@ void SFile::reload() {
     
     list.removeDuplicates();
     for(QString s : list){
-        if(Game::debugOutput) qDebug() << s;
+        if(Game::debugOutput) qDebug() << "SFile 860:" << s;
         TexLib::addTex(texPath, s, true);
     }
 }
@@ -880,7 +881,7 @@ void SFile::setCurrentDistanceLevel(unsigned int stateId, int level){
     if(level >= iloscd)
         level = 0;
     state[stateId].distanceLevel = level;
-    if(Game::debugOutput) qDebug() << state[stateId].distanceLevel;
+    if(Game::debugOutput) qDebug() << "SFile 884:" << state[stateId].distanceLevel;
 }
 
 void SFile::enableSubObjByNameQueue(unsigned int stateId, QString name, bool val){
@@ -1324,10 +1325,12 @@ void SFile::fillShapeTextureInfo(QHash<int, ShapeTextureInfo*>& list, unsigned i
             
             if(ttex->missing){
                 tInfo->loaded = "MISSING";
+                qWarning() << "Missing Texture: " << tInfo->textureName;
                 continue;
             }
             if(ttex->error){
                 tInfo->loaded = "ERROR";
+                qWarning() << "Texture Error: " << tInfo->textureName;                
                 continue;
             }
             

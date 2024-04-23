@@ -95,7 +95,7 @@ void EngListWidget::fs(QString n){
     if(couplingType.currentIndex() == 0)
         cf = "";
     QString sf = searchBox.text();
-    qDebug() << ef <<" "<< cf <<" "<< sf;
+    // qDebug() << ef <<" "<< cf <<" "<< sf;
     fillEngList(ef, cf, sf);
 }
 

@@ -2144,8 +2144,8 @@ void Terrain::reloadLines() {
     // EFO set terrwidth from global, might be able to remove this and use the global
     terrWidth = Game::selectedTerrWidth;    
     
-    if(Game::debugOutput) qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
-    if(Game::debugOutput) qDebug() << "local TerrWidth: " << terrWidth;    
+    // if(Game::debugOutput) qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
+    // if(Game::debugOutput) qDebug() << "local TerrWidth: " << terrWidth;    
     
     int samples = *tfile->nsamples;
     int sampleSize = *tfile->sampleSize;

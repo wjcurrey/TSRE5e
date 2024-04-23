@@ -37,7 +37,7 @@ QVector<CarSpawnerObj::CarSpawnerList> CarSpawnerObj::carSpawnerList;
 void CarSpawnerObj::LoadCarSpawnerList(){
     QString path = Game::root + "/routes/" + Game::route + "/carspawn.dat";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << path;
+    if(Game::debugOutput) qDebug() << "CSO40: " << path;
     QFile *file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly))
         return;
@@ -51,7 +51,7 @@ void CarSpawnerObj::LoadCarSpawnerList(){
     
     path = Game::root + "/routes/" + Game::route + "/openrails/carspawn.dat";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << path;
+    if(Game::debugOutput) qDebug() << "CSO54: " << path;
     file = new QFile(path);
     if (!file->open(QIODevice::ReadOnly))
         return;
@@ -61,7 +61,7 @@ void CarSpawnerObj::LoadCarSpawnerList(){
     ParserX::NextLine(data);
     
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        if(Game::debugOutput) qDebug() << sh;
+        if(Game::debugOutput) qDebug() << "CSO64: " << sh;
         if (sh == ("carspawnerlist")) {
             parseCarList(data);
             ParserX::SkipToken(data);
@@ -77,10 +77,10 @@ void CarSpawnerObj::parseCarList(FileBuffer* data){
     carSpawnerList.push_back(CarSpawnerList());
     carSpawnerList.back().name = "DEFAULT";
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        if(Game::debugOutput) qDebug() << sh;
+        if(Game::debugOutput) qDebug() << "CSO80: " << sh;
         if (sh == ("listname")) {
             carSpawnerList.back().name = ParserX::GetString(data);
-            if(Game::debugOutput) qDebug() << carSpawnerList.back().name;
+            if(Game::debugOutput) qDebug() << "CSO83: " << carSpawnerList.back().name;
             ParserX::SkipToken(data);
             continue;
         }

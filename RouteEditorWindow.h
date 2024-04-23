@@ -49,6 +49,8 @@ public slots:
     void show();
     void createPaths();
     void reloadRef();
+    void reloadMkr();
+    void reloadSettings();
     void refreshErrors();
     void about();
     void terrainCamera(bool val);
@@ -81,7 +83,6 @@ public slots:
     void showToolsTerrain(bool show);
     void showToolsGeo(bool show);
     void showToolsActivity(bool show);
-
     
     void showTerrainTreeEditr();
     void showWorldObjPivotPointsEnabled(bool show);
@@ -101,6 +102,8 @@ signals:
     void exitNow();
     void sendMsg(QString text);
     void reloadRefFile();
+    void reloadMkrFile();    
+    void reloadMkrLists();
     void refreshErrorList();
    /// EFO Status updates
     void updStatus(QString statName, QString statValue);    
@@ -133,6 +136,8 @@ private:
     QAction *saveAction;
     QAction *createPathsAction;
     QAction *reloadRefAction;
+    QAction *reloadMkrAction;    
+    QAction *reloadSettingsAction;        
     QAction *closeAction;
     QAction *exitAction;
     QAction *rebuildAction;

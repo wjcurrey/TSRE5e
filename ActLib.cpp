@@ -48,7 +48,7 @@ int ActLib::GetAct(QString path, QString name){
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                if(Game::debugOutput) qDebug() <<"actid "<< pathid;
+                // if(Game::debugOutput) qDebug() <<"actid "<< pathid;
                 return (int)i.key();
             }
     }
@@ -67,11 +67,11 @@ int ActLib::AddAct(QString path, QString name, bool nowe) {
         if (i.value()->pathid.length() == pathid.length())
             if (i.value()->pathid == pathid) {
                 i.value()->ref++;
-                if(Game::debugOutput) qDebug() <<"actid "<< pathid;
+                // if(Game::debugOutput) qDebug() <<"actid "<< pathid;
                 return (int)i.key();
             }
     }
-    if(Game::debugOutput) qDebug() << "New " << jestact << " act: " << pathid;
+    // if(Game::debugOutput) qDebug() << "New " << jestact << " act: " << pathid;
     Act[jestact] = new Activity(pathid, path, name, nowe);
     if(!nowe)
         route[Act[jestact]->header->routeid].push_back(jestact);
@@ -222,7 +222,7 @@ int ActLib::LoadAllAct(QString gameRoot, bool gui){
     QString path;
     path = gameRoot + "/routes";
     QDir dir(path);
-    if(Game::debugOutput) qDebug() << path;
+    if(Game::debugOutput) qDebug() << "ActLib 225: " << path;
     dir.setFilter(QDir::Dirs);
     
     QStringList dirPaths;
