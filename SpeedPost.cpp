@@ -11,6 +11,7 @@
 #include "SpeedPost.h"
 #include "FileBuffer.h"
 #include "ParserX.h"
+#include "Game.h"
 #include <math.h>
 #include <QDebug>
 
@@ -125,7 +126,7 @@ void SpeedPost::set(QString sh, FileBuffer* data) {
         }
         return;
     }
-    qDebug() << "#speedpost_set - undefined token: " << sh;
+    if(Game::debugOutput) qDebug() << "#speedpost_set - undefined token: " << sh;
     return;
 }
 

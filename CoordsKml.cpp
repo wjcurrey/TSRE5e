@@ -24,15 +24,15 @@
 #include "GeoCoordinates.h"
 
 CoordsKml::CoordsKml(QString path) {
-    qDebug() << "kml!";
+    if(Game::debugOutput) qDebug() << "kml!";
     loaded = false;
 
     QFile file(path);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        qDebug() << "no file" << file.errorString();
+        if(Game::debugOutput) qDebug() << "no file" << file.errorString();
         return;
     }
-    qDebug() <<  "file";
+    if(Game::debugOutput) qDebug() <<  "file";
     QByteArray data = file.readAll();
     
     bool placemark = false;
@@ -173,6 +173,7 @@ CoordsKml::CoordsKml(QString path) {
         reader.readNext();
     }
     loaded = true;
+    
 }
 
 CoordsKml::~CoordsKml() {

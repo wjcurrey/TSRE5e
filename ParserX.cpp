@@ -453,6 +453,7 @@ float ParserX::GetNumber(FileBuffer* bufor){
 // Parsowanie liczby rzeczywistej
 //-----------------------------------
 float ParserX::GetNumberInside(FileBuffer* bufor, bool *ok){
+    
     unsigned short int b = 0;
     int j;
     float x, t;

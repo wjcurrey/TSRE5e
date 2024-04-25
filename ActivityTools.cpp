@@ -740,7 +740,7 @@ void ActivityTools::newActButtonEnabled(){
             continue;
         int id = ActLib::AddAct(pathid, name, true);
         ActLib::Act[id]->init(route->getTrk()->idName, "New Activity"+QString::number(i));
-        qDebug()<< ActLib::Act[id]->header->name;
+        if(Game::debugOutput) qDebug()<< ActLib::Act[id]->header->name;
         route->activityId.push_back(id);
         //actShow.addItem(ActLib::Act[id]->header->name, id);
         //actShow.setCurrentIndex(actShow.count()-1); 
@@ -848,7 +848,7 @@ void ActivityTools::actFailedSignalDeleteEnabled(){
         return;
 
     int i = failedSignals.currentIndex();
-        qDebug() << i << a->activityFailedSignal.size();
+        if(Game::debugOutput) qDebug() << i << a->activityFailedSignal.size();
     if(i >= a->activityFailedSignal.size())
         return;
     if(i < 0)

@@ -117,7 +117,7 @@ void FileBuffer::findToken(int id) {
 
 void FileBuffer::toUtf16(){
     if(isBOM()) return;
-    if(Game::debugOutput) qDebug() << "converting to UTF16";
+    // if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "converting to UTF16";
     // 
     unsigned char * newData = new unsigned char[length * 2];
     for(int i = 0; i < length; i++){
@@ -142,15 +142,15 @@ bool FileBuffer::insertFile(QString incPath, QString alternativePath, QString* l
             incPath = alternativePath;
             file.setFileName(incPath);
             if (!file.open(QIODevice::ReadOnly)){
-                qDebug() << incPath << "not exist";
+                // if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << incPath << "not exist";
                 return false;
             }
         } else {
-            qDebug() << incPath << "not exist";
+            // if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << incPath << "not exist";
             return false;
         }
     }
-    if(Game::debugOutput) qDebug() << incPath;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Include: \t" << incPath;
     if(loaded != NULL){
         *loaded = incPath;
     }

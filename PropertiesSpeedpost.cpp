@@ -12,6 +12,7 @@
 #include "SpeedpostObj.h"
 #include "TRitem.h"
 #include "Game.h"
+#include "GLMatrix.h"
 
 PropertiesSpeedpost::PropertiesSpeedpost() {
     
@@ -168,7 +169,7 @@ void PropertiesSpeedpost::numberEnabled(QString val){
 
 void PropertiesSpeedpost::numberDotEnabled(int val){
     if(sobj == NULL) return;
-    qDebug()<<"aaa";
+    if(Game::debugOutput) qDebug()<<"aaa";
     Undo::StateBegin();
     Undo::PushGameObjData(worldObj);
     Undo::PushTrackDB(Game::trackDB, false);
@@ -181,7 +182,7 @@ void PropertiesSpeedpost::numberDotEnabled(int val){
 
 void PropertiesSpeedpost::chCustomNumberEnabled(int val){
     if(sobj == NULL) return;
-    qDebug()<<"aaa";
+    if(Game::debugOutput) qDebug()<<"aaa";
     Undo::StateBegin();
     Undo::PushGameObjData(worldObj);
     Undo::PushTrackDB(Game::trackDB, false);
@@ -201,7 +202,7 @@ void PropertiesSpeedpost::chCustomNumberEnabled(int val){
 
 void PropertiesSpeedpost::chCustomSpeedEnabled(int val){
     if(sobj == NULL) return;
-    qDebug()<<"aaa";
+    if(Game::debugOutput) qDebug()<<"aaa";
     Undo::StateBegin();
     Undo::PushGameObjData(worldObj);
     Undo::PushTrackDB(Game::trackDB, false);
@@ -243,6 +244,31 @@ void PropertiesSpeedpost::flipSignal(){
     Undo::PushGameObjData(worldObj);
     Undo::PushTrackDB(Game::trackDB);
     sobj->flip(chFlipShape.isChecked());
+    
+    if(Game::sigOffset)
+    {       
+            if(Game::debugOutput)  qDebug() << "Filename: " << sobj->fileName.toLower() ;
+
+            if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":" <<"1:P "<<sobj->firstPosition[0]<<" "<<sobj->firstPosition[1]<<" "<<sobj->firstPosition[2]<<" Q" <<sobj->qDirection[1]<<" "<<sobj->qDirection[3] ;            
+            float thisOffset = 0;
+            if(sobj->fileName.toLower().contains("gantry") == false) thisOffset = Game::sigOffset;
+                
+            sobj->position[0] = sobj->firstPosition[0];   /// (reset to the TrItemObj coordinates)
+            // sobj->position[1] = sobj->firstPosition[1];
+            sobj->position[2] = sobj->firstPosition[2];
+            float pos[3];
+            
+            pos[0] = thisOffset;
+            pos[1] = 0;
+            pos[2] = 0;
+            Vec3::transformQuat((float*)pos, (float*)pos, (float*)sobj->qDirection);
+            sobj->translate(pos[0], pos[1], pos[2]);
+            sobj->modified = true;
+            sobj->setMartix(); 
+            if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":" <<"2:P "<<sobj->position[0]<<" "<<sobj->position[1]<<" "<<sobj->position[2]<<" Q" <<sobj->qDirection[1]<<" "<<sobj->qDirection[3] ;                        
+    }
+
+    
     Undo::StateEnd();
 }
 

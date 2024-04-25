@@ -43,14 +43,14 @@ bool TSectionDAT::loadGlobal() {
         file->close();
         file = new QFile(path);
         if (!file->open(QIODevice::ReadOnly)){
-            qDebug() << path << "not exist";
+            if(Game::debugOutput) qDebug() << path << "not exist";
             return false;
         } else {
-            qDebug() << path;
+            if(Game::debugOutput) qDebug() << path;
             incpath = Game::root + "/global";
         }
     } else {
-        qDebug() << orpath;
+        if(Game::debugOutput) qDebug() << orpath;
         incpath = Game::root + "/routes/" + Game::route + "/openrails";
     }
 
@@ -164,7 +164,7 @@ bool TSectionDAT::loadGlobal() {
                         } else if (sh == ("manualjunctionshape")) {
                             shp->manualjunctionshape = true;
                         } else {
-                            qDebug() << sh;
+                            if(Game::debugOutput) qDebug() << sh;
                         }
                         ParserX::SkipToken(data);
                     }
@@ -191,7 +191,7 @@ bool TSectionDAT::loadGlobal() {
         ParserX::SkipToken(data);
     }
 
-    qDebug() << "TsectionDAT: " << tsectionMaxIdx << " " << tsectionShapes;
+    if(Game::debugOutput) qDebug() << "TsectionDAT: " << tsectionMaxIdx << " " << tsectionShapes;
     routeMaxIdx = tsectionMaxIdx;
     routeShapes = tsectionShapes;
     return true;
@@ -199,7 +199,7 @@ bool TSectionDAT::loadGlobal() {
 
 void TSectionDAT::mergeTSection(TSectionDAT* second, QHash<unsigned int,unsigned int>& fixedSectionIds, QHash<unsigned int,unsigned int>& fixedShapeIds){
     if (second->routeMaxIdx < 3) return;
-    qDebug() <<"1";
+    if(Game::debugOutput) qDebug() <<"1";
     int routeCount = routeMaxIdx;
     for (int i = second->tsectionMaxIdx; i < second->routeMaxIdx; i++) {
         if (second->sekcja[i] == NULL) 
@@ -221,7 +221,7 @@ void TSectionDAT::mergeTSection(TSectionDAT* second, QHash<unsigned int,unsigned
             fixedSectionIds[i] = routeMaxIdx++;
         }
     }
-    qDebug() <<"2";
+    if(Game::debugOutput) qDebug() <<"2";
     for (int i = second->tsectionShapes; i < second->routeShapes; i++) {
         if (second->shape[i] == NULL)
             continue;
@@ -244,7 +244,7 @@ bool TSectionDAT::saveRoute() {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/tsection.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     QFile file(path);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
@@ -290,7 +290,7 @@ bool TSectionDAT::loadRoute(bool autoFix) {
     QString path;
     path = Game::root + "/routes/" + Game::route + "/tsection.dat";
     path.replace("//", "/");
-    qDebug() << path;
+    if(Game::debugOutput)  qDebug() << path;
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return false;
@@ -395,7 +395,7 @@ void TSectionDAT::loadRouteUtf16Data(FileBuffer* data, bool autoFix){
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#RouteTsectionDat - undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#RouteTsectionDat - undefined token " << sh;
         ParserX::SkipToken(data);
     }
 }

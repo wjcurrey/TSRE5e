@@ -95,7 +95,7 @@ CELoadWindow::CELoadWindow() {
     //                  this, SLOT(setNewRoute()));
     
     if(Game::checkCERoot(Game::root)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ <<"ok";
         load->show();
         exit->setFixedWidth(100);
         browse->setText(Game::root);
@@ -121,7 +121,7 @@ void CELoadWindow::dirSelected(){
     //nowa->hide();
     exit->setFixedWidth(600);
     if(Game::checkCERoot(directory)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__<<"ok";
         load->show();
         exit->setFixedWidth(100);
         browse->setStyleSheet(QString("color: ")+Game::StyleGreenText);
@@ -144,7 +144,7 @@ void CELoadWindow::handleBrowseButton(){
     if (result)
     {
         directory = fd->selectedFiles()[0];
-        qDebug()<<directory;
+        if(Game::debugOutput) qDebug()<< __FILE__ << __LINE__<<directory;
     }
     //Game::root = directory;
     browse->setText(directory);
@@ -154,7 +154,7 @@ void CELoadWindow::handleBrowseButton(){
     //nowa->hide();
     exit->setFixedWidth(600);
     if(Game::checkCERoot(directory)){
-        qDebug()<<"ok";
+        if(Game::debugOutput) qDebug()<< __FILE__ << __LINE__<<"ok";
         load->show();
    
         exit->setFixedWidth(100);
@@ -188,6 +188,35 @@ void CELoadWindow::handleBrowseButton(){
 void CELoadWindow::routeLoad(){
     ConEditorWindow* cwindow = new ConEditorWindow();
     cwindow->resize(1280, 800);
+    
+    
+  //// EFO Try to keep window on main window:
+        const QScreen* primaryScreen = QApplication::primaryScreen();
+        const QSize windowSize = cwindow->size();
+   
+        // Calculate the centered position based on both monitors
+        const QRect primaryGeometry = primaryScreen->geometry();
+        const QPoint centeredPos((primaryGeometry.width() - windowSize.width()) / 2,
+                                 (primaryGeometry.height() - windowSize.height()) / 2);
+        
+        if(Game::debugOutput) qDebug() << "Primary: " << primaryGeometry.width() << "/" << primaryGeometry.height();
+        if(Game::debugOutput) qDebug() << "Window: " << windowSize.width() << "/" << windowSize.height();
+        
+        if(Game::debugOutput) qDebug() << "Window   Orig: " << cwindow->pos() ;
+        
+        // Ensure the window stays within the primary monitor bounds
+        cwindow->move(centeredPos.x() >= 0 ? centeredPos.x() : 0,
+                    centeredPos.y() >= 0 ? centeredPos.y() : 0);
+ 
+        if(Game::debugOutput) qDebug() << "Window Center: " << cwindow->pos() ;        
+            
+        QStringList winPos = Game::mainPos.split(","); 
+        if(winPos.count() > 1) cwindow->move( winPos[0].trimmed().toInt(), winPos[1].trimmed().toInt());
+        
+        if(Game::debugOutput) qDebug() << "Window  Final: " << cwindow->pos() ;        
+    
+    
+    
     this->hide();
     cwindow->show();
 }
@@ -212,7 +241,7 @@ void CELoadWindow::listRoutes(){
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << path;
 
     QTextStream in(&file);
     QString line;

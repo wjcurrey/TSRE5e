@@ -193,7 +193,7 @@ void PropertiesForest::showObj(GameObj* obj){
     ForestObj* tobj = (ForestObj*)obj;
         
     this->infoLabel->setText("Object: "+forestObj->type);
-    this->fileName.setText(tobj->treeTexture);
+    this->fileName.setText(tobj->treeTexture);    /// Forest Texture
         
     this->tX.setText(QString::number(forestObj->x, 10));
     this->tY.setText(QString::number(-forestObj->y, 10));

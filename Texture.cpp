@@ -23,14 +23,21 @@ Texture::Texture() {
 
 Texture::Texture(QString pathid) {
     this->pathid = pathid;
+    
+ //       pathid = evaluatePathId();  
+//
+  
+    
     this->hashid.push_back(pathid);
     //temp fix for dds/ace loading
     // Openrails uses .dds textures instead of .ace
     QString tType = pathid.toLower().split(".").last();
+    /*   /// EFO there's no good reason to swap DDS and ACE files... use what's defined
     if(tType == "dds"){
-        hashid.push_back(pathid.left(pathid.length() - 3)+"ace");
-         qDebug() << " dds found: " << pathid.toLower();
+     //   hashid.push_back(pathid.left(pathid.length() - 3)+"ace");   /// EFO ehy is this overriding to ACE???
+        if(Game::debugOutput)    qDebug() << " dds found: " << pathid.toLower();
     }
+      */
 }
     
 Texture::Texture(int x, int y, int bpp, Brush* brush){
@@ -115,7 +122,7 @@ unsigned char * Texture::getImageData(int width, int height){
     float scalew = (float)this->width/width;
     float scaleh = (float)this->height/height;
     
-    qDebug() << this->width <<" "<< this->height;
+    qDebug() << "Texture125:" << this->width <<" "<< this->height;
     
     int lineWidth = (this->width*bytesPerPixel);
     //if( lineWidth%4 !=0) 
@@ -156,9 +163,9 @@ void Texture::advancedCrop(float* texCoords, int w, int h){
     texCoords2[5] = texCoords[5]*16.0;//*width;
     texCoords2[6] = texCoords[6]*16.0;//*height;
     
-    qDebug() << width << height << bytesPerPixel << "--" << w << h;
-    qDebug() << texCoords2[1] << texCoords2[2] << texCoords2[3] << texCoords2[4] << texCoords2[5] << texCoords2[6];
-    qDebug() << texCoords[1] << texCoords[2] << texCoords[3] << texCoords[4] << texCoords[5] << texCoords[6];
+    qDebug() << "Texture166:" << width << height << bytesPerPixel << "--" << w << h;
+    qDebug() << "Texture167:"<< texCoords2[1] << texCoords2[2] << texCoords2[3] << texCoords2[4] << texCoords2[5] << texCoords2[6];
+    qDebug() << "Texture168:"<< texCoords[1] << texCoords[2] << texCoords[3] << texCoords[4] << texCoords[5] << texCoords[6];
     
     unsigned char* newData = new unsigned char[w*h*this->bytesPerPixel];    
     
@@ -201,7 +208,7 @@ void Texture::crop(float x1, float y1, float x2, float y2){
     if(!editable) 
         setEditable();
 
-    qDebug() << x1 <<" "<<y1<<" "<<x2<<" "<<y2;
+    qDebug() << "Texture211:" << x1 <<" "<<y1<<" "<<x2<<" "<<y2;
 
     if(x1 < x2 && y1 < y2)
         return;   
@@ -398,5 +405,20 @@ void Texture::delVBO() {
     missing = false;
     error = false;
     //gl.glDeleteTextures(1, tex, 0);
+}
+
+QString Texture::evaluatePathId() {   //// EFO fixing relative paths which have folders between Trainset and /../    
+    int trainsetPos = pathid.indexOf("trainset");
+    int parentDirPos = pathid.indexOf("/../");
+    if (trainsetPos != -1 && parentDirPos != -1 && trainsetPos < parentDirPos) {        
+        if(Game::debugOutput) qDebug() << "Before APF:" << pathid;
+        // Replace everything between "trainset" and "/../" with empty string
+        pathid = pathid.mid(0, trainsetPos+8) + pathid.mid(parentDirPos + 3);                
+        if(Game::debugOutput) qDebug() << "After AFP: " << pathid;
+        return pathid;        
+    } else {
+        // Pathid doesn't contain the specific pattern or "trainset" comes after "/../"
+        return pathid;
+    }
 }
 

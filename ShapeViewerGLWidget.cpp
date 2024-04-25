@@ -238,9 +238,9 @@ void ShapeViewerGLWidget::paintGL() {
                 max = fabs(sFile->bound[2]-sFile->bound[3]);
             if(fabs(sFile->bound[4]-sFile->bound[5]) > max)
                 max = fabs(sFile->bound[4]-sFile->bound[5]);
-            qDebug() << fabs(sFile->bound[0]-sFile->bound[1]);
-            qDebug() << fabs(sFile->bound[2]-sFile->bound[3]);
-            qDebug() << fabs(sFile->bound[4]-sFile->bound[5]);
+            //qDebug() << fabs(sFile->bound[0]-sFile->bound[1]);
+            //qDebug() << fabs(sFile->bound[2]-sFile->bound[3]);
+            //qDebug() << fabs(sFile->bound[4]-sFile->bound[5]);
             camera->setPos(-max*1.2,fabs(sFile->bound[2]-sFile->bound[3])/2.0,0.0);
         }
     }
@@ -262,7 +262,7 @@ void ShapeViewerGLWidget::paintGL() {
         int realy = viewport[3] - (int) y - 1;
         glReadPixels(x, realy, 1, 1, GL_RGBA, GL_FLOAT, &winZ);
         
-        qDebug() << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
+        //qDebug() << winZ[0] << " " << winZ[1] << " " << winZ[2] << " " << winZ[3];
         //int colorHash = (int)(winZ[0]*255)*256*256 + (int)(winZ[1]*255)*256 + (int)(winZ[2]*255);
         //qDebug() << colorHash;
         int isSelection = (int)(winZ[0]*255);
@@ -427,14 +427,16 @@ void ShapeViewerGLWidget::resetRot(){
 
 
 void ShapeViewerGLWidget::showEng(Eng *e){
-    eng = e;
+    // if(Game::debugOutput) qDebug() << "SVGLW 429: engObj " ;
+    eng = e;    
     con = NULL;
     renderItem = 2;
 }
 
 void ShapeViewerGLWidget::showEng(QString path, QString name){
+    // if(Game::debugOutput) qDebug() << "SVGLW 436:" << path << " " << name;
     int idx = Game::currentEngLib->addEng(path, name);
-    qDebug() << "eng id "<< idx;
+    // if(Game::debugOutput) qDebug() << "eng id "<< idx;
     eng = Game::currentEngLib->eng[idx];
     con = NULL;
     renderItem = 2;
@@ -442,7 +444,7 @@ void ShapeViewerGLWidget::showEng(QString path, QString name){
 
 void ShapeViewerGLWidget::showEngSet(int id){
     Game::currentShapeLib = currentShapeLib;
-    qDebug() << "eng set id "<< id;
+    // qDebug() << "eng set id "<< id;
     con = ConLib::con[id];
     con->setTextColor(backgroundGlColor);
     eng = NULL;
@@ -507,7 +509,7 @@ void ShapeViewerGLWidget::showCon(int id){
         renderItem = 3;
         return;
     }
-    qDebug() << "con id "<< id;
+    // qDebug() << "con id "<< id;
     con = ConLib::con[id];
     con->setTextColor(backgroundGlColor);
     eng = NULL;
@@ -536,7 +538,7 @@ void ShapeViewerGLWidget::showConSimple(int id){
         renderItem = 5;
         return;
     }
-    qDebug() << "con id "<< id;
+    // qDebug() << "con id "<< id;
     con = ConLib::con[id];
     con->setTextColor(backgroundGlColor);
     eng = NULL;
@@ -544,7 +546,7 @@ void ShapeViewerGLWidget::showConSimple(int id){
 }
 
 void ShapeViewerGLWidget::showCon(int aid, int id){
-    qDebug() << "con aid "<< aid<< " con id "<< id;
+    // qDebug() << "con aid "<< aid<< " con id "<< id;
     con = ActLib::Act[aid]->activityObjects[id]->con;
     con->setTextColor(backgroundGlColor);
     renderItem = 3;

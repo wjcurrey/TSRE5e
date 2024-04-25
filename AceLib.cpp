@@ -37,7 +37,7 @@ void AceLib::run() {
     if (!file.open(QIODevice::ReadOnly)){
         texture->missing = true;
         if(!IsThread)
-            qDebug() << "ACE: not exist "<<texture->pathid;
+            if(Game::debugOutput) qDebug() << "ACE: not exist "<<texture->pathid;
         //return false;
         return;
     }

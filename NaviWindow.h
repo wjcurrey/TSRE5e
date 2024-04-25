@@ -35,6 +35,7 @@ public slots:
     void mkrList(QMap<QString, Coords*> list);
     void mkrFilesSelected(QString item);
     void mkrListSelected(QString item);
+    void reloadMkrLists();
 
     void recStatus(QString statName, QString statVal );       
     
@@ -63,6 +64,7 @@ private:
     QLineEdit zBox;
     QLineEdit pxBox;
     QLineEdit pyBox;
+    QLineEdit pyBoxx;    
     QLineEdit pzBox;
     QLabel tileInfo;
     QString lastEdit = "";

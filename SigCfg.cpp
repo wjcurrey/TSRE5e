@@ -64,7 +64,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "sigcfg lighttextures - undefined token: "<<sh;
+                if(Game::debugOutput) qDebug() << "sigcfg lighttextures - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -95,7 +95,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "sigcfg lightstab - undefined token: "<<sh;
+                if(Game::debugOutput) qDebug() << "sigcfg lightstab - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -127,7 +127,7 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "sigcfg signaltypes - undefined token: "<<sh;
+                if(Game::debugOutput) qDebug() << "sigcfg signaltypes - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
@@ -167,14 +167,14 @@ SigCfg::SigCfg() {
                     ParserX::SkipToken(bufor);
                     continue;
                 }
-                qDebug() << "sigcfg signalshapes - undefined token: "<<sh;
+                if(Game::debugOutput) qDebug() << "sigcfg signalshapes - undefined token: "<<sh;
                 ParserX::SkipToken(bufor);
                 continue;
             }
             ParserX::SkipToken(bufor);
             continue;
         }
-        qDebug() << "sigcfg sigcfg.dat - undefined token: "<<sh;
+        if(Game::debugOutput) qDebug() << "sigcfg sigcfg.dat - undefined token: "<<sh;
         ParserX::SkipToken(bufor);
         continue;
     }

@@ -124,10 +124,10 @@ void Consist::load(){
     int i;
     QString sh;
     pathid.replace("//","/");
-    if(Game::debugOutput) qDebug() << pathid;
+    // if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)){
-        qDebug() << pathid << "not exist";
+        if(Game::debugOutput) qDebug() << pathid << "not exist";
         return;
     }
 
@@ -145,7 +145,7 @@ void Consist::load(){
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#Consist - undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#Consist - undefined token " << sh;
         ParserX::SkipToken(data);
     }
     
@@ -280,7 +280,7 @@ bool Consist::load(FileBuffer* data){
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#train - undefined token " << sh;
+        if(Game::debugOutput) qDebug() << "#train - undefined token " << sh;
         ParserX::SkipToken(data);
     }
     return ok;
@@ -730,7 +730,7 @@ void Consist::initOnTrack(float *posTXZ, int direction, QMap<int, int> *junction
     
     int ok = Game::trackDB->findNearestPositionOnTDB(posT, pos, NULL, tpos);
     if(ok < 0) {
-        qDebug() << "coninit fail";
+        if(Game::debugOutput) qDebug() << "coninit fail";
         return;
     }
     if(Game::debugOutput) qDebug() << "coninit init" << tpos[0] << tpos[1];
@@ -868,13 +868,13 @@ void Consist::save(){
     QString spath;
     spath = path + "/" + name;
     spath.replace("//", "/");
-    qDebug() << "Consist save: " << spath;
+    if(Game::debugOutput) qDebug() << "Consist save: " << spath;
     QFile file(spath);
     
     
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     if(!file.isOpen()) {
-        qDebug() << "con file write error. file not open " << spath;
+        if(Game::debugOutput) qDebug() << "con file write error. file not open " << spath;
         return;
     }
     QTextStream out(&file);
@@ -907,7 +907,7 @@ void Consist::save(QString woff, QTextStream* out){
     for(int i = 0; i < this->engItems.size(); i++){
         
         if(Game::debugOutput)
-         qDebug() << engItems[i].type                 
+         if(Game::debugOutput) qDebug() << engItems[i].type                 
                   << " ename: " << engItems[i].ename 
                   << " epath: " << engItems[i].epath 
                   << " eot: " << engItems[i].eot;

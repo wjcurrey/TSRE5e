@@ -19,13 +19,14 @@
 #include "Route.h"
 #include "Camera.h"
 
+
 CameraFree::CameraFree(float* pt) {
     pozT = pt;
     
     up[0] = 0;
     up[1] = 1;
     up[2] = 0;
-    playerRot[0] = 0.0;
+    playerRot[0] = 3.14;  // (face north, not south!)
     playerRot[1] = 0.0;
     playerPos[0] = 0;
     playerPos[1] = 10;
@@ -224,6 +225,13 @@ void CameraFree::moveForward(float fps) {
 
     //playerPos[2] = playerPos[2] + przesz * (float) cos(playerRot[0]);
     // playerPos[0] = playerPos[0] + przesz * (float) sin(playerRot[0]);
+    
+    //  2.0 * std::atan2(w, z);  
+    
+    
+    
+   
+    
     check_coords();
 }
 
@@ -410,6 +418,8 @@ void CameraFree::keyDown(QKeyEvent * e) {
             break;
         case Qt::Key_Period:
             lockYaxis = !lockYaxis;
+            Game::lockCamera = !Game::lockCamera;
+            // if(lockYaxis == true) emit updStatus(QString("camera"),QString("Camera Locked")); else emit updStatus(QString("camera"),QString("Camera Unlocked"));
             break;
         default:
             break;

@@ -25,7 +25,9 @@ public:
     
 public slots:
     void sizeEnabled(QString val);
-    
+    void editFileNameEnabled();
+    void reloadEnabled();
+
 private:
     TransferObj *transferObj;
     QPixmap* texPreview;

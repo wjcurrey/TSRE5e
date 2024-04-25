@@ -107,6 +107,7 @@ public slots:
     void placeToolStickTerrain();
     void placeToolStickAll();
     void reloadRefFile();
+    void reloadMkrFiles();
     void setCameraObject(GameObj* obj);
     void setMoveStep(float val);
     void paintToolObj();
@@ -119,7 +120,11 @@ public slots:
     void pickObjForPlacement();
     void pickObjRotForPlacement();
     void pickObjRotElevForPlacement();
-    
+    void pickObjRotForCamera();
+    void pickObjRotForCameraFlip();
+    void resetCamN(); void resetCamS(); void resetCamE(); void resetCamW(); void resetCamZ(); 
+    void tangentOrigin(); void tangentTarget(); void tangentMath(); void TangentApplyRot();
+
     void initRoute2();
      
 signals:
@@ -136,6 +141,7 @@ signals:
     void flexData(int x, int z, float* p);
     void mkrList(QMap<QString, Coords*> list);
     void refreshObjLists();
+    void reloadMkrLists();
     
     void sendMsg(QString name);
     void sendMsg(QString name, bool val);
@@ -170,6 +176,7 @@ private:
     QBasicTimer timer;
     unsigned long long int lastTime;
     unsigned long long int timeNow;
+    unsigned long long int timeSaved;
     bool m_core;
     int m_xRot;
     int m_yRot;
@@ -190,6 +197,8 @@ private:
     bool selection = false;
     int mousex, mousey;
     GameObj* selectedObj = NULL;
+    GameObj* StartObject = NULL;
+    GameObj* EndObject = NULL;    
     GameObj* lastSelectedObj = NULL;
     WorldObj* copyPasteObj = NULL;
     GroupObj* groupObj = NULL;
@@ -246,7 +255,6 @@ private:
     
     GuiGlCompass * compass = NULL;
     OglObj * compassPointer = NULL;
-    
     
     
 };

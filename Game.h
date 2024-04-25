@@ -206,6 +206,21 @@ public:
     static int pyramid;
     static int maxAutoPlacement;
     static int imageMapsZoomOffset;
+    static float railProfile[];
+    static float convertHeight;
+    static QString convertUnit;
+    static int markerHeight;
+    static int markerText;
+    static float lastElev;
+    static float sigOffset;
+    static QStringList markerFiles;
+    static bool reload;
+    static QString MapAPIKey;    
+    static bool imageSubstitution;
+    static bool imageUpgrade;
+    static int convertThreshold;
+    static int convertDivisor;
+
 private:
     //static RouteEditorWindow* window;
     //static LoadWindow* loadWindow;

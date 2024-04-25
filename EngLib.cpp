@@ -52,6 +52,7 @@ int EngLib::addEng(QString path, QString name) {
     //qDebug() << "Nowy " << jesteng << " eng: " << pathid;
 
     eng[jesteng] = new Eng(pathid, path, name);
+    // qDebug() << "EngLib 49 : "<< pathid << " ~ emass: " << eng[jesteng]->mass ;
 
     return jesteng++;
 }
@@ -90,7 +91,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag"<<"*.eot");
     if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
-        qDebug() << "Path not exist" << path;
+        if(Game::debugOutput) qDebug() << "Path not exist" << path;
     dir.setFilter(QDir::Dirs);
     if(Game::debugOutput) qDebug() << dir.count() <<" dirs";
     unsigned long long timeNow = QDateTime::currentMSecsSinceEpoch();
@@ -114,14 +115,14 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     trainDir.setFilter(QDir::Files);
     if(Game::debugOutput) qDebug() << path2;
     if(!dir2.exists())
-        qDebug() << "Path not exist" << path2;
+        if(Game::debugOutput) qDebug() << "Path not exist" << path2;
     dir2.setFilter(QDir::Dirs);
     if(Game::debugOutput) qDebug() << dir2.count() <<" dirs2";
     foreach(QString dirFile, dir2.entryList()){
         //qDebug() << dirFile;
         trainDir.setPath(path2+dirFile);
         foreach(QString engfile, trainDir.entryList()){
-            qDebug() << path2 << dirFile <<"/"<< engfile;
+            if(Game::debugOutput) qDebug() << path2 << dirFile <<"/"<< engfile;
             //addEng(path+dirFile,engfile);
             dirPaths.push_back(path2+dirFile);
             engPaths.push_back(engfile);
@@ -143,7 +144,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
             QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
         }
     }
-    qDebug() << "loaded" << (QDateTime::currentMSecsSinceEpoch() - timeNow)/1000<< "s";
+    if(Game::debugOutput) qDebug() << "loaded" << (QDateTime::currentMSecsSinceEpoch() - timeNow)/1000<< "s";
     delete progress;
     return 0;
 }

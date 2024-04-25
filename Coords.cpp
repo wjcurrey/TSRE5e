@@ -32,7 +32,7 @@ Coords::Coords() {
 }
 
 Coords::Coords(QString path) {
-    qDebug() << "undefined coords file";
+    if(Game::debugOutput) qDebug() << "undefined coords file";
     loaded = false;
 }
 
@@ -44,38 +44,44 @@ void Coords::render(GLUU* gluu, float * playerT, float* playerW, float playerRot
 
     gluu->setMatrixUniforms();
 
+    /// create the stick objects
     if (simpleMarkerObjP == NULL) {
-        simpleMarkerObjP = new OglObj();
+        simpleMarkerObjP = new OglObj(); 
         simpleMarkerObjL = new OglObj();
         float *punkty = new float[3 * 2];
         int ptr = 0;
         int i = 0;
 
+        /// stick base
         punkty[ptr++] = 0;
         punkty[ptr++] = 0;
         punkty[ptr++] = 0;
+        /// stick top
         punkty[ptr++] = 0;
-        punkty[ptr++] = 30;
+        punkty[ptr++] = Game::markerHeight;   /// EFO 
         punkty[ptr++] = 0;
 
-        simpleMarkerObjP->setMaterial(1.0, 0.0, 1.0);
-        simpleMarkerObjP->init(punkty, ptr, RenderItem::V, GL_LINES);
-        simpleMarkerObjL->setMaterial(0.0, 1.0, 0.0);
+        simpleMarkerObjP->setMaterial(1.0, 0.0, 1.0);  /// purple
+        simpleMarkerObjP->init(punkty, ptr, RenderItem::V, GL_LINES);        
+        simpleMarkerObjL->setMaterial(0.0, 1.0, 0.0);  /// green
         simpleMarkerObjL->init(punkty, ptr, RenderItem::V, GL_LINES);
         delete[] punkty;
     }
     
+    /// loop thru markerList one item at a time
     TextObj* txt;
     for (int i = 0; i < markerList.size(); i++ ) {
+         /// if MarkerLines are active
         if(Game::markerLines){
             if(markerList[i].line3d == NULL){
                 markerList[i].line3d = new OglObj();
                 markerList[i].line3d->setLineWidth(2);
-                qDebug() << markerList[i].style;
+                if(Game::debugOutput) qDebug() << "coords80: " << markerList[i].style;
                 QColor color(style[markerList[i].style].color);
                 markerList[i].line3d->setMaterial(color.redF(),color.greenF(),color.blueF());
                 //markerList[i].line3d->setMaterial(((float)((i*10)))/255.0,1,1);
             }
+            /// if line not loaded
             if(!markerList[i].line3d->loaded){
                 //qDebug() << markerList[i].x.size();
                 float *punkty = new float[markerList[i].x.size()*12]; 
@@ -101,15 +107,17 @@ void Coords::render(GLUU* gluu, float * playerT, float* playerW, float playerRot
             markerList[i].line3d->render();
             gluu->mvPopMatrix();
             /////
-        } else {
+        } else 
+        /// MarkerLines are not active
+           {
             for(int j = 0; j < markerList[i].tileX.size(); j++ ){
                 if (fabs(markerList[i].tileX[j] - playerT[0]) + fabs(-markerList[i].tileZ[j] - playerT[1]) > 2) {
                     continue;
                 }
                 gluu->mvPushMatrix();
                 //if(pos == NULL) return;
-                float h = Game::terrainLib->getHeight(markerList[i].tileX[j], -markerList[i].tileZ[j], markerList[i].x[j], markerList[i].z[j]);
-                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, markerList[i].x[j] + 2048 * (markerList[i].tileX[j] - playerT[0]), h, markerList[i].z[j] + 2048 * (-markerList[i].tileZ[j] - playerT[1]));
+                float h = Game::terrainLib->getHeight(markerList[i].tileX[j], -markerList[i].tileZ[j], markerList[i].x[j], markerList[i].z[j]);   //// EFO removed - to markerList[i].z[j]
+                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, markerList[i].x[j] + 2048 * (markerList[i].tileX[j] - playerT[0]), h, markerList[i].z[j] + 2048 * (-markerList[i].tileZ[j] - playerT[1]));   //// EFO removed - to markerList[i].z[j]
                 //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 2048*(this->trItemRData[3] - playerT[0] ), this->trItemRData[1]+2, -this->trItemRData[2] + 2048*(-this->trItemRData[4] - playerT[1]));
                 //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 0, this->trItemRData[1]+0, -this->trItemRData[2] + 0);
                 gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
@@ -117,13 +125,14 @@ void Coords::render(GLUU* gluu, float * playerT, float* playerW, float playerRot
                     simpleMarkerObjP->render();
                 else
                     simpleMarkerObjL->render();
-                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, 0, 30, 0);
+                Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, 0, Game::markerHeight, 0);
                 gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
                 txt = nameGl[markerList[i].name.toStdString()];
                 if(txt == NULL){
-                    txt = new TextObj(markerList[i].name, 16, 1.0);
+                    txt = new TextObj(markerList[i].name, 16, Game::markerText);
                     txt->setColor(0,0,0);
                     nameGl[markerList[i].name.toStdString()] = txt;
+                    // qDebug() << "coords136 rendering marker: " << markerList[i].name << " : " << playerRot;
                 } 
                 txt->render(playerRot);
                 gluu->mvPopMatrix();
@@ -173,7 +182,7 @@ void Coords::getTileList(QMap<int, QPair<int, int>*> &tileList, int radius, int 
     QMapIterator<int, QPair<int, int>*> i(tileList2);
     int x, z;
     radius *= step;
-    qDebug() << "radius" << radius;
+    if(Game::debugOutput) qDebug() << "coords186 radius" << radius;
     while (i.hasNext()) {
         i.next();
         if(i.value() == NULL)

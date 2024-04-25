@@ -198,7 +198,7 @@ void MapDataUrlImage::autoTimerGet(){
     for(int i = 0; i < requests.size(); i++){
         if(requests[i].complete == true)
             continue;
-        QString imageMapsUrl = Game::imageMapsUrl;
+        QString imageMapsUrl = Game::imageMapsUrl + Game::MapAPIKey;
         imageMapsUrl.replace("{lat}", QString::number(requests[i].lat));
         imageMapsUrl.replace("{lon}", QString::number(requests[i].lon));
         imageMapsUrl.replace("{zoom}", QString::number(requests[i].zoom + Game::imageMapsZoomOffset));  /// EFO Adjustment for MapBox

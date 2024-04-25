@@ -54,10 +54,10 @@ bool Path::isModified(){
 void Path::load(){
     QString sh;
     pathid.replace("//", "/");
-    qDebug() << pathid;
+    // if(Game::debugOutput) qDebug() << pathid;
     QFile *file = new QFile(pathid);
     if (!file->open(QIODevice::ReadOnly)) {
-        qDebug() << pathid << "not exist";
+        if(Game::debugOutput) qDebug() << pathid << "not exist";
         return;
     }
 
@@ -85,7 +85,7 @@ void Path::load(){
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#TrackPDPs - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#TrackPDPs - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
@@ -129,19 +129,19 @@ void Path::load(){
                             ParserX::SkipToken(data);
                             continue;
                         }
-                        qDebug() << "#TrPathNodes - undefined token: " << sh;
+                        if(Game::debugOutput) qDebug() << "#TrPathNodes - undefined token: " << sh;
                         ParserX::SkipToken(data);
                     }
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "#TrackPath - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#TrackPath - undefined token: " << sh;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
             continue;
         }
-        qDebug() << "#PAT - undefined token: " << sh;
+        if(Game::debugOutput) qDebug() << "#PAT - undefined token: " << sh;
         ParserX::SkipToken(data);
     }
     
@@ -231,7 +231,7 @@ void Path::init3dShapes(bool initShapes){
     float distanceDownPath = 0;
     for(int i = 0; i < node.size(); i++){
         if(node[i].flag1 == 1){
-            qDebug() << "point";
+            if(Game::debugOutput) qDebug() << "point";
             posT[0] = node[i].tilex;
             posT[1] = node[i].tilez;
             Vec3::copy(posW, node[i].pos);
@@ -267,12 +267,12 @@ void Path::init3dShapes(bool initShapes){
             lastNodeId = nodeId1;
             lastDistance = currentDistance;
         } else if(node[i].flag1 == 2){
-            qDebug() << "junction";
+            if(Game::debugOutput) qDebug() << "junction";
             //qDebug() << node[i].tilex, node[i].tilez, node[i].pos[0], node[i].pos[1], node[i].pos[2];
             nodeId1 = tdb->findNearestNode(node[i].tilex, node[i].tilez, node[i].pos, NULL, 4, false);
             //qDebug() << nodeId1;
             if(lastNodeId < 0){
-                qDebug() << "fail";
+                if(Game::debugOutput) qDebug() << "fail";
                 fail++;
             }
             
@@ -311,14 +311,14 @@ void Path::init3dShapes(bool initShapes){
 
             lastNodeId = nodeId1;
         } else {
-            qDebug() << "fail";
+            if(Game::debugOutput) qDebug() << "fail";
             fail++;
         }
         
         if(fail > 0)
             return;
         
-        qDebug() << "currentNodeId" << currentNodeId << distance1 << distance2 ;
+        if(Game::debugOutput) qDebug() << "currentNodeId" << currentNodeId << distance1 << distance2 ;
         
         for(int ti = 0; ti < tdb->trackNodes[currentNodeId]->iTri; ti++){
             int trid1 = tdb->trackNodes[currentNodeId]->trItemRef[ti];
@@ -352,7 +352,7 @@ void Path::init3dShapes(bool initShapes){
                     pathObjectsMap[distanceDownPath + dist]->name = tdb->trackItems[trid]->stationName;
                     pathObjectsMap[distanceDownPath + dist]->trItemId = trid;
                     pathObjectsMap[distanceDownPath + dist]->distanceDownPath = distanceDownPath + dist;
-                    qDebug() << "="<<tdb->trackItems[trid]->stationName << distanceDownPath + dist;
+                    if(Game::debugOutput) qDebug() << "="<<tdb->trackItems[trid]->stationName << distanceDownPath + dist;
                 }
             }
         }
@@ -463,12 +463,12 @@ void Path::CreatePaths(TDB * tdb){
     QString path;
     path = Game::root + "/routes/" + Game::route + "/paths";
     QDir dir(path);
-    qDebug() << path;
+    if(Game::debugOutput) qDebug() << path;
     dir.setNameFilters(QStringList() << "*.pat");
     dir.setFilter(QDir::Files);
     foreach(QString dirFile, dir.entryList())
     {
-        qDebug() << dirFile;
+        if(Game::debugOutput) qDebug() << dirFile;
         if(!QDir(dirFile).exists())
             dir.remove(dirFile);
     }
@@ -501,12 +501,12 @@ void Path::CreatePaths(TDB * tdb){
             //pos = ruch.getPosition();
             float *dPos = ruch.getCurrentPosition();
             Game::check_coords(dPos[5],dPos[6],dPos[0],dPos[2]);
-            qDebug() << dPos[0]<<" "<<dPos[1]<<" "<<dPos[2];
+            if(Game::debugOutput) qDebug() << dPos[0]<<" "<<dPos[1]<<" "<<dPos[2];
             out << "	TrackPDP ( "<<dPos[5]<<" "<<dPos[6]<<" "<<dPos[0]<<" "<<dPos[1]<<" "<<dPos[2]<<" 1 1 )" << "\n";
             ruch.next(10);
             dPos = ruch.getCurrentPosition();
             Game::check_coords(dPos[5],dPos[6],dPos[0],dPos[2]);
-            qDebug() << dPos[0]<<" "<<dPos[1]<<" "<<dPos[2];
+            if(Game::debugOutput) qDebug() << dPos[0]<<" "<<dPos[1]<<" "<<dPos[2];
             out << "	TrackPDP ( "<<dPos[5]<<" "<<dPos[6]<<" "<<dPos[0]<<" "<<dPos[1]<<" "<<dPos[2]<<" 1 1 )" << "\n";
             out << ")" << "\n";
             out << "TrackPath (" << "\n";

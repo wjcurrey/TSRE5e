@@ -73,10 +73,10 @@ void Terrain::load(){
     if((esdAlternativeTexture & Game::TextureFlags[Game::season]) != 0)
         seasonPath = Game::season.toLower() + "/";
 
-    if(Game::season == "Winter" || Game::season == "AutumnSnow" || Game::season == "WinterSnow" || Game::season == "SpringSnow" ){
-        if(esdAlternativeTexture & Game::TextureFlags["Snow"] != 0)
+    if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnow" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
+        if(esdAlternativeTexture & Game::TextureFlags["snow"] != 0)
             seasonPath = "snow/";
-        if(esdAlternativeTexture & Game::TextureFlags["SnowTrack"] != 0)
+        if(esdAlternativeTexture & Game::TextureFlags["snowtrack"] != 0)
             seasonPath = "snow/";
     }
     
@@ -2144,8 +2144,8 @@ void Terrain::reloadLines() {
     // EFO set terrwidth from global, might be able to remove this and use the global
     terrWidth = Game::selectedTerrWidth;    
     
-    if(Game::debugOutput) qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
-    if(Game::debugOutput) qDebug() << "local TerrWidth: " << terrWidth;    
+    // if(Game::debugOutput) qDebug() << "Game TerrWidth: " << Game::selectedTerrWidth;
+    // if(Game::debugOutput) qDebug() << "local TerrWidth: " << terrWidth;    
     
     int samples = *tfile->nsamples;
     int sampleSize = *tfile->sampleSize;

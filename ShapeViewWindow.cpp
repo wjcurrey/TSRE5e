@@ -57,7 +57,7 @@ void ShapeViewWindow::msg(QString text, float val){
 void ShapeViewWindow::msg(QString text, QString val){
     //qDebug() << text;
     if(text == "showShape"){
-        qDebug() << val;
+        qDebug() << "SVW60:" << val;
         if(val.length() < 1) return;
         if(!this->isVisible()) return;
         QStringList values = val.split("|");

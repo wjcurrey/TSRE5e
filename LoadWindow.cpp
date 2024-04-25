@@ -46,7 +46,7 @@ LoadWindow::LoadWindow() {
     exit = new QPushButton("Exit");
     exit->setStyleSheet(QString("background-color: ")+Game::StyleRedButton);
     
-    
+
     nowaTrasa = new QLineEdit();
     QRegExp rx("^[a-zA-Z0-9\\_\\-\\ ]*$");
     //QRegExp rx("[\\/<>|\":?*].");
@@ -94,15 +94,18 @@ LoadWindow::LoadWindow() {
     mainLayout->setContentsMargins(1,1,1,1);
     //mainLayout->addWidget(naviBox);
     this->setLayout(mainLayout);
-    
+            
     
     //nowaTrasa->hide();
 
-    QObject::connect(exit, SIGNAL (released()), this, SLOT (close()));
+    QObject::connect(exit, SIGNAL (released()), this, SLOT(close()));
     QObject::connect(&routeList, SIGNAL(itemClicked(QListWidgetItem*)),
                       this, SLOT(setLoadRoute()));
     //QObject::connect(nowaTrasa, SIGNAL(textChanged(QString)),
     //                  this, SLOT(setNewRoute()));
+    
+ QObject::connect(&routeList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+                      this, SLOT(routeLoad()));
     
     listRoots();
     
@@ -302,3 +305,4 @@ void LoadWindow::listRoots(){
     }
     file.close();
 } 
+

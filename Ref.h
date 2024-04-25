@@ -36,6 +36,7 @@ public:
         QString align;
         QString description;
         QString selectionMethod;
+        bool placed;
         long long int value = 0;
         unsigned int staticFlags = 0;
         

@@ -70,7 +70,7 @@ void SignalShape::set(QString sh, FileBuffer* data) {
                             subObj[idx].backFacing = true;
                             continue;
                         }
-                        qDebug() << "signalFlags" << sflags;
+                        //qDebug() << "signalFlags" << sflags;
                         //subObj[idx].signalFlags = sflags;
                     }
                     ParserX::SkipToken(data);
@@ -89,7 +89,7 @@ void SignalShape::set(QString sh, FileBuffer* data) {
                     ParserX::SkipToken(data);
                     continue;
                 }
-                qDebug() << "--- " << sh;
+               // qDebug() << "--- " << sh;
                 ParserX::SkipToken(data);
                 continue;
             }
@@ -102,7 +102,7 @@ void SignalShape::set(QString sh, FileBuffer* data) {
         }
         return;
     }
-    qDebug() << "-- " << sh;
+    //qDebug() << "-- " << sh;
     return;
 }
 

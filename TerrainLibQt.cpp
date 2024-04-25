@@ -117,11 +117,11 @@ void TerrainLibQt::createNewRouteTerrain(int x, int z) {
 }
 
 void TerrainLibQt::saveEmpty(int x, int z) {
-    qDebug() << "#new tile add to QT ";
+    if(Game::debugOutput) qDebug() << "#new tile add to QT ";
     currentQuadTree->addTile(x, z);
-    qDebug() << "#new tile get name ";
+    if(Game::debugOutput) qDebug() << "#new tile get name ";
     QString name = currentQuadTree->getMyName(x, z);
-    qDebug() << "#new tile Gen "<<name;
+    if(Game::debugOutput) qDebug() << "#new tile Gen "<<name;
     if(currentQuadTree->isLow())
         Terrain::SaveEmpty(name, 256, 128, 16, true);
     else
@@ -307,7 +307,7 @@ void TerrainLibQt::setHeightFromGeoGui(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -323,7 +323,7 @@ void TerrainLibQt::setHeightFromGeoGui(int x, int z, float* p) {
     heightWindow->terrainSize = terr->getSampleCount()*terr->getSampleSize();
     heightWindow->exec();
     if(heightWindow->ok){
-        qDebug() << "ok";
+        if(Game::debugOutput) qDebug() << "ok";
         for (int i = 0; i < samples; i++) {
             for (int j = 0; j < samples; j++) {
                 terr->terrainData[i][j] = heightWindow->terrainData[j][i];
@@ -349,7 +349,7 @@ void TerrainLibQt::setHeightFromGeo(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -364,7 +364,7 @@ void TerrainLibQt::setHeightFromGeo(int x, int z, float* p) {
     heightWindow->terrainSize = terr->getSampleCount()*terr->getSampleSize();
     heightWindow->load(false);
     if(heightWindow->ok){
-        qDebug() << "ok";
+        if(Game::debugOutput) qDebug() << "ok";
         for (int i = 0; i < samples; i++) {
             for (int j = 0; j < samples; j++) {
                 terr->terrainData[i][j] = heightWindow->terrainData[j][i];
@@ -428,9 +428,9 @@ void TerrainLibQt::setTerrainToTrackObj(Brush* brush, float* punkty, int length,
     p3[1] = 0;
     p3[2] = 10;
     Vec3::transformMat4(p3, p3, matrix);
-    qDebug() << p1[0] << " " << p1[1] <<" " << p1[2];
-    qDebug() << p2[0] << " " << p2[1] <<" " << p2[2];
-    qDebug() << p3[0] << " " << p3[1] <<" " << p3[2];
+    if(Game::debugOutput) qDebug() << p1[0] << " " << p1[1] <<" " << p1[2];
+    if(Game::debugOutput) qDebug() << p2[0] << " " << p2[1] <<" " << p2[2];
+    if(Game::debugOutput) qDebug() << p3[0] << " " << p3[1] <<" " << p3[2];
     Vector3f vec1, vec2, vec3;
     vec1.x = p2[0] - p1[0]; vec1.y = p2[1] - p1[1]; vec1.z = p2[2] - p1[2];
     vec2.x = p3[0] - p1[0]; vec2.y = p3[1] - p1[1]; vec2.z = p3[2] - p1[2];
@@ -439,9 +439,9 @@ void TerrainLibQt::setTerrainToTrackObj(Brush* brush, float* punkty, int length,
     vec3.x = vec1.y * vec2.z - vec1.z * vec2.y;
     vec3.y = vec1.z * vec2.x - vec1.x * vec2.z;
     vec3.z = vec1.x * vec2.y - vec1.y * vec2.x;
-    qDebug() << vec1.x << " " << vec1.y <<" " << vec1.z;
-    qDebug() << vec2.x << " " << vec2.y <<" " << vec2.z;
-    qDebug() << vec3.x << " " << vec3.y <<" " << vec3.z;
+    if(Game::debugOutput) qDebug() << vec1.x << " " << vec1.y <<" " << vec1.z;
+    if(Game::debugOutput) qDebug() << vec2.x << " " << vec2.y <<" " << vec2.z;
+    if(Game::debugOutput) qDebug() << vec3.x << " " << vec3.y <<" " << vec3.z;
     float vec3d = vec3.x*p1[0] + vec3.y*p1[1] + vec3.z*p1[2];
     vec3.x /= vec3.y;
     vec3.z /= vec3.y;
@@ -451,7 +451,7 @@ void TerrainLibQt::setTerrainToTrackObj(Brush* brush, float* punkty, int length,
     
     for(int i = 0; i < length; i+=3 ){
         float h = vec3d - vec3.x*punkty[i] - vec3.z*punkty[i+2];
-        qDebug() << punkty[i] << " " << punkty[i+1] <<" " << punkty[i+2] <<" "<<h <<"";
+        if(Game::debugOutput) qDebug() << punkty[i] << " " << punkty[i+1] <<" " << punkty[i+2] <<" "<<h <<"";
     }
     //qDebug() << p1[0] << " " << p1[1] <<" "<<p1[2] <<"";
     //qDebug() << p2[0] << " " << p2[1] <<" "<<p2[2] <<"";
@@ -552,7 +552,7 @@ void TerrainLibQt::setTerrainTexture(Brush* brush, int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -565,7 +565,7 @@ void TerrainLibQt::toggleWaterDraw(int x, int z, float* p, float direction) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -577,7 +577,7 @@ void TerrainLibQt::makeTextureFromMap(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -589,7 +589,7 @@ void TerrainLibQt::removeTileTextureFromMap(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -601,7 +601,7 @@ void TerrainLibQt::setTileBlob(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -613,7 +613,7 @@ void TerrainLibQt::setWaterLevelGui(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -625,7 +625,7 @@ void TerrainLibQt::toggleDraw(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -638,7 +638,7 @@ int TerrainLibQt::getTexture(int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return -1;
@@ -650,7 +650,7 @@ void TerrainLibQt::paintTexture(Brush* brush, int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -662,7 +662,7 @@ void TerrainLibQt::lockTexture(Brush* brush, int x, int z, float* p) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -674,7 +674,7 @@ void TerrainLibQt::toggleGaps(int x, int z, float* p, float direction) {
     float posx = p[0];
     float posz = p[2];
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr = this->getTerrainByXY(x, z);
     if (terr == NULL) return;
@@ -703,7 +703,7 @@ QSet<Terrain*> TerrainLibQt::paintHeightMap(Brush* brush, int x, int z, float* p
     float posz = round(p[2]/8.0)*8.0;
     
     Game::check_coords(x, z, posx, posz);
-    qDebug() << x << " " << z << " " << posx << " " << posz;
+    if(Game::debugOutput) qDebug() << x << " " << z << " " << posx << " " << posz;
     
     Terrain *terr;
     terr = getTerrainByXY(x, z);
@@ -1149,7 +1149,7 @@ void TerrainLibQt::renderWaterLo(GLUU* gluu, float* playerT, float* playerW, flo
             if (terrainQtLo[terrainNameId] == NULL) {
                 terrainQtLo[terrainNameId] = new TerrainInfo();
                 quadTreeLo->fillTerrainInfo((int) playerT[0] + i, -(int) playerT[1] - j, terrainQtLo[terrainNameId]);
-                qDebug() << terrainNameId;
+                if(Game::debugOutput) qDebug() << "Terrain Name ID: " << terrainNameId;
                 terrainQtLo[terrainNameId]->t = new Terrain(terrainQtLo[terrainNameId]);
             }
             if (terrainQtLo[terrainNameId]->rendered)
@@ -1369,7 +1369,7 @@ void TerrainLibQt::renderLo(GLUU *gluu, float * playerT, float* playerW, float* 
             if (terrainQtLo[terrainNameId] == NULL) {
                 terrainQtLo[terrainNameId] = new TerrainInfo();
                 quadTreeLo->fillTerrainInfo((int) playerT[0] + i, -(int) playerT[1] - j, terrainQtLo[terrainNameId]);
-                qDebug() << terrainNameId;
+                if(Game::debugOutput) qDebug() << "TID: " << terrainNameId;
                 terrainQtLo[terrainNameId]->t = new Terrain(terrainQtLo[terrainNameId]);
             }
             if (terrainQtLo[terrainNameId]->rendered)
