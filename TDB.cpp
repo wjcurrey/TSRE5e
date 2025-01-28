@@ -78,6 +78,7 @@ void TDB::loadTdb(){
     // EFO Adds
     lwireLineHeight = Game::wireLineHeight;
     lsectionLineHeight = Game::sectionLineHeight;
+    
     if(Game::debugOutput) qDebug() << "Line Heights set" << lsectionLineHeight << " " << lwireLineHeight;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         if (sh == "trackdb") {
@@ -737,6 +738,7 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     //TrackShape* shp = this->tsection->shape[r->value];
     //qDebug() << shp->filename;
 
+    // Game::wireLineColor->setNamedColor("Pink");
     int end1Id = getNextItrNode();//++this->iTRnodes;
     int vecId = getNextItrNode();//++this->iTRnodes;
     int end2Id = getNextItrNode();//++this->iTRnodes;
@@ -2253,7 +2255,7 @@ void TDB::renderLines(GLUU *gluu, float* playerT, float playerRot) {
         if(road)
             sectionLines.setMaterial(0.0, 0.0, 1.0);
         else
-            sectionLines.setMaterial(1.0, 1.0, 0.0);
+            sectionLines.setMaterial(Game::wireLineColor->redF(), Game::wireLineColor->greenF(), Game::wireLineColor->blueF());
         sectionLines.init(punkty, ptr - punkty, RenderItem::V, GL_LINES);
         delete[] punkty;
     }
@@ -3450,7 +3452,7 @@ void TDB::saveEmpty(bool road) {
     QFile file(path);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(7);
+    out.setRealNumberPrecision(Game::rnp);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
     out << "SIMISA@@@@@@@@@@JINX0T0t______\n\n";
@@ -3496,7 +3498,7 @@ void TDB::save() {
 
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(7);  //// EFO Let's see if this blows up vectors at (7) was (8)
+    out.setRealNumberPrecision(Game::rnp);  //// EFO Let's see if this blows up vectors at (7) was (8)
     //out.setRealNumberNotation(QTextStream::FixedNotation);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
@@ -3724,7 +3726,7 @@ void TDB::saveTit() {
     //qDebug() << "TDB 3746";
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out.setRealNumberPrecision(7);   //// EFO this might fix some of the node issues... was (8) now (7)
+    out.setRealNumberPrecision(Game::rnp);   //// EFO this might fix some of the node issues... was (8) now (7)
     //out.setRealNumberNotation(QTextStream::FixedNotation);
     out.setCodec("UTF-16");
     out.setGenerateByteOrderMark(true);
@@ -3867,13 +3869,11 @@ void TDB::checkDatabase(){
         Game::currentRoute->fillWorldObjectsByTrackItemIds(objects, tdbId);
     }
         
-
+    /// This checks interactives - not track nodes
     for (int i = 0; i < this->iTRitems; i++) {
         if(trackItems[i] == NULL) 
             continue;
-        
-        isPosition = false;
-        
+                           
         if (trackItems[i]->type != "emptyitem"){
             QVector<int> ids;
             int id = findTrItemNodeIds(i, ids);
@@ -3907,6 +3907,8 @@ void TDB::checkDatabase(){
             
             if(id >= 0 ){
                 isPosition = getDrawPositionOnTrNode(drawPosition, id, trackItems[i]->getTrackPosition());
+                
+                                
                 if(!isPosition){
                     ErrorMessage *e = new ErrorMessage(
                             ErrorMessage::Type_Error, 
@@ -4108,6 +4110,31 @@ void TDB::checkDatabase(){
             continue;
         if (n->typ == -1) 
             continue;
+
+/*
+        /// EFO TRACK BURIED deep underground, moving to TrackObj.cpp around line 61        
+        if(n->UiD[7] < Game::deepUnderground)
+        {            
+                if(abs(n->UiD[5] < 1)) continue;  /// some nodes have an invalid location value
+                if(abs(n->UiD[3] > 0)) continue;  /// only look at the first pin
+                
+                ErrorMessage *e = new ErrorMessage(
+                ErrorMessage::Type_Warning, 
+                tdbName, 
+                QString("TrackNode: ") + QString::number(i) + " UiD: " + QString::number(n->UiD[2]) + " is deep underground: " + QString::number(n->UiD[7]),
+                QString(    "Node at " + QString::number(n->UiD[4]) + 
+                            " " + QString::number(n->UiD[5]) +
+                            " " + QString::number(n->UiD[6]) + 
+                            " " + QString::number(n->UiD[7]) + 
+                            " " + QString::number(n->UiD[8]) + 
+                        " might be a stray track piece or other object that got lost when moving without the terrain visible.\n\n To fix, you can use \"Transform\" to adjust the position values or possibly the \"Z\" and \"H\" key to try to bring it back to the surface.")
+                );
+                
+                e->setLocationXYZ(n->UiD[4], n->UiD[5], n->UiD[6], n->UiD[7], n->UiD[8]);
+                ErrorMessagesLib::PushErrorMessage(e);
+        }
+  */        
+        
         if (n->typ == 1) {
             if(n->iTrv == 0){
                 ErrorMessage *e = new ErrorMessage(

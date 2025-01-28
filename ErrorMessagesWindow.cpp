@@ -76,7 +76,7 @@ ErrorMessagesWindow::ErrorMessagesWindow(QWidget* parent) : QWidget(parent) {
     refreshErrorList();
 }
 
-void ErrorMessagesWindow::selectRequestReceived(GameObj* o){
+void ErrorMessagesWindow::selectRequestReceived(GameObj* o){    
     emit selectObject(o);
 }
 
@@ -92,7 +92,7 @@ void ErrorMessagesWindow::refreshErrorList(){
     errorList.clear();
     QList<QTreeWidgetItem *> items;
     QStringList list;
-    qDebug() << "Errors:";
+ //   qDebug() << "Errors:";
     
     for(int i = ErrorMessagesLib::ErrorMessages.size() - 1; i >= 0 ; i-- ){
         if(ErrorMessagesLib::ErrorMessages[i] == NULL)

@@ -68,6 +68,6 @@ int ShapeLib::addShape(QString path, QString texPath) {
 
     shape[jestshape] = new SFile(pathid, path.split("/").last(), texPath);
     shape[jestshape]->pathid = pathid;
-
-    return jestshape++;
+    
+    return jestshape++;      
 }

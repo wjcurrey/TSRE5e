@@ -106,13 +106,13 @@ void TFile::load(FileBuffer* data){
         data->off += 32;
         int pozycja, offset, akto;
         data->findToken(136);
-        //qDebug() << "znaleziono sekcje 136 na " << data->off << " ";
+        if(Game::extendedDebug)  qDebug() << "znaleziono sekcje 136 na " << data->off << " ";
         data->off += 5;
         for (int i = 0; i < 6; i++) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //qDebug() << "znaleziono sekcje " << pozycja <<" na " << data->off << " " << offset;
+            if(Game::extendedDebug) qDebug() << "znaleziono sekcje " << pozycja <<" na " << data->off << " " << offset;
 
             switch (pozycja) {
                 case 137:
@@ -157,7 +157,7 @@ void TFile::get139(FileBuffer* data, int length) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //qDebug() << "139 znaleziono sekcje " << pozycja <<" na " << data->off << " " << offset;
+            if(Game::extendedDebug) qDebug() << "139 znaleziono sekcje " << pozycja <<" na " << data->off << " " << offset;
 
             switch (pozycja) {
                 case 140:
@@ -213,6 +213,19 @@ void TFile::get139(FileBuffer* data, int length) {
                     if(Game::debugOutput) qDebug() << "TFile - unknown token: "<< pozycja;
                     break;
             }
+            if(Game::extendedDebug) 
+                qDebug() << 
+                    "140: " << nsamples <<                     
+                    "141: " << sampleRotation <<
+                    "142: " << floor << 
+                    "143: " << scale << 
+                    "144: " << sampleSize <<
+                    "145: " << sampleFbuffer << 
+                    "146: " << sampleYbuffer << 
+                    "147: " << sampleEbuffer << 
+                    "148: " << sampleNbuffer << 
+                    "281: " << sampleASbuffer ;
+                    
             data->off = akto + offset;
             if(data->off >= length) break;
         }
@@ -238,7 +251,6 @@ void TFile::get151(FileBuffer* data) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //System.out.println("=znaleziono sekcje " + pozycja + " na " + data.position() + " " + offset);
 
             int tttpozycja, tttoffset, tttakto;
             data->off++;
@@ -254,7 +266,6 @@ void TFile::get151(FileBuffer* data) {
                 tttpozycja = data->getInt();
                 tttoffset = data->getInt();
                 tttakto = data->off;
-                //System.out.println("==znaleziono sekcje " + tttpozycja + " na " + data.position() + " " + tttoffset);
 
                 switch (tttpozycja) {
                     case 153:
@@ -282,12 +293,11 @@ void TFile::get153(FileBuffer* data, TFile::Mat* m) {
         data->off++;
         int ilosc = data->getInt();
         m->count153 = ilosc;
-        //System.out.println("i to " + ilosc);
+        if(Game::extendedDebug) qDebug() << "i to " << ilosc;
         for (int j = 0; j < ilosc; j++) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //System.out.println("===znaleziono sekcje " + pozycja + " na " + data.position() + " " + offset);     
             data->off ++;
 
             //m->tex[j] = "";
@@ -324,14 +334,13 @@ void TFile::get156(FileBuffer* data, TFile::Mat* m) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //System.out.println("===znaleziono sekcje " + pozycja + " na " + data.position() + " " + offset);     
             data->off++;
             
             m->itex[j][0] = data->getInt();//&0xff;
             m->itex[j][1] = data->getInt();//&0xff;
             m->itex[j][2] = data->getInt();//&0xff;
             m->itex[j][3] = data->getInt();//&0xff;
-            //qDebug() << j <<":" <<m->itex[j][0] << " " << m->itex[j][1] << " " << m->itex[j][2] << " " << m->itex[j][3];
+            if(Game::extendedDebug) qDebug() << "get156: " << j <<":" <<m->itex[j][0] << " " << m->itex[j][1] << " " << m->itex[j][2] << " " << m->itex[j][3];
 
             data->off = akto + offset;
         }
@@ -344,11 +353,10 @@ void TFile::get157(FileBuffer* data) {
         pozycja = data->getInt();
         offset = data->getInt();
         akto = data->off;
-        //System.out.println("=znaleziono sekcje " + pozycja + " na " + data.position() + " " + offset);
         data->off++;
         int ttilosc = data->getInt();
         //qDebug() << "ttilosc " << ttilosc;
-        //System.out.println("ilosc " + ttilosc);
+        if(Game::extendedDebug) qDebug() << "ilosc " << ttilosc;
         int tttpozycja, tttoffset, tttakto;
         //
         
@@ -356,7 +364,6 @@ void TFile::get157(FileBuffer* data) {
             tttpozycja = data->getInt();
             tttoffset = data->getInt();
             tttakto = data->off;
-            //System.out.println("==znaleziono sekcje " + tttpozycja + " na " + data.position() + " " + tttoffset);
             data->off++;
 
             int ttpozycja, ttoffset, ttakto;
@@ -365,13 +372,11 @@ void TFile::get157(FileBuffer* data) {
                 ttpozycja = data->getInt();
                 ttoffset = data->getInt();
                 ttakto = data->off;
-                //System.out.println("===znaleziono sekcje " + ttpozycja + " na " + data.position() + " " + ttoffset);
 
                 switch (ttpozycja) {
                     case 160:
                         data->off++;
                         patchsetDistance = data->getInt();
-                        //System.out.println("= " + data.getInt());
                         jj++;
                         break;
                     case 161:
@@ -404,7 +409,6 @@ void TFile::get163(FileBuffer* data, int n) {
             pozycja = data->getInt();
             offset = data->getInt();
             akto = data->off;
-            //System.out.println("===znaleziono sekcje " + pozycja + " na " + data.position() + " " + offset);     
             data->off++;
             
             flags[j] = data->getInt();//&0xFFFF;
@@ -425,8 +429,8 @@ void TFile::get163(FileBuffer* data, int n) {
             tdata[j*13+11] = data->getFloat();
             tdata[j*13+12] = data->getFloat();
             errorBias[j] = data->getFloat();
-            //qDebug() << tdata[j*7+1] << tdata[j*7+2] << tdata[j*7+3] << tdata[j*7+4] << tdata[j*7+5] << tdata[j*7+6];
-            
+            if(Game::extendedDebug) qDebug() << "get163: " << tdata[j*7+1] << tdata[j*7+2] << tdata[j*7+3] << tdata[j*7+4] << tdata[j*7+5] << tdata[j*7+6];
+                                
             //data->off = akto + offset;
         }
     }

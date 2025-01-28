@@ -150,7 +150,8 @@ void GLUU::setMatrixUniforms() {
     currentTexture = -1;
     
     currentShader->setUniformValue(currentShader->lod, Game::objectLod);
-    currentShader->setUniformValue(currentShader->skyColor, fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
+//    currentShader->setUniformValue(currentShader->skyColor, fogColor[0],fogColor[1],fogColor[2],fogColor[3]);
+    currentShader->setUniformValue(currentShader->skyColor, Game::skyColor[0],Game::skyColor[1],Game::skyColor[2],Game::skyColor[3]);    
     currentShader->setUniformValue(currentShader->shaderDiffuseColor, 0.7,0.7,0.7,0.7);
     currentShader->setUniformValue(currentShader->shaderAmbientColor, 0.3,0.3,0.3,0.3);
     currentShader->setUniformValue(currentShader->shaderSpecularColor, 1.0,1.0,1.0,1.0);

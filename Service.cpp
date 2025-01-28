@@ -72,6 +72,20 @@ void Service::load(){
         if (sh == ("simisa@@@@@@@@@@jinx0v0t______")) {
             continue;
         }
+        
+        if (sh == ("_comment")) 
+        {   ParserX::SkipToken(data);
+            continue;
+        }
+
+        if (sh == ("_skip")) 
+        {   ParserX::SkipToken(data);
+            continue;
+        }
+        
+        
+        
+        
         if (sh == ("service_definition")) {
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                 if (sh == ("serial")) {

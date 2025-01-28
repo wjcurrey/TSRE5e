@@ -29,6 +29,7 @@
 #include <QString>
 #include <QDebug>
 #include <QFile>
+#include <QTextStream>
 #include "GLUU.h"
 #include "GLMatrix.h"
 #include "TS.h"
@@ -144,15 +145,61 @@ void Tile::checkForErrors(){
                 }
             }
         
-        // Remove all objects by type
+        if((Game::listFiles == true) && (Game::loadAllWFiles == true))
+        {
+            /// EFO Log the filenames contained        
+            
+            QString trimmedFile = obj->fileName;
+            int sdl = obj->staticDetailLevel;
+            
+            if(sdl = -1) sdl = 0;
+            
+            int index = trimmedFile.indexOf("shapes\\\\");
+            if ((index != -1)) {
+                trimmedFile = trimmedFile.mid(index + 8); // Skip "shapes\\\\"
+                if(Game::debugOutput == true) qDebug() << trimmedFile << " was " << obj->fileName;
+            }
+            
+            if(obj->type != "trackobj")
+            if((Route::fileList.contains(trimmedFile, Qt::CaseInsensitive) == false))
+            {                                
+                Route::fileList.append(trimmedFile.toLower());
+            }
+            
+            if(obj->type == "trackobj")               
+            if((Route::trackList.contains(trimmedFile, Qt::CaseInsensitive) == false))
+            {                                
+                Route::trackList.append(trimmedFile.toLower());                
+            }
+
+
+            // else
+               //      qDebug() << trimmedFile << " " << obj->type << " " <<  obj->sectionIdx ;
+
+
+        /// Moving this to the last step so that the TrackObj list is available
         if(Game::objectsToRemove.size() > 0){
             foreach (QString val, Game::objectsToRemove){
-                if(obj->type == val){
-                    obj->loaded = false;
-                    modified = true;
+//                qDebug() << "removal: " << val.trimmed().toLower() << " " << obj->type;                        
+                if((obj->fileName.toLower() == val.trimmed().toLower()) && ( obj->type.toLower() == "static") )                    
+                {
+                    qDebug() << "removal: " << val.trimmed().toLower() << " " << obj->type;                        
+                    /// Double check to see if it's a track section
+                    if(Route::trackList.contains(val) == false)
+                    {                                        
+                        obj->loaded = false;
+                        modified = true;
+                        qDebug() << obj->type << " Object auto-removed: " << val;
+                    }
+                    else
+                    {   qDebug() << "Requested object not removed because it's also a track shape in-use: " << val;
+                    }
                 }
             }
         }
+        }
+        
+                
     }
     
 }
@@ -175,7 +222,10 @@ void Tile::loadInit(){
         WorldObj* obj = (WorldObj*) it->second;
         if(obj == NULL) 
             continue;
+
         obj->loadInit();
+        
+        
     }
     
     checkForErrors();
@@ -256,6 +306,9 @@ void Tile::load() {
         int offset, offsetO;
         int idx, idxO;
         WorldObj* nowy;
+        
+
+        
         while(data->length > data->off){
             idx = data->getToken();
             offset = data->off + data->getInt() + 4;
@@ -345,6 +398,17 @@ void Tile::loadUtf16Data(FileBuffer *data){
                         ParserX::SkipToken(data);
                         continue;
                     }
+
+                    if (sh == ("_comment")) 
+                    {   ParserX::SkipToken(data);
+                        continue;
+                    }
+
+                    if (sh == ("_skip")) 
+                    {   ParserX::SkipToken(data);
+                        continue;
+                    }
+
                     if(Game::debugOutput) qDebug() << "#tr_worldfile - undefined token " << sh;
                     ParserX::SkipToken(data);
                 }
@@ -400,6 +464,17 @@ void Tile::loadWS() {
                 ParserX::SkipToken(data);
                 continue;
             }
+            
+            if (sh == ("_comment")) 
+            {   ParserX::SkipToken(data);
+                continue;
+            }
+
+            if (sh == ("_skip")) 
+            {   ParserX::SkipToken(data);
+                continue;
+            }
+                        
             if(Game::debugOutput) qDebug() << "#TileWS - undefined token" << sh;
             ParserX::SkipToken(data);
         }

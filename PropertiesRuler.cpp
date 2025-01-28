@@ -131,6 +131,8 @@ PropertiesRuler::PropertiesRuler() {
     eTemplate.addItem("DEFAULT");
     eTemplate.addItem("DISABLED");
     
+
+    
     ProceduralShape::Load();
     if(ProceduralShape::ShapeTemplateFile != NULL){
         QMapIterator<QString, ShapeTemplate*> i(ProceduralShape::ShapeTemplateFile->templates);
@@ -147,6 +149,13 @@ PropertiesRuler::PropertiesRuler() {
     vbox->addWidget(button);
     QObject::connect(button, SIGNAL(released()),
                       this, SLOT(addShapeEdited()));
+    
+    label = new QLabel("Press 'T' to add multiple points by individual clicks. Press 'Select' button when done.");
+    label->setContentsMargins(3,20,0,0);
+    label->setWordWrap(true);
+    vbox->addWidget(label);
+
+    
     vbox->addStretch(1);
     this->setLayout(vbox);
 }
@@ -198,6 +207,12 @@ void PropertiesRuler::showObj(GameObj* obj){
     this->elevProg.setText(QString::number(prog));
     this->elevProp.setText(QString::number(prop));
     this->elev1inXm.setText(QString::number(oneInXm));
+    
+     // Simulate a key press event
+    QWidget keywidget; 
+    QKeyEvent* keyEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_T, Qt::NoModifier);
+    QApplication::postEvent(&keywidget, keyEvent); 
+        
 }
 
 void PropertiesRuler::updateObj(GameObj* obj){

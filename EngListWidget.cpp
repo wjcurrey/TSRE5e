@@ -8,10 +8,12 @@
  *  See LICENSE.md or https://www.gnu.org/licenses/gpl.html
  */
 
+#include <QCollator>
 #include "EngListWidget.h"
 #include "EngLib.h"
 #include "Eng.h"
 #include "Game.h"
+
 
 EngListWidget::EngListWidget() : QWidget(){
     addBegButton.setText("Add Beg");
@@ -82,6 +84,7 @@ EngListWidget::EngListWidget() : QWidget(){
     items.viewport()->installEventFilter(this);
     items.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     totalVal.setEnabled(false);
+    
 }
 
 EngListWidget::~EngListWidget() {
@@ -105,7 +108,7 @@ void EngListWidget::fillEngList(){
 
 void EngListWidget::fillEngList(QString engFilter, QString couplingFilter, QString searchFilter){
     items.clear();
-
+        
     Eng * e;
     totalVal.setText(QString::number(Game::currentEngLib->jesteng));
     
@@ -119,6 +122,7 @@ void EngListWidget::fillEngList(QString engFilter, QString couplingFilter, QStri
         
         new QListWidgetItem ( e->displayName, &items, i);
     }
+
     items.sortItems(Qt::AscendingOrder);
     
     if(items.count() < Game::currentEngLib->jesteng)

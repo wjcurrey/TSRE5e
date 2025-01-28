@@ -208,6 +208,7 @@ void ShapeViewerGLWidget::paintGL() {
     if(mode == "rot"){
         Mat4::rotate(gluu->mvMatrix, gluu->mvMatrix, rotY, 0,1,0);
         Mat4::rotate(gluu->mvMatrix, gluu->mvMatrix, rotZ, 0,0,1);
+
     }
     gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
     
@@ -426,6 +427,11 @@ void ShapeViewerGLWidget::resetRot(){
 }
 
 
+void ShapeViewerGLWidget::resetCamRoster(float profile) {
+    rotY = (M_PI/profile);
+    rotZ = 0;
+}
+
 void ShapeViewerGLWidget::showEng(Eng *e){
     // if(Game::debugOutput) qDebug() << "SVGLW 429: engObj " ;
     eng = e;    
@@ -579,8 +585,10 @@ void ShapeViewerGLWidget::showShape(SFile *currentSFile){
     renderItem = 4;
     con = NULL;
     eng = NULL;
+    resetCamRoster(2);
 }
 
 void ShapeViewerGLWidget::setMode(QString n){
     mode = n;
 }
+

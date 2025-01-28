@@ -180,6 +180,16 @@ void Activity::load() {
                             ParserX::SkipToken(data);
                             continue;
                         }
+
+                        //// EFO Add missing ortsAICrossingHornPattern                        
+                        if (sh == ("ortsaicrossinghornpattern")) {
+                            // ortsAICrossingHornPattern = ParserX::GetNumber(data);
+                            // it's a string, not a number
+                            ortsAICrossingHornPattern = ParserX::GetStringInside(data);
+                            ParserX::SkipToken(data);
+                            continue;
+                        }
+                        
                         if (sh == ("traffic_definition")) {
                             traffic = new TrafficDefinition();
                             traffic->name = ParserX::GetStringInside(data);
@@ -329,6 +339,7 @@ void Activity::load() {
     return;
 }
 
+// Write Activity file
 void Activity::save() {
     QString tpath;
     
@@ -367,6 +378,11 @@ void Activity::save() {
         out << "		NextActivityObjectUID ( " << nextActivityObjectUID << " )\n";
     if (ortsAIHornAtCrossings != -9999)
         out << "		ORTSAIHornAtCrossings ( " << ortsAIHornAtCrossings << " )\n";
+    
+    //// EFO Add missing ortsAICrossingHornPattern
+    if (ortsAICrossingHornPattern     != "") 
+        out << "		ORTSAICrossingHornPattern     ( " << ortsAICrossingHornPattern << " )\n";  
+    
     if (traffic != NULL){
         out << "		Traffic_Definition ( " << ParserX::AddComIfReq(traffic->name) <<"\n";
         for(int i = 0; i<traffic->service.size(); i++)
@@ -513,6 +529,7 @@ void ActivityServiceDefinition::reloadDefinition(){
     }
 }
 
+/// Read Service
 void ActivityServiceDefinition::load(FileBuffer* data) {
     QString sh;
     name = ParserX::GetStringInside(data);
@@ -559,6 +576,7 @@ void ActivityServiceDefinition::load(FileBuffer* data) {
     }
 }
 
+/// Write Service 
 void ActivityServiceDefinition::save(QTextStream* out) {
     QString woff;
     
@@ -617,6 +635,7 @@ void ActivityServiceDefinition::updateSim(float *playerT, float deltaTime){
     servicePointer->updateSim(playerT, deltaTime);
 }
 
+/// Reads activity header
 void Activity::ActivityHeader::load(FileBuffer* data) {
     QString sh;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
@@ -732,6 +751,8 @@ void Activity::ActivityHeader::load(FileBuffer* data) {
     }
 }
 
+
+// Writes out activity header in .ACT
 void Activity::ActivityHeader::save(QTextStream* out) {
     *out << "	Tr_Activity_Header (\n";
     if (routeid.length() > 0)
@@ -844,11 +865,29 @@ void Activity::setOrtsHornAtCrossigns(bool val){
     modified = true;
 }
 
+//// EFO Add missing ortsAICrossingHornPattern
+void Activity::setOrtsAICrossingHornPattern(QString val){
+    
+    if(ortsAIHornAtCrossings = 1)
+    {
+      ortsAICrossingHornPattern = val;   
+      modified = true;
+    }
+}
+
+
 bool Activity::isOrtsHornAtCrossigns(){
     if(ortsAIHornAtCrossings == 1)
         return true;
     return false;
 }
+//// EFO Add missing ortsAICrossingHornPattern
+bool Activity::isOrtsAICrossingHornPattern(){
+    if(ortsAICrossingHornPattern == 1)
+        return true;
+    return false;
+}
+
 
 void Activity::setDifficulty(int val){
     header->difficulty = val;

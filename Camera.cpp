@@ -72,7 +72,7 @@ void Camera::setPos(float* pos){
 void Camera::setPos(float x, float y, float z){
 }
 
-void Camera::setPlayerRot(float x, float y){
+void Camera::setPlayerRot(float x, float y){   
     this->playerRot[0] = x;
     this->playerRot[1] = y;
 }

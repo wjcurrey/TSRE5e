@@ -153,7 +153,7 @@ PropertiesDyntrack::PropertiesDyntrack() {
         if(i%2 == 0){
             sSectA[i].setDecimals(2);
             sSectA[i].setMinimum(0);
-            sSectA[i].setMaximum(250);
+            sSectA[i].setMaximum(5000);
             sSectA[i].setSingleStep(1.0);
         } else {
             sSectA[i].setDecimals(5);      /// EFO increasing precision from decimals(3)

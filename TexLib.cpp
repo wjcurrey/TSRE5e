@@ -17,6 +17,7 @@
 #include <QDebug>
 #include <QFile>
 #include "Game.h"
+#include "Route.h"
 
 int TexLib::jesttextur = 0;
 std::unordered_map<int, Texture*> TexLib::mtex;
@@ -138,13 +139,24 @@ int TexLib::addTex(QString pathid, bool reload) {
             if(tType == "ace"){            
             /// check to see if DDS exists for ACE
             QFile file(pathid.left(pathid.length() - 3)+"dds");            
-            if (file.exists()){
+            if  ((file.exists()) and (pathid.contains(Game::route +  "/terrtex") == false) ){
+            // if  (file.exists()) {                
                 qDebug () << "DDS upgraded for " << pathid;                 
                 tType = "dds";
                 pathid = pathid.left(pathid.length() - 3)+"dds";
             }
         }    
     }        
+    
+    if(Game::listFiles)
+    {
+        if(Route::texturesList.contains(pathid) == false)
+        {
+            if((pathid.endsWith(".ace")) | (pathid.endsWith(".dds")))
+            Route::texturesList.append(pathid);
+        }    
+    }        
+        
         
     
     int texId = 0;
@@ -157,6 +169,7 @@ int TexLib::addTex(QString pathid, bool reload) {
     } else {
         newFile->delVBO();
     }
+
     //qDebug() << pathid.toLower();
     //qDebug() << tType;
         

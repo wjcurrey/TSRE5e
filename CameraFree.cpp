@@ -258,11 +258,15 @@ void CameraFree::moveRight(float fps) {
 }
 
 void CameraFree::moveUp() {
-    playerPos[1] += przesy;
+//    playerPos[1] += przesy;
+        playerPos[1] = playerPos[1] + (10.0 / 60) * przesy;    
+
 }
 
 void CameraFree::moveDown() {
-    playerPos[1] -= przesy;
+//    playerPos[1] -= przesy;
+        playerPos[1] = playerPos[1] - (10.0 / 60) * przesy;    
+
 }
 
 void CameraFree::patrzX(float f) {
@@ -419,7 +423,6 @@ void CameraFree::keyDown(QKeyEvent * e) {
         case Qt::Key_Period:
             lockYaxis = !lockYaxis;
             Game::lockCamera = !Game::lockCamera;
-            // if(lockYaxis == true) emit updStatus(QString("camera"),QString("Camera Locked")); else emit updStatus(QString("camera"),QString("Camera Unlocked"));
             break;
         default:
             break;

@@ -35,6 +35,7 @@ signals:
     void contentHierarchySelected(int);
     void dirFilesSelected(QString);
 
+
 private:
     QListWidget dirFiles;
     QLineEdit searchFiles;

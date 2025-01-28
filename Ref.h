@@ -61,6 +61,7 @@ public:
     void loadFile(QString path);
     void loadUtf16Data(FileBuffer *data, QString path);
     void saveToStream(QTextStream *out);
+    void save();
     bool loaded;
     RefItem *selected = NULL;
     

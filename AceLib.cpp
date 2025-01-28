@@ -92,17 +92,30 @@ void AceLib::run() {
                 ;
         return;
     }
-    if ( texture->width % 2 != 0 || texture->height % 2 != 0 ) {
-        texture->error = true;
-        if(!IsThread)
-            qDebug() << "!!!!!!!!!!!!! mega fail tex dim % 2 != 0: " << texture->pathid
-                << " " << texture->width
-                << " " << texture->height
-                << " " << texture->bpp
-                ;
-        return;
+    //// EFO MOD Check to see if texture is square.... 
+
+    if ( texture->width % 2 != 0 || texture->height % 2 != 0 || (texture->width != texture->height) ) { 
+        
+        if(Game::UnsafeMode == true) 
+        {
+            qWarning() << "Check Texture Dimensions (may cause crash): " << texture->pathid << " = " << texture->width << " x " << texture->height;                       
+        }
+        else   /// safe path
+        {                 
+            texture->error = true;            
+
+            if(!IsThread)
+                qWarning() << "Non-squareable texture failed to load: " << texture->pathid
+                    << " " << texture->width
+                    << " " << texture->height
+                    << " " << texture->bpp
+                    ;
+            return;
+        }
     }
 
+    
+    
     texture->bytesPerPixel = (texture->bpp / 8);
     texture->imageSize = (texture->bytesPerPixel * texture->width * texture->height);
     texture->imageData = new unsigned char[texture->imageSize];

@@ -38,6 +38,7 @@ ShapeViewerNavigatorWidget::ShapeViewerNavigatorWidget(QWidget* parent) : QWidge
     dirFiles.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     fileItems.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     
+    
     QObject::connect(&dirFiles, SIGNAL(itemClicked(QListWidgetItem*)),
                       this, SLOT(dirFilesSelected(QListWidgetItem*)));
     
@@ -51,6 +52,9 @@ ShapeViewerNavigatorWidget::~ShapeViewerNavigatorWidget() {
 void ShapeViewerNavigatorWidget::dirFilesSelected(QListWidgetItem* item){
     emit dirFilesSelected(item->data(9999).toString());
 }
+
+
+
 
 void ShapeViewerNavigatorWidget::fileItemsSelected(QTreeWidgetItem* item, int column){
     qDebug() << item->type() << item->text(0);

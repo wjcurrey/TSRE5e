@@ -106,7 +106,12 @@ ShapeViewerWindow::ShapeViewerWindow() : QMainWindow() {
     view3dMenu = menuBar()->addMenu(tr("&3D View"));
     vResetShapeView = new QAction(tr("&Reset"), this); 
     view3dMenu->addAction(vResetShapeView);
+    vProfileShapeView = new QAction(tr("&Profile View"), this); 
+    view3dMenu->addAction(vProfileShapeView);
+    
     QObject::connect(vResetShapeView, SIGNAL(triggered()), this, SLOT(vResetShapeViewSelected()));
+    QObject::connect(vProfileShapeView, SIGNAL(triggered()), this, SLOT(vProfileShapeViewSelected()));
+    
     vGetImgShapeView = new QAction(tr("&Copy Image"), this); 
     view3dMenu->addAction(vGetImgShapeView);
     QObject::connect(vGetImgShapeView, SIGNAL(triggered()), this, SLOT(vGetImgShapeViewSelected()));
@@ -196,6 +201,36 @@ void ShapeViewerWindow::vResetShapeViewSelected(){
         glShapeWidget->resetRot();
     }
 }
+
+void ShapeViewerWindow::vProfileShapeViewSelected(){
+    float profile = -1.6;
+    if(currentItemType == "shape"){
+        glShapeWidget->resetCamRoster(profile);
+    }
+    
+    if(currentItemType == "eng"){
+        if(currentEng == NULL)
+            return;
+        float pos = -currentEng->sizez-1;
+        if(pos > -15) pos = -15;
+        engCamera->setPos(pos,2.5,0);
+        engCamera->setPlayerRot(M_PI/profile,0);
+        glShapeWidget->resetCamRoster(profile);
+    }
+    if(currentItemType == "con"){
+        if(currentCon == NULL)
+            return;
+        if(currentCon->engItems.size() < 1)
+            return;
+        float pos = -currentCon->conLength;
+        if(pos > -15) pos = -15;
+        engCamera->setPos(pos,2.5,pos/2.0);
+        engCamera->setPlayerRot(M_PI/profile,0);
+        glShapeWidget->resetCamRoster(profile);
+    }
+}
+
+
 
 ShapeViewerWindow::~ShapeViewerWindow() {
 }

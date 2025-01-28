@@ -285,7 +285,7 @@ void Trk::loadUtf16Data(FileBuffer* data){
                     continue;
                 }
 
-                if(Game::debugOutput) qDebug() << "#TRK tr_routefile - undefined token: " << sh;
+                if(Game::debugOutput) qDebug() << "#TRK tr_routefile - undefined token: " << sh;                               
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);

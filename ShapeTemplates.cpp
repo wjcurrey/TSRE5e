@@ -96,7 +96,12 @@ ShapeTemplates::ShapeTemplates() {
                             templates[name]->elements[e->name] = e;
                             ParserX::SkipToken(data);
                             continue;
+                        }                        
+                        if (sh == ("version")) {
+                            ParserX::SkipToken(data);
+                            continue;
                         }
+                                                        
                         qDebug() << "#Template - undefined token: " << sh;
                         ParserX::SkipToken(data);
                         continue;
@@ -104,6 +109,11 @@ ShapeTemplates::ShapeTemplates() {
                     ParserX::SkipToken(data);
                     continue;
                 }
+                if (sh == ("version")) {
+                    ParserX::SkipToken(data);
+                    continue;
+                }
+                
                 qDebug() << "#Templates - undefined token: " << sh;
                 ParserX::SkipToken(data);
                 continue;

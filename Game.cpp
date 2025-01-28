@@ -35,6 +35,13 @@
 #include "StatusWindow.h"
 #include "Camera.h"
 
+//////////////////////////////////
+//////// Version
+//////////////////////////////////
+
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.005m";  // over-ride from main.cpp
+
+
 bool Game::ServerMode = false;
 QString Game::serverLogin = "";
 QString Game::serverAuth = "";
@@ -44,16 +51,23 @@ TDB *Game::trackDB = NULL;
 TDB *Game::roadDB = NULL;    
 SoundList *Game::soundList = NULL;    
 TerrainLib *Game::terrainLib = NULL;   
-
+bool Game::LocalTSectionOnly = false;
 bool Game::UseWorkingDir = false;
 QString Game::AppName = "TSRE5";
-QString Game::AppVersion = "Trainsim.Com Fork v0.8.004c ";
+
+/// EFO New Setting for default startup option
+QString Game::startapp = "r";
+
+bool Game::showSDL = false;
+
 QString Game::AppDataVersion = "0.697";
 QString Game::root = "";
 QString Game::route = "";
 QString Game::routeName = "";
 QString Game::trkName = "";
 QString Game::season = "";
+bool Game::loadActivities = true;
+bool Game::loadConsists = true;
 //QString Game::route = "traska";
 //QString Game::route = "cmk";
 QString Game::mainWindowLayout = "PWT";
@@ -130,6 +144,7 @@ bool Game::markerLines = false;
 bool Game::loadAllWFiles = false;
 bool Game::autoFix = false;
 bool Game::gui = true;
+bool Game::listFiles = false;
 
 QString Game::geoPath = "hgst";
 
@@ -184,6 +199,7 @@ QString Game::routeMergeString;
 
 // EFO added 
 float Game::wireLineHeight = 3;
+
 float Game::sectionLineHeight = 2.8;
 float Game::terrainTools[] = {1,5,5,9,1,10};
 int   Game::selectedWidth = 2;
@@ -191,6 +207,7 @@ int   Game::selectedTerrWidth = 2;
 bool  Game::lockCamera = false;
 QColor *Game::selectedColor = new QColor("#FF0000");       /// EFO default red
 QColor *Game::selectedTerrColor = new QColor("#FF0000");   /// EFO default red
+QColor *Game::wireLineColor = new QColor("#FFFF00");       /// EFO default yellow
 
 QString Game::mainPos;   /// EFO Null handling exists
 QString Game::statusPos;  /// EFO Null handling exists
@@ -205,8 +222,15 @@ int   Game::pyramid = 5;
 int   Game::maxAutoPlacement = 999;
 int   Game::imageMapsZoomOffset = 0;
 float Game::railProfile[] = {0.7175, 0.7895};
-float Game::convertHeight = 1;  /// EFO will set to feet = 3.28084 if useImperial is set to true;
-QString Game::convertUnit = "m";
+
+float Game::convertDistance = 1;  /// EFO will set to feet = 3.28084 if useImperial is set to true;
+QString Game::convertUnitD = " m";
+float Game::convertMass = 1;  /// EFO will set to pounds = 2.20462 if useImperial is set to true;
+QString Game::convertUnitM = " t";
+float Game::convertSpeed = 1;  /// EFO will set to mph = 0.621371 if useImperial is set to true;
+QString Game::convertUnitS = " mph";
+int  Game::deepUnderground = -100;
+
 int   Game::markerHeight = 30;
 int   Game::markerText = 16;
 float Game::lastElev = 0.0;
@@ -216,9 +240,20 @@ bool Game::reload;
 QString Game::MapAPIKey = "";
 bool Game::imageSubstitution = true;
 bool Game::imageUpgrade = true;
-int Game::convertThreshold = 999;
-int Game::convertDivisor = 2000;
+QString Game::includeFolder = "openrails";
 
+int Game::logfileMax = 99999;
+int Game::logfileDays = 99999;
+
+bool Game::CheckBraces = false;
+bool Game::UnsafeMode = false;
+bool Game::extendedDebug = false;
+bool Game::routeMergeTerrain = false;
+bool Game::routeMergeTDB = false;
+bool Game::routeMergeTerrtex = false;
+bool Game::routeRebuildTDB;
+
+int Game::rnp = 7;  //// can be 8
 
 QHash<QString, int> Game::TextureFlags {
         {"none", 0x0},
@@ -234,6 +269,26 @@ QHash<QString, int> Game::TextureFlags {
         {"underground", 0x40000000}
     };
 
+    
+QStringList getFilesInDirectory(const QString& directoryPath) {
+    QDir directory(directoryPath);
+
+    // Filter for files only (exclude directories)
+    QStringList filters;
+    filters << "tsre-log-*.txt"; // filter
+
+    // Apply filters and sorting
+    directory.setSorting(QDir::Time);
+    
+    // Get the list of files
+    QStringList files = directory.entryList(filters);
+            
+    // Remove "." and ".." entries
+    files.removeOne(".");
+    files.removeOne("..");     
+    return files;
+}    
+    
 void Game::InitAssets() {
     QString path;
     bool newInstallation = false;
@@ -321,18 +376,32 @@ void Game::load() {
         args.clear();
         args.push_back(line.section('=', 0, 0));
         args.push_back(line.section('=', 1));
+        
         //if(Game::debugOutput) qDebug() << args[0] << args[1];
+        
         
         
         if(args.count() < 2) continue;
         setname = args[0].trimmed().toLower();       
         setval = args[1].trimmed().toLower();
         setval = setval.replace("\"","");
+        setval = setval.replace(";","");
+
         
         if(setname.length()==0) continue;
         
         if(Game::debugOutput) qDebug() << "Args    : " << args[0].trimmed() << " "<< args[1].trimmed();
         if(Game::debugOutput) qDebug() << "Sets    : " << setname << "=" << setval;        
+
+/*
+ 
+ 
+ *      When evaluating "setname" always be sure to check against lowercase 
+ *          Tokens get set to lowercase and don't care if mixed case was used in the settings.txt file
+ 
+ 
+ 
+ */
         
         //// These are protected and should never be reloaded
         if(Game::reload == false)
@@ -463,8 +532,7 @@ void Game::load() {
             }
             if(setname =="routemergestring")
                 routeMergeString = setval;
-            if(setname =="objectsToRemove")
-                objectsToRemove = setval.split(":");
+      
             if(setname =="serverlogin"){
                 serverLogin = args[1].trimmed();
             }
@@ -496,6 +564,37 @@ void Game::load() {
             if(setname == "sigoffset"){
                 sigOffset = setval.toFloat();
             }
+
+            if(setname =="routemergeterrain"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    routeMergeTerrain = true;
+                else
+                    routeMergeTerrain = false; 
+            }
+
+            if(setname =="routemergetdb"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    routeMergeTDB = true;
+                else
+                    routeMergeTDB = false; 
+            }
+
+            if(setname =="routemergeterrtex"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    routeMergeTerrtex = true;
+                else
+                    routeMergeTerrtex = false; 
+            }
+            
+            if(setname =="routerebuildtdb"){
+                if((setval == "true") or (setval == "1") or (setval == "on"))
+                    routeRebuildTDB = true;
+                else
+                    routeRebuildTDB = false; 
+            }
+
+
+            
             
         }
         
@@ -617,16 +716,20 @@ void Game::load() {
         
         if(setname =="geopath")
             geoPath = setval;
+        
         if(setname =="colorconview")
             colorConView = new QColor(setval);
         if(setname =="colorshapeview")
             colorShapeView = new QColor(setval);
+        
         if(setname =="ortsengenable"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 ortsEngEnable = true;
             else
                 ortsEngEnable = false;
         }
+        
+        
         if(setname =="sorttileobjects"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 sortTileObjects = true;
@@ -646,12 +749,14 @@ void Game::load() {
             else
                 snapableOnlyRot = false; 
         }
-        
-        
+                
         if(setname =="shadowsenabled"){
           if((setval == "true") or (setval == "1") or (setval == "on"))  
             shadowsEnabled = 1;
+          else 
+              shadowsEnabled = 0;
         }
+          
         if(setname =="shadowmapsize"){
             shadowMapSize = setval.toInt();
             if(shadowMapSize == 8192){
@@ -775,6 +880,11 @@ void Game::load() {
         if(setname =="season"){
             season = setval;
         }
+        
+        if(setname =="startapp"){
+            startapp = setval;
+        }
+
         if(setname =="markerlines"){
             if((setval == "true") or (setval == "1") or (setval == "on"))
                 markerLines = true;
@@ -800,6 +910,15 @@ void Game::load() {
                  lockCamera = false;
         }       
 
+        if(setname =="cameralock") {
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 lockCamera = true;
+            else
+                 lockCamera = false;
+        }       
+
+        
+        
         if(setname =="newsymbols") {
              if((setval == "true") or (setval == "1") or (setval == "on"))
              {
@@ -826,11 +945,20 @@ void Game::load() {
         }
         
         if(setname =="useimperial"){
-                convertHeight = 3.28084;
-                convertUnit = "ft";
-
+                convertDistance = 3.28084;
+                convertMass = 1.102;
+                convertSpeed = 0.621371;
+                convertUnitD = " ft";
+                convertUnitM = " T";               
+                convertUnitS = " mph";
         }
 
+        if(setname == "deepunderground")
+        {
+            deepUnderground = setval.toInt();        
+        }
+        
+        
         if(setname == "viewcompass"){
              if((setval == "true") or (setval == "1") or (setval == "on"))
                  viewCompass = true;
@@ -845,11 +973,32 @@ void Game::load() {
                  viewMarkers = false;
         }       
 
+        if(setname == "listfiles"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 listFiles = true;
+            else
+                 listFiles = false;
+        }       
+
         if(setname =="mapapikey"){
                 MapAPIKey = args[1].trimmed();
                 
         }
 
+        if(setname =="includefolder"){
+                includeFolder = args[1].trimmed();
+        }
+        
+        if(setname =="logfiledays"){
+                logfileDays = setval.toInt();
+        }
+        
+        if(setname =="logfilemax"){
+                logfileMax = setval.toInt();
+        }
+        
+
+        
         if(setname == "imagesubstitution"){
              if((setval == "true") or (setval == "1") or (setval == "on"))
                  imageSubstitution = true;
@@ -863,19 +1012,84 @@ void Game::load() {
             else
                  imageUpgrade = false;
         }       
+
+        if(setname == "loadconsists"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 loadConsists = true;
+            else
+                 loadConsists = false;
+        }
+
+        if(setname == "loadactivities"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 loadActivities = true;
+            else
+                 loadActivities = false;
+        }
+        
+        if(setname == "localtsectiononly"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 LocalTSectionOnly = true;
+            else
+                 LocalTSectionOnly = false;
+        }
+                       
+        if(setname == "objectstoremove" ) 
+            {
+              // qDebug() << "Removal Found";
+              objectsToRemove = setval.split(",") ;
+              qDebug() << "Removal objects found: " << objectsToRemove.size();              
+            }
+        
+        if(setname == "checkbraces" ) 
+        {
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 CheckBraces = true;
+            else
+                 CheckBraces = false;
+        }           
+                    
+        if(setname == "unsafemode")
+        {
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 UnsafeMode = true;
+            else
+                 UnsafeMode = false;
+        }           
         
         
+        ///////// These are unpublished settings ///////////////
+
+        if(setname == "extendeddebug"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 extendedDebug = true;
+            else
+                 extendedDebug = false;
+        }       
+
         
-        
-        
+        if(setname == "wfhuser"){
+             if((setval == "true") or (setval == "1") or (setval == "on"))
+                 showSDL = true;
+            else
+                 showSDL = false;
+        }       
+
+        if(setname == "realnumberprecision"){
+             rnp = setval.toInt();
+        }       
         
         if(Game::debugOutput) qDebug() << "Skip: " << skipped;
         skipped.clear();               
+        
+    // qDebug() << setname << " --> " << setval;        
+    
+        
     }
     
     qDebug() <<  Game::AppVersion ;
     
-    
+    cleanupLogs();
 
 }
 /*
@@ -1013,6 +1227,7 @@ void Game::check_coords(T&& x, T&& z, float* p) {
         p[0] += 2048;
         x--;
     }
+    
     if (p[2] >= 1024) {
         p[2] -= 2048;
         z++;
@@ -1058,10 +1273,15 @@ void Game::CreateNewSettingsFile(){
     //qDebug() << filepath;
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     out.setDevice(&file);
-    out << "consoleOutput = false\n";
+
+    
+    out << "// TSRE " << Game::AppVersion << "\n";
+    out << "// In this file, there are two comment marks in use -- # and // -- Both work the same  \n";    
+    out << "\n";
+    out << "consoleOutput = false    // set to true for detailed debugging \n";
     out << "\n";
     out << "# main directory of your game data\n";
-    out << "gameRoot = F:/train simulator\n";
+    out << "gameRoot = C:/train simulator\n";
     out << "\n";
     out << "# route directory name to load on startup by default\n";
     out << "routeName = asdasasdasd1233\n";
@@ -1077,9 +1297,30 @@ void Game::CreateNewSettingsFile(){
     out << "#deleteTrWatermarks = true\n";
     out << "#deleteViewDbSpheres = true\n";
     out << "\n";
-    out << "# geo data\n";
-    out << "geoPath = F:/hgst\n";
-    out << "\n";
+    
+    
+    out << "    //////////////////////////////  Map and Terrain Features\n";
+    out << "//  mapImageResolution = 2048          // Image resolution for downloaded map imagery\n";
+    out << "//  geoPath = C:/hgst                       // Drive and folder for HGT files\n";
+    out << "//  Image Maps require a valid API key from either Google or MapBox\n";
+    out << "//\n";
+    out << "////  Image Maps require a valid API key from either Google or MapBox\n";
+    out << "//\n";
+    out << "////  Google           \n";
+    out << "// imageMapsUrl = http://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom={zoom}&size={res}x{res}&maptype=satellite&key=\n";
+    out << "//  MapAPIKey = yourMapAPIKey\n";
+    out << "//\n"; 
+    out << "//// MapBox\n";
+    out << "//// See https://docs.mapbox.com/api/maps/static-images/ for parameter options\n";
+    out << "//\n";
+    out << " imageMapsUrl = https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{lon},{lat},{zoom}/{res}x{res}?access_token=\n";
+    out << " MapAPIKey = yourMapAPIKey\n";
+    out << "//// MapBox needs this offset setting to be -1:\n";
+    out << " imageMapsZoomOffset = -1\n";
+
+    
+    
+    
     out << "# misc\n";
     out << "#systemTheme = true\n";
     out << "#colorConView = #FF0000\n";
@@ -1108,7 +1349,7 @@ void Game::CreateNewSettingsFile(){
     out << "#cameraStickToTerrain = true\n";
     out << "#mouseSpeed = 0.1\n";
     out << "#mainWindowLayout = W\n";
-    out << "#ceindowLayout = CU1\n";
+    out << "#ceWindowLayout = CU1\n";
     out << "#useQuadTree = false\n";
     out << "#fogColor = #D0D0FF\n";
     out << "#fogDensity = 0.5\n";
@@ -1128,6 +1369,8 @@ void Game::CreateNewSettingsFile(){
     out << "#imageMapsZoomOffset = 0\n";
     out << "#legacySypport = false\n";
     out << "#loadAllWFiles = false\n";
+    out << "#loadConsists = false\n";
+    out << "#loadActivities = false\n";
     out << "#lockCamera = false\n";
     out << "#mainWindow = 200,200\n";
     out << "#naviWindow = 0,200\n";
@@ -1160,9 +1403,27 @@ void Game::CreateNewSettingsFile(){
     out << "#useOnlyPositiveQuaternions=false\n";
     out << "#useSuperelevation=false\n";
     out << "#viewCompass = false\n";
-    out << "wireLineHeight = 3\n";
-    out << "#";
-            
+    out << "wireLineHeight = 3\n";        
+    out << "// imagesubstitution = true\n";
+    out << "// imageupgrade = true\n";
+    out << "// includefolder = \"openrails\"\n";
+    out << "// logfiledays = 10\n";
+    out << "// logfilemax = 100\n";
+    out << "// markerheight = 10\n";
+    out << "// markertext = 2.5\n";
+    out << "// railprofile = = 0.7175, 0.7895\n";
+    out << "// sigoffset = 2.5\n";
+    out << "// skycolor = #FFFFFF\n";
+    out << "// usetdbemptyitems = true\n";
+    out << "// useworkingdir = false\n";
+    out << "// viewmarkers = true\n";
+    out << "// warningbox = true\n";
+//    out << "// LocalTSectionOnly = false\n";
+    out << "// startapp = C    /// options R C S \n";
+    out << "// deepunderground = -100   // depth in meters to flag for misplaced objects\n";
+    out << "// listFiles = false // LoadAllWFiles must also be true, gives list of all shapes and track used by route \n";
+    
+           
     out.flush();
     file.close();
 }
@@ -1246,3 +1507,49 @@ void Game::DownloadAppData(QString path){
     out.flush();
     file2.close();
 }
+
+void Game::cleanupLogs(){
+    qDebug() << "";
+    
+    // Get the application directory
+     QString appDir = QDir::currentPath();
+
+     // Define the search pattern for log files
+     QString pattern = "tsre-*.txt";
+
+     // Set the maximum number of files to keep
+     int maxFiles = Game::logfileMax ;
+     int deletedFiles = 0;
+     
+     qDebug() << "Logfile Max Nbr:" << Game::logfileMax;
+     qDebug() << "Logfile Max days:" << Game::logfileDays;
+    
+     // Create a QDir object for the application directory
+     QDir dir(appDir);     
+     QStringList fileList = getFilesInDirectory(appDir);
+     
+     qDebug() << "Directory files found:" << fileList.size();
+     
+     // Delete files older than 12 days, keeping only the newest ones
+     QDateTime daysToKeep = QDateTime::currentDateTime().addDays(-Game::logfileDays);          
+     qDebug() << "Last Date Kept:" << daysToKeep;
+     
+     for (int i = 0; i < fileList.size(); ++i) {
+       const QString& filePath = dir.filePath(fileList[i]);
+       QFileInfo fileInfo(filePath);
+       if (fileInfo.isFile() && fileInfo.lastModified() < daysToKeep ) {
+                QFile::remove(filePath);
+                deletedFiles++;
+                continue;
+                }
+                if(i > maxFiles)
+                {
+                    QFile::remove(filePath);
+                    deletedFiles++;
+                }
+                            
+        }
+     qDebug() << "Logs Deleted:"  << deletedFiles;
+     }  
+      
+       

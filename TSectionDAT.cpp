@@ -17,7 +17,10 @@
 #include <QTextStream>
 
 TSectionDAT::TSectionDAT(bool autoFix, bool loadRouteNow) {
-    loadGlobal();
+
+    //// EFO
+        loadGlobal();
+    
     if(loadRouteNow)
         loadRoute(autoFix);
 }
@@ -71,13 +74,15 @@ bool TSectionDAT::loadGlobal() {
         }
         if (sh == ("tracksections")) {
             //if (tsectionMaxIdx == 0)
-            tsectionMaxIdx = ParserX::GetNumber(data);
+            tsectionMaxIdx = ParserX::GetNumber(data);  /// Get the top number in TrackSections ( x
             int index = 0;
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                 if (sh == "tracksection") {
                     index = (int) ParserX::GetNumber(data);
+
                     //System.out.println("jest "+index);
                     sekcja[index] = new TSection(index);
+
                     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                         if (sh == "sectioncurve") {
                             sekcja[index]->type = 1;
@@ -312,19 +317,17 @@ void TSectionDAT::loadRouteUtf16Data(FileBuffer* data, bool autoFix){
     int index = 0;
     QString sh;
     int newIdx = 0, newSdx = 0;
+    int prevIdx;
+    int thisIdx;
+    int IdxGap;
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         //qDebug() << sh;
         if (sh == "tracksections") {
             while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-                //qDebug() << sh;
-                //if (sh.toLower() =="sectionidx") break;
+                                
                 if (sh.toLower() == "tracksection") {
-                    //    bufor->get();
-                    //    bufor->get();
-                    //    continue;
-                    //}
-                    //if (sh.toLower() =="sectioncurve") {
                     int typ = (int) ParserX::GetNumber(data);
+
                     index = (int) ParserX::GetNumber(data);
                     if (index < this->tsectionMaxIdx){
                         if(autoFix){
@@ -335,6 +338,7 @@ void TSectionDAT::loadRouteUtf16Data(FileBuffer* data, bool autoFix){
                             dataOutOfSync = true;
                         }
                     }
+                                        
                     if (index > this->routeMaxIdx)
                         this->routeMaxIdx = index;                    
                     sekcja[index] = new TSection(index);
@@ -342,13 +346,22 @@ void TSectionDAT::loadRouteUtf16Data(FileBuffer* data, bool autoFix){
                     if (typ == 0) {
                         sekcja[index]->size = ParserX::GetNumber(data);
                         sekcja[index]->val1 = ParserX::GetNumber(data);
-                        //System.out.println(sekcja.get(index).id+" "+sekcja.get(index).size);
+
                     } else {
                         sekcja[index]->angle = ParserX::GetNumber(data);
                         sekcja[index]->radius = ParserX::GetNumber(data);
-                        //System.out.println(sekcja.get(index).id+" "+sekcja.get(index).radius+""+sekcja.get(index).angle);
+                    
                     }
+                    
+                thisIdx = sekcja[index]->id;
+                if(index > 1)                 
+                
+                // qDebug() << "LocalT: ID:" << thisIdx;
+                IdxGap = thisIdx - prevIdx;
+                if(IdxGap > 2)
+                   qDebug() << "Local TSection: Gap found:" << IdxGap;                                                       
                 }
+                prevIdx = sekcja[index]->id;
                 ParserX::SkipToken(data);
             }
             ParserX::SkipToken(data);
@@ -407,7 +420,4 @@ bool TSectionDAT::isRoadShape(int id) {
 
 void TSectionDAT::getShapeData(int id) {
     if (shape[id] == NULL) return;
-
-
-
 }

@@ -436,9 +436,33 @@ void ObjTools::routeLoaded(Route* a){
             item.description = dirFile;
             item.clas = "non-indexed";
             item.type = "static";
-            route->ref->refItems[QString("#TSRE#")+"route/shapes directory"].push_back(item);        
+            route->ref->refItems[QString("#TSRE#")+"route/shapes directory"].push_back(item);
+            Route::shapesList.append(dirFile.toLower());
         }
     }
+
+        if((Game::listFiles == true) && (Game::loadAllWFiles == true))
+        {    
+            /// Compare loaded to shapes directory
+            QFile file("./" + Game::route + "_filesNotUsed.txt");    
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                QStringList sortedShapeList = Route::shapesList;
+                sortedShapeList.sort();
+                for (const QString& fileName : sortedShapeList) {
+                    if ((Route::fileList.contains(fileName, Qt::CaseInsensitive) == false) && (Route::trackList.contains(fileName, Qt::CaseInsensitive) == false))
+                    {
+                       out << fileName << " \n";
+//                       qDebug() << fileName << " not used";
+                    }
+//                    else
+  //                      qDebug() << fileName << " is used";
+                      // out << fileName << " --- NOT USED \n";                                
+                }
+                file.close();
+            }
+        }
+    
 }
 
 void ObjTools::refClassSelected(const QString & text){

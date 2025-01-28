@@ -26,6 +26,7 @@ public:
 public slots:
     void exitNow();
     void handleBrowseButton(QString directory = "");
+
     void routeLoad();
     void setNewRoute();
     void setLoadRoute();
@@ -34,12 +35,15 @@ signals:
     void showMainWindow();
 private:
     void listRoutes();
-    QListWidget routeList;
+    QTableWidget routeList;
     QComboBox cRecent;
     QPushButton *browse;
     QPushButton *load;
     QPushButton *neww;
     QPushButton *exit;
+
+    
+    
     QLineEdit *nowaTrasa;
     QWidget* nowa;
     bool newRoute = false;

@@ -65,12 +65,23 @@
 #include "SigCfg.h"
 #include "TDBClient.h"
 #include "RouteEditorWindow.h"
+#include "ShapeLib.h"
+#include "SFile.h"
+
 
 Route::Route() {
 
 }
 
+/// These are static members that need to be instantiated outside of a function
+    QStringList Route::fileList ;
+    QStringList Route::trackList ;    
+    QStringList Route::shapesList ;    
+    QStringList Route::texturesList ;    
+    QStringList Route::missingList;
+
 void Route::load(){
+
     Game::currentRoute = this;
     trkName = Game::trkName;
     routeDir = Game::route;
@@ -134,7 +145,7 @@ void Route::load(){
     this->roadDB->loadTdb(); 
     Game::trackDB = this->trackDB;
     Game::roadDB = this->roadDB;  
-    loadAddons();
+    loadAddons();    
     
     loadMkrList();        
     createMkrPlaces();
@@ -154,9 +165,16 @@ void Route::load(){
     ForestObj::ForestClearDistance = trk->forestClearDistance;
     CarSpawnerObj::LoadCarSpawnerList();
 
-    if(Game::loadAllWFiles){
-        preloadWFilesInit();
+    if(Game::loadAllWFiles){        
+                 
+        preloadWFilesInit();        
+        
+        if(Game::listFiles == true)
+        {        
+            ListFiles();        
+        }        
     }
+    
     checkRouteDatabase();
     loaded = true;
     
@@ -176,7 +194,7 @@ void Route::load(){
             setAsCurrentGameRoute();
         }
     }
-   
+       
 }
 
 void Route::load(QString name){
@@ -287,9 +305,8 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
     mOffset[0] = offsetX;// (-4*2048) - 256;
     mOffset[1] = offsetY;//81.47992;
     mOffset[2] = offsetZ;//(-5*2048) + 640;
-    
-    // Merge TDB
-    qDebug() << "## Merge TDB";
+
+
     unsigned int trackNodeOffset = 0; 
     unsigned int trackItemOffset = 0;
     unsigned int roadNodeOffset = 0; 
@@ -297,9 +314,17 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
     QHash<unsigned int, unsigned int> fixedSectionIds;
     QHash<unsigned int, unsigned int> fixedShapeIds;
     unsigned int oldTrackNodeCount = this->trackDB->iTRnodes; 
-    unsigned int oldRoadNodeCount = this->roadDB->iTRnodes;
-    this->trackDB->mergeTDB(route2->trackDB, mOffset, trackNodeOffset, trackItemOffset, fixedSectionIds, fixedShapeIds);
-    this->roadDB->mergeTDB(route2->roadDB, mOffset, roadNodeOffset, roadItemOffset, fixedSectionIds, fixedShapeIds);
+    unsigned int oldRoadNodeCount = this->roadDB->iTRnodes;    
+    
+    if(Game::routeMergeTDB)
+    {
+        // Merge TDB
+        qDebug() << "## Merge TDB";
+        this->trackDB->mergeTDB(route2->trackDB, mOffset, trackNodeOffset, trackItemOffset, fixedSectionIds, fixedShapeIds);
+        this->roadDB->mergeTDB(route2->roadDB, mOffset, roadNodeOffset, roadItemOffset, fixedSectionIds, fixedShapeIds);
+    }
+    else
+        qDebug() << "## Merge TDB Skipped";
     
     // Merge world objects
     if(gui){
@@ -314,6 +339,7 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
     Tile *t2Tile;
     QVector<int*> trackObjUpdates;
     int pi = 0;
+
     foreach (Tile* tTile, route2->tile){
         if(progress != NULL){
             progress->setValue((++pi));
@@ -329,7 +355,9 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
             WorldObj *wObj = tTile->obiekty[i];
             if(wObj == NULL) continue;
             //if(wObj->isTrackItem()) continue;
-            wObj->addTrackItemIdOffset(trackItemOffset, roadItemOffset);
+            
+            if(Game::routeMergeTDB)  wObj->addTrackItemIdOffset(trackItemOffset, roadItemOffset);                        
+            
             int x, z, uid, oldx, oldz, olduid;
             oldx = wObj->x;
             oldz = wObj->y;
@@ -356,87 +384,117 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
                 modifiedWorldTiles[((x)*10000 + z)] = t2Tile;
             //
             t2Tile->placeObject(wObj);
-            if(wObj->typeID == wObj->trackobj || wObj->typeID == wObj->dyntrack){
-                int *u = new int[6];
-                u[0] = oldx;
-                u[1] = oldz;
-                u[2] = olduid;
-                u[3] = x;
-                u[4] = z;
-                u[5] = wObj->UiD;
-                trackObjUpdates.push_back(u);
+            if(Game::routeMergeTDB == true)
+            {                
+                if(wObj->typeID == wObj->trackobj || wObj->typeID == wObj->dyntrack){
+                    int *u = new int[6];
+                    u[0] = oldx;
+                    u[1] = oldz;
+                    u[2] = olduid;
+                    u[3] = x;
+                    u[4] = z;
+                    u[5] = wObj->UiD;
+                    trackObjUpdates.push_back(u);
+                }
             }
         }
         
     }
     
-    this->trackDB->updateUiDs(trackObjUpdates, oldTrackNodeCount);
-    this->roadDB->updateUiDs(trackObjUpdates, oldRoadNodeCount);
+    /// EFO this is now settings driven
+    if(Game::routeMergeTDB == true)
+    {        
+        this->trackDB->updateUiDs(trackObjUpdates, oldTrackNodeCount);
+        this->roadDB->updateUiDs(trackObjUpdates, oldRoadNodeCount);
+    }            
     
     if(progress != NULL)
         delete progress;
+
     
     if(Game::debugOutput) qDebug() << "## Create MKR Places";
     createMkrPlaces();
     
     // Merge terrain
-    if(gui){
-        progress = new QProgressDialog("Merging Terrain ...", "", 0, route2->tile.size() + modifiedWorldTiles.size());
-        progress->setWindowModality(Qt::WindowModal);
-        progress->setCancelButton(NULL);
-        progress->setWindowFlags(Qt::CustomizeWindowHint);
-        progress->show();
-    }
-    pi = 0;
-    qDebug() << "Load all route2 terrain tiles";
-    foreach (Tile* wTile, route2->tile){
-        if(progress != NULL){
-            progress->setValue((++pi));
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+    /// EFO this is now settings driven    
+    if(Game::routeMergeTerrain){        
+        if(gui){
+            progress = new QProgressDialog("Merging Terrain ...", "", 0, route2->tile.size() + modifiedWorldTiles.size());
+            progress->setWindowModality(Qt::WindowModal);
+            progress->setCancelButton(NULL);
+            progress->setWindowFlags(Qt::CustomizeWindowHint);
+            progress->show();
         }
-       if (wTile == NULL) 
-           continue;
-       Terrain *t = route2->terrainLib->getTerrainByXY(wTile->x, wTile->z, true);
-       if (t == NULL)
-           qDebug() << "FAIL terrain NULL";
-       else if (!t->loaded)
-           qDebug() << "FAIL terrain not loaded";
-       else
-           if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":" << t->mojex << t->mojez;
+        pi = 0;
+        qDebug() << "Load all route2 terrain tiles";
+
+        foreach (Tile* wTile, route2->tile){                  
+            if(progress != NULL){
+                progress->setValue((++pi));
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+            }
+           if (wTile == NULL) 
+               continue;
+           Terrain *t = route2->terrainLib->getTerrainByXY(wTile->x, wTile->z, true);
+           if (t == NULL)
+               qDebug() << "FAIL terrain NULL";
+           else if (!t->loaded)
+               qDebug() << "FAIL terrain not loaded";
+           else
+               if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":" << t->mojex << t->mojez;
+        }
     }
+        else
+        qDebug() << "## Merge Terrain Skipped";
+
+    
+    if(Game::routeMergeTerrtex){
+        qDebug() << "copying Terrtex: ";
+        QString route2path = Game::root + "/routes/" + route2->routeName  + "/terrtex";
+        QString route1path = Game::root + "/routes/" + this->routeName + "/terrtex/";
+            FileFunctions::copyFiles(route2path, route1path  );
+           // qDebug() << "copying Terrtex: " << route2path << " to " << route1path;
+    }
+        else
+        qDebug() << "## Merge TerrTex Skipped";
+
     
     setAsCurrentGameRoute();
-    
-    qDebug() << "Fill Terrain data";
-    Terrain *tTile;
-    foreach (Tile* wTile, modifiedWorldTiles){
-        if(progress != NULL){
-            progress->setValue((++pi));
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
-        }
-        if (wTile == NULL) 
-            continue;
-        tTile = terrainLib->getTerrainByXY(wTile->x, wTile->z, false);
-        if(tTile == NULL){
-            terrainLib->saveEmpty(wTile->x, -wTile->z);
-            if(!terrainLib->reload(wTile->x, wTile->z)){
-                qDebug() << "reload terrain fail";
+
+    /// EFO this is now settings driven    
+    if(Game::routeMergeTerrain){        
+        qDebug() << "Fill Terrain data";
+        Terrain *tTile;
+        foreach (Tile* wTile, modifiedWorldTiles){
+            if(progress != NULL){
+                progress->setValue((++pi));
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
             }
+            if (wTile == NULL) 
+                continue;
             tTile = terrainLib->getTerrainByXY(wTile->x, wTile->z, false);
-            
+            if(tTile == NULL){
+                terrainLib->saveEmpty(wTile->x, -wTile->z);
+                if(!terrainLib->reload(wTile->x, wTile->z)){
+                    qDebug() << "reload terrain fail";
+                }
+                tTile = terrainLib->getTerrainByXY(wTile->x, wTile->z, false);
+
+            }
+            if (!tTile->loaded)
+               qDebug() << "FAIL main terrain not loaded";
+
+            qDebug() << "fill";
+            route2->terrainLib->fillTerrainData(tTile, mOffset);
+
         }
-        if (!tTile->loaded)
-           qDebug() << "FAIL main terrain not loaded";
-        
-        qDebug() << "fill";
-        route2->terrainLib->fillTerrainData(tTile, mOffset);
-        
-    }
-    if(progress != NULL)
-        delete progress;
+        if(progress != NULL)
+           delete progress;
+
+    } 
+    
     // Other
     
-
 }
 
 void Route::selectObjectsByXYRange(int mojex, int mojez, int minx, int maxx, int minz, int maxz){
@@ -1536,6 +1594,8 @@ void Route::dragWorldObject(WorldObj* obj, int x, int z, float* pos){
         if(tTile->loaded != 1) return;
     }
 
+    /// 
+    
     obj->setPosition(tpos);
     Vec3::copy(obj->firstPosition, obj->position);
     obj->setQdirection(q);
@@ -1813,7 +1873,7 @@ WorldObj* Route::autoPlaceObject(int x, int z, float* p, int mode) {
 }
 
 void Route::fillWorldObjectsByTrackItemIds(QHash<int,QVector<WorldObj*>> &objects, int tdbId){
-    foreach (Tile* tTile, tile){ if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":";
+    foreach (Tile* tTile, tile){ 
         if (tTile == NULL) continue;
         if (tTile->loaded == 1) {
             tTile->fillWorldObjectsByTrackItemIds(objects, tdbId);
@@ -1822,7 +1882,7 @@ void Route::fillWorldObjectsByTrackItemIds(QHash<int,QVector<WorldObj*>> &object
 }
 
 void Route::fillWorldObjectsByTrackItemId(QVector<WorldObj*> &objects, int tdbId, int id){
-    foreach (Tile* tTile, tile){  if(Game::debugOutput)  qDebug() << __FILE__ << " " << __LINE__ << ":";
+    foreach (Tile* tTile, tile){  
         if (tTile == NULL) continue;
         if (tTile->loaded == 1) {
             tTile->fillWorldObjectsByTrackItemId(objects, tdbId, id);
@@ -2261,6 +2321,17 @@ void Route::save() {
     this->roadDB->save();
     this->trk->save();
     ActLib::SaveAll();
+    
+    /// EFO this is a hack to trick the updated timestamp on the folder.  It could be used as a stub for 
+    /// moving the TSRE log out of the TSRE folder and placing into the route folder, which might be a better place for it
+    QString filePath;
+    filePath = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "tsreupd.txt";
+    QFile file(filePath);    
+    file.open(QIODevice::WriteOnly);
+    file.close(); 
+    QFile::remove(filePath);
+    
+    
     /*foreach(Service *s, service){
         if(s == NULL)
             continue;
@@ -2425,28 +2496,43 @@ void Route::showTrkEditr(Trk * val){
     trkWindow.exec();
 }
 
+
+void Route::ListFiles(){
+//     
+    qDebug() << " Listing out files.... ";
+    /// EFO List world shapes
+    QFile file("./" + Game::route + "_filesUsed.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        QStringList sortedFileList = fileList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            if(fileName.size() > 0) 
+            out << fileName << " \n";
+        }
+        file.close();
+    }  
+
+    /// EFO List track pieces
+    file.setFileName("./" + Game::route + "_trackUsed.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        QStringList sortedFileList = trackList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            out << fileName << " \n";
+        }
+        file.close();
+    }  
+
+    
+    qDebug() << " Done listing out files.... ";
+}
+
 /// EFO hail mary
 void Route::rebuildTDB()
 {
-    qDebug() << "Route-TDBRebuild";
-  Game::loadAllWFiles = true;
-        preloadWFiles(true);
-        // load tsection with autofix
-        this->tsection = new TSectionDAT(true);
-        // update ids inside W files
-        foreach (Tile* tTile, tile){
-            if (tTile == NULL) continue;
-            if (tTile->loaded == 1) {
-                tTile->updateTrackSectionInfo(tsection->autoFixedShapeIds, tsection->autoFixedSectionIds);
-                qDebug() << "Route-TDBRebuild";
-             }
-        }
-        ErrorMessage *e = new ErrorMessage(
-            ErrorMessage::Type_Info, 
-            ErrorMessage::Source_Editor, 
-            QString("Route Track Database rebuilt by TSRE. "),
-                    "Please validate carefully before deleting backups"
-                    );
-        ErrorMessagesLib::PushErrorMessage(e);
-        
+
+    
+    
 }

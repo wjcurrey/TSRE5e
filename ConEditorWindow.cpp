@@ -39,10 +39,17 @@ ConEditorWindow::ConEditorWindow() : QMainWindow() {
     Vec3::set((float*)Game::sunLightDirection,-1.0,0.0,0.0);
     aboutWindow = new AboutWindow(this);
     englib = new EngLib();
+    
+    /// Moving the loading
     englib->loadAll(Game::root, true);
     Game::currentEngLib = englib;
+    if(Game::loadConsists == true)
     ConLib::loadAll(Game::root, true);
+    if(Game::loadActivities == true)    
     ActLib::LoadAllAct(Game::root, true);
+    /// end Moving the loading
+
+    
     randomConsist = new RandomConsist(this);
     glShapeWidget = new ShapeViewerGLWidget(this);
     if(Game::colorShapeView != NULL)
@@ -271,9 +278,16 @@ ConEditorWindow::ConEditorWindow() : QMainWindow() {
     viewMenu->addAction(vConView);
     QObject::connect(vConView, SIGNAL(triggered(bool)), this, SLOT(viewConView(bool)));
     view3dMenu = menuBar()->addMenu(tr("&3D View"));
+    
     vResetShapeView = new QAction(tr("&Shape View: Reset"), this); 
     view3dMenu->addAction(vResetShapeView);
     QObject::connect(vResetShapeView, SIGNAL(triggered()), this, SLOT(vResetShapeViewSelected()));
+    
+    vProfileShapeView = new QAction(tr("&Shape View: Profile View"), this); 
+    view3dMenu->addAction(vProfileShapeView);
+    QObject::connect(vProfileShapeView, SIGNAL(triggered()), this, SLOT(vProfileShapeViewSelected()));
+
+    
     vGetImgShapeView = new QAction(tr("&Shape View: Copy Image"), this); 
     view3dMenu->addAction(vGetImgShapeView);
     QObject::connect(vGetImgShapeView, SIGNAL(triggered()), this, SLOT(vGetImgShapeViewSelected()));
@@ -383,6 +397,10 @@ ConEditorWindow::ConEditorWindow() : QMainWindow() {
         vEngList2->trigger();
     if(!Game::ceWindowLayout.toUpper().contains("U"))
         vConUnits->trigger();
+    if(Game::ceWindowLayout.toUpper().contains("-S"))
+        vEngView->trigger();    
+
+    
 }
 
 ConEditorWindow::~ConEditorWindow() {
@@ -408,7 +426,7 @@ void ConEditorWindow::eFindConsistsByEng(){
 void ConEditorWindow::cOpenInExternalEditor(){
     if(currentCon == NULL) return;
     QFileInfo fileInfo(currentCon->pathid);
-    if(Game::debugOutput) qDebug() << currentCon->pathid;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << currentCon->pathid;
     if(fileInfo.exists())
         QDesktopServices::openUrl(QUrl::fromLocalFile(currentCon->pathid));
 }
@@ -457,7 +475,7 @@ void ConEditorWindow::saveImgShapeView(){
     if(glShapeWidget->screenShot != NULL){
         QImage img = glShapeWidget->screenShot->mirrored(false, true);
         QString path = QFileDialog::getSaveFileName(this, "Save File", "./", "Images (*.png *.jpg)");
-        if(Game::debugOutput) qDebug() << path;
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << path;
         if(path.length() < 1) return;
         QFile file(path);
         file.open(QIODevice::WriteOnly);
@@ -486,6 +504,20 @@ void ConEditorWindow::vResetShapeViewSelected(){
     glShapeWidget->resetRot();
 }
 
+void ConEditorWindow::vProfileShapeViewSelected(){
+    float profile = -1.6;
+    
+    if(currentEng == NULL) return;
+    float pos = -currentEng->sizez-1;
+    if(pos > -15) pos = -15;
+    engCamera->setPos(pos,2.5,0);
+    engCamera->setPlayerRot(M_PI/profile,0);    
+    glShapeWidget->resetCamRoster(profile);
+    glShapeWidget->showShape();
+}
+
+
+
 void ConEditorWindow::save(){
     if(con1->isActivity())
         saveCurrentActivity();
@@ -510,7 +542,7 @@ void ConEditorWindow::saveCurrentConsist(){
         do {
             spath = currentCon->path + "/" + currentCon->name;
             spath.replace("//", "/");
-            qDebug() << spath;
+            qDebug() << __FILE__ << __LINE__ << spath;
             QFile file(spath);
             if(!file.exists())
                 break;
@@ -619,7 +651,7 @@ void ConEditorWindow::viewConView(bool show){
 
 void ConEditorWindow::setCurrentEng(int id, int engSetId){
     currentEng = englib->eng[id];
-    if(Game::debugOutput) qDebug() << "CEW622: " << currentEng->engName;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << currentEng->engName;
 
     engSets.clear();
     con1->getEngSets(currentEng, engSets);
@@ -668,12 +700,13 @@ void ConEditorWindow::fillCurrentEng(int engSetId){
     
     eType.setText(ttype);
     
-    
+     /// EFO ----> another location for unit of measure?
+    // 
     //eBrakes;
     //eCouplings;
-    eMass.setText(QString::number(currentEng->mass) + " t");
+    eMass.setText(QString::number((currentEng->mass)*Game::convertMass) + Game::convertUnitM);
     if(currentEng->wagonTypeId >= 4){
-        eMaxSpeed.setText(QString::number((int)currentEng->maxSpeed) + " km/h");
+        eMaxSpeed.setText(QString::number(((int)currentEng->maxSpeed)*Game::convertSpeed) + Game::convertUnitS);
         eMaxForce.setText(QString::number((int)currentEng->maxForce / 1000.0) + " kN");
         eMaxPower.setText(QString::number((int)currentEng->maxPower ) + " kW");
     } else {
@@ -682,7 +715,7 @@ void ConEditorWindow::fillCurrentEng(int engSetId){
         eMaxPower.setText("--");
     }
     eShape.setText(currentEng->shape.name);
-    eSize.setText(QString::number(currentEng->sizex)+" "+QString::number(currentEng->sizey)+" "+QString::number(currentEng->sizez)+" ");
+    eSize.setText(QString::number(currentEng->sizex*Game::convertDistance)+ Game::convertUnitD + " "+QString::number(currentEng->sizey*Game::convertDistance)+Game::convertUnitD + " "+QString::number(currentEng->sizez*Game::convertDistance)+Game::convertUnitD + " ");
     eCouplings.setText(currentEng->getCouplingsName());
     eBrakes.setText(currentEng->brakeSystemType);
 }
@@ -728,7 +761,7 @@ void ConEditorWindow::engSetShowSet(QString n){
 }
 
 void ConEditorWindow::cSaveAsEngSetSelected(){
-    qDebug() << "new eng set";
+    qDebug() << __FILE__ << __LINE__<< "new eng set";
     if(currentCon == NULL) return;
     if(!currentCon->isNewConsist()){
         QMessageBox msgBox;
@@ -755,7 +788,7 @@ void ConEditorWindow::cSaveAsEngSetSelected(){
     QString spath;
     spath = currentCon->path + "/" + currentCon->name;
     spath.replace("//", "/");
-    qDebug() << spath;
+    qDebug() << __FILE__ << __LINE__ << spath;
     QFile file(spath);
     if(file.exists()){
         owerwriteDialog.exec();
@@ -792,7 +825,7 @@ void ConEditorWindow::engListSelected(int id){
     else
         setCurrentEng(id, -1);
     //currentEng = englib->eng[id];
-    if(Game::debugOutput) qDebug() << "CEW795: " << currentEng->engName;
+    if(Game::debugOutput) qDebug() << __FILE__ << __LINE__<< currentEng->engName;
     //float pos = -currentEng->sizez-1;
     //if(pos > -15) pos = -15;
     //engCamera->setPos(pos,2.5,0);
@@ -818,7 +851,7 @@ void ConEditorWindow::addToConSelected(int id, int pos, int count){
 
 void ConEditorWindow::conListSelected(int id){
     currentCon = ConLib::con[id];
-    qDebug() << currentCon->conName;
+    qDebug() << __FILE__ << __LINE__ << currentCon->conName;
     refreshCurrentCon();
     conSlider->setValue(0);
     emit showCon(id);
@@ -826,11 +859,14 @@ void ConEditorWindow::conListSelected(int id){
 
 void ConEditorWindow::conListSelected(int aid, int id){
     currentCon = ActLib::Act[aid]->activityObjects[id]->con;
-    qDebug() << currentCon->showName;
+    qDebug() << __FILE__ << __LINE__ << currentCon->showName;
     refreshCurrentCon();
     conSlider->setValue(0);
     emit showCon(aid, id);
 }
+
+
+//////  EFO this is where the measurements are calculated for a consist
 
 void ConEditorWindow::refreshCurrentCon(){
     units->setCon(currentCon);
@@ -840,10 +876,10 @@ void ConEditorWindow::refreshCurrentCon(){
         conSlider->setValue(conSlider->maximum());
     cFileName.setText(currentCon->conName);
     cDisplayName.setText(currentCon->displayName);
-    cMass.setText(QString::number(currentCon->mass) + " t");
-    cEmass.setText(QString::number(currentCon->emass) + " t");
-    cWmass.setText(QString::number(currentCon->mass - currentCon->emass) + " t");
-    cLength.setText(QString::number(currentCon->conLength) + " m");
+    cMass.setText(QString::number((currentCon->mass)*(Game::convertMass)) +  Game::convertUnitM);
+    cEmass.setText(QString::number((currentCon->emass)*(Game::convertMass)) + Game::convertUnitM);
+    cWmass.setText(QString::number((currentCon->mass - currentCon->emass)*(Game::convertMass)) + Game::convertUnitM);
+    cLength.setText(QString::number((currentCon->conLength)*(Game::convertDistance)) + Game::convertUnitD);
     cUnits.setText(QString::number(currentCon->engItems.size()));
     cDurability.setValue(currentCon->durability);
 }
@@ -903,7 +939,7 @@ void ConEditorWindow::closeEvent( QCloseEvent *event )
     con1->getUnsaed(unsavedConIds);
     con1->getUnsaedAct(unsavedActIds);
     if(unsavedConIds.size()+unsavedActIds.size() == 0){
-        qDebug() << "Nothing to Save";
+        qDebug() << __FILE__ << __LINE__ << "Nothing to Save";
         event->accept();
         return;
     }

@@ -58,6 +58,7 @@ public slots:
     void cSeasonEnabled(int val);
     void cWeatherEnabled(int val);
     void cHornAtCrossingsEnabled(int val);
+    void eORTSAICrossingHornPatternEnabled(QString val);
     void eFuelCoalEnabled(QString val);
     void sFuelCoalEnabled();
     void eFuelDieselEnabled(QString val);
@@ -131,6 +132,7 @@ private:
     QComboBox cSeason;
     QComboBox cWeather;
     QCheckBox cHornAtCrossings;
+    QLineEdit eORTSAICrossingHornPattern;
 
     QComboBox cService;
     QComboBox cTraffic;

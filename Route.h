@@ -153,8 +153,14 @@ public:
     void render(GLUU *gluu, float* playerT, float* playerW, float* target, float playerRot, float fov, int renderMode);
     void renderShadowMap(GLUU *gluu, float* playerT, float* playerW, float* target, float playerRot, float fov, bool selection);
 
+    static QStringList fileList;    
+    static QStringList trackList;        
+    static QStringList missingList;
+    static QStringList shapesList;    
+    static QStringList texturesList;        
+    void ListFiles();
     void rebuildTDB();
-    
+
     
 signals:
     void objectSelected(GameObj* obj);
@@ -165,6 +171,7 @@ protected:
     QString trkName;
     QString routeDir;
     QString routeName;
+
     
     void loadTrk();
     TDB *trackDB = NULL;

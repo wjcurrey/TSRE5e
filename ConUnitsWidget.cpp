@@ -55,6 +55,8 @@ ConUnitsWidget::ConUnitsWidget() {
 ConUnitsWidget::~ConUnitsWidget() {
 }
 
+
+
 void ConUnitsWidget::setCon(Consist* c){
     con = c;
     if(con == NULL) return;

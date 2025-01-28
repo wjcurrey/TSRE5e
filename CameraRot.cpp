@@ -164,11 +164,13 @@ void CameraRot::moveRight(float fps) {
 }
 
 void CameraRot::moveUp() {
-    playerPos[1] += przesy;
+//    playerPos[1] += przesy;
+    playerPos[1] = playerPos[1] + (10.0 / 60) * przesy;    
 }
 
 void CameraRot::moveDown() {
-    playerPos[1] -= przesy;
+//    playerPos[1] -= przesy;
+    playerPos[1] = playerPos[1] - (10.0 / 60) * przesy;        
 }
 
 void CameraRot::patrzX(float f) {

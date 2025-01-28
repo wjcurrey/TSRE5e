@@ -69,6 +69,7 @@ public slots:
     void replaceAllEnabled();
     void replaceAllAllEnabled();
     void vResetShapeViewSelected(); 
+    void vProfileShapeViewSelected();     
     void vGetImgShapeViewSelected(); 
     void vSaveImgShapeViewSelected();
     void copyImgShapeView();
@@ -137,6 +138,7 @@ private:
     QAction *vEngView;
     QAction *vConView;
     QAction *vResetShapeView;
+    QAction *vProfileShapeView;    
     QAction *vGetImgShapeView;
     QAction *vSaveImgShapeView;
     QAction *vSetColorShapeView;
