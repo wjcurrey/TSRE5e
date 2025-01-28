@@ -187,13 +187,18 @@ public:
     static QStringList objectsToRemove;
     
     // EFO Adds
+    static bool LocalTSectionOnly;
     static float wireLineHeight;
     static float sectionLineHeight;
     static float terrainTools[];
     static int selectedTerrWidth;
     static int selectedWidth;    
     static QColor *selectedColor;
-    static QColor *selectedTerrColor;    
+    static QColor *selectedTerrColor;        
+    static QColor *wireLineColor;
+    
+    static bool loadConsists;
+    static bool loadActivities;    
     static QString mainPos;
     static QString statusPos;
     static QString naviPos;
@@ -207,8 +212,13 @@ public:
     static int maxAutoPlacement;
     static int imageMapsZoomOffset;
     static float railProfile[];
-    static float convertHeight;
-    static QString convertUnit;
+    static QString convertUnitS;
+    static float convertSpeed;
+
+    static QString convertUnitM;
+    static float convertMass;
+    static QString convertUnitD;
+    static float convertDistance;
     static int markerHeight;
     static int markerText;
     static float lastElev;
@@ -218,8 +228,21 @@ public:
     static QString MapAPIKey;    
     static bool imageSubstitution;
     static bool imageUpgrade;
-    static int convertThreshold;
-    static int convertDivisor;
+    static QString includeFolder;
+    static int  deepUnderground;
+    static int logfileMax;
+    static int logfileDays;
+    static QString startapp;
+    static bool listFiles;
+    static bool showSDL;
+    static int rnp;
+    static bool CheckBraces;
+    static bool UnsafeMode;
+    static bool extendedDebug;
+    static bool routeMergeTerrain;
+    static bool routeMergeTDB;
+    static bool routeMergeTerrtex;    
+    static bool routeRebuildTDB;    
 
 private:
     //static RouteEditorWindow* window;
@@ -227,6 +250,7 @@ private:
     static void CreateNewSettingsFile();
     static void DownloadAppData(QString path);
     static void CheckForOpenAl();
+    static void cleanupLogs();
 };
 
 #endif	/* GAMESETTINGS_H */

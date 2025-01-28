@@ -47,6 +47,7 @@
 #include "PropertiesTrackItem.h"
 #include "PropertiesActivityPath.h"
 #include "PropertiesConsist.h"
+#include "Ref.h"
 #include "NaviWindow.h"
 #include "StatusWindow.h"
 #include "ErrorMessagesWindow.h"
@@ -65,6 +66,7 @@
 #include "Route.h"
 #include "LoadWindow.h"
 #include "CELoadWindow.h"
+#include "TexLib.h"
 
 
 
@@ -331,6 +333,7 @@ RouteEditorWindow::RouteEditorWindow() {
     toolsMenu->addAction(shapeViewAction);
     QObject::connect(shapeViewAction, SIGNAL(triggered(bool)), this, SLOT(hideShowShapeViewWidget(bool)));
     errorViewAction = GuiFunct::newMenuCheckAction(tr("&Errors and Messages"), this, false); 
+    errorViewAction->setShortcut(QKeySequence("F8"));    
     toolsMenu->addAction(errorViewAction);
     QObject::connect(errorViewAction, SIGNAL(triggered(bool)), this, SLOT(hideShowErrorMsgWidget(bool)));
     toolsMenu->addSeparator();
@@ -622,9 +625,9 @@ RouteEditorWindow::RouteEditorWindow() {
       QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));   
       QObject::connect(objTools, SIGNAL(updStatus(QString, QString)), statusWindow, SLOT(recStatus(QString, QString)));         
  
-      // connects the GLWidget to the Navi window for marker update
-      QObject::connect(glWidget, SIGNAL(MkrFiles(mkrList(QMap<QString, Coords*> list))), naviWindow, SLOT(mkrList(QMap<QString, Coords*> list)));
-
+      // connects the GLWidget to the Navi window for marker update      
+//      QObject::connect(glWidget, SIGNAL(MkrFiles(mkrList(QMap<QString, Coords*> list))), naviWindow, SLOT(mkrList(QMap<QString, Coords*> list)));
+      QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));
       /// EFO connect the status buttons to the other windows
       
 
@@ -650,6 +653,19 @@ void RouteEditorWindow::exitToLoadWindow(){
 void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     QVector<QString> unsavedItems;
     glWidget->getUnsavedInfo(unsavedItems);
+    
+    /// EFO List missing shapes
+    QFile file("./" + Game::route + "_missingShapes.txt");    
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        QStringList sortedFileList = Route::missingList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            out << fileName << " \n";
+        }
+        file.close();
+    }      
+    
     if(unsavedItems.size() == 0){
         if(Game::debugOutput) qDebug() << "Nothing to Save";
         emit exitNow();
@@ -659,7 +675,7 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
         //qApp->quit();
         return;
     }
-    
+   
     UnsavedDialog unsavedDialog;   /// EFO need to add the stwqc here when terrain and world are split
     unsavedDialog.setWindowTitle("Save changes?");
     unsavedDialog.setMsg("Save changes in route?");
@@ -683,6 +699,8 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
     //// EFO  need to flesh this out for saving terrain and world separately
     save();
 
+
+    
     emit exitNow();
     event->accept();
     

@@ -48,6 +48,8 @@ public:
     void setElevation(float prom);
     float getElevation();
     int getCollisionType();
+    ErrorMessage* checkForErrors();
+    
 private:
     float elevation;
     //unsigned int collideFunction;

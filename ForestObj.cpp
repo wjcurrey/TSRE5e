@@ -65,7 +65,7 @@ ForestObj::~ForestObj() {
 void ForestObj::LoadForestList(){
     QString path = Game::root + "/routes/" + Game::route + "/forests.dat";
     path.replace("//", "/");
-    if(Game::debugOutput) qDebug() << "FO68: " << path;
+    
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         return;
@@ -76,7 +76,7 @@ void ForestObj::LoadForestList(){
     //ParserX::szukajsekcji1(sh, data);
     //ParserX::GetNumber(data);
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
-        if(Game::debugOutput) qDebug() << "FO79: "<< sh;
+        
         if (sh == ("forest")) {
             ForestObj::forestList.push_back(ForestObj::ForestList());
             ForestObj::forestList.back().name = ParserX::GetString(data);
@@ -123,7 +123,7 @@ void ForestObj::set(QString sh, QString val){
 
 void ForestObj::set(QString sh, long long int val) {
     if (sh == ("ref_value")) {
-        if(Game::debugOutput) qDebug() << "FO126: "<< val;
+        // if(Game::debugOutput) qDebug() << "FO126: "<< val;
         int val2        = val & 0xFFFF;
         int tareax      = (val >> 16) & 0xFFF;
         int tareaz      = (val >> 28) & 0xFFF;
@@ -398,7 +398,7 @@ void ForestObj::drawShape(){
                 bBox[1] += position[0];
                 bBox[2] += position[2];
                 bBox[3] += position[2];            
-                if(Game::debugOutput) qDebug() << "FO401: "<< bBox[0] << bBox[1] << bBox[2] << bBox[3];
+                // if(Game::debugOutput) qDebug() << "FO401: "<< bBox[0] << bBox[1] << bBox[2] << bBox[3];
             
                 if(Game::trackDB != NULL)
                     Game::trackDB->fillNearestSquaredDistanceToTDBXZ(posT, fpoints, bBox);

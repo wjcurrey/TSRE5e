@@ -16,6 +16,7 @@
 #include "SFile.h"
 #include <QDebug>
 #include <QFile>
+#include <QTextStream>
 #include "Game.h"
 #include "GLUU.h"
 #include "OglObj.h"
@@ -82,9 +83,9 @@ Eng::Eng(QString p, QString n) {
     path = p;
     name = n;
     if(Game::ortsEngEnable){
-        orpathid = p.toLower()+"/openrails/"+n.toLower();
+        orpathid = p.toLower()+"/"+ Game::includeFolder + "/"+n.toLower();
         orpathid.replace("//","/");
-        orpath = path+"/openrails/";
+        orpath = path+"/" + Game::includeFolder + "/";
     } else {
         orpathid = pathid;
         orpath = path;
@@ -103,6 +104,7 @@ void Eng::addToFileList(QString val){
     val.replace("\\","/");
     val.replace("//","/");
     filePaths.push_back(val);
+    // qDebug() << "addToFileList: " << val;
 }
 
 Eng::Eng(QString src, QString p, QString n) {
@@ -111,9 +113,9 @@ Eng::Eng(QString src, QString p, QString n) {
     path = p;
     name = n;
     if(Game::ortsEngEnable){
-        orpathid = p.toLower()+"/openrails/"+n.toLower();
+        orpathid = p.toLower()+"/" + Game::includeFolder + "/"+n.toLower();
         orpathid.replace("//","/");
-        orpath = path+"/openrails/";
+        orpath = path+"/" + Game::includeFolder + "/";
     } else {
         orpathid = pathid;
         orpath = path;
@@ -147,15 +149,49 @@ void Eng::load(){
             addToFileList(pathid);
         }
     } else {
-        if(Game::debugOutput) if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Base Engine \t \t" << orpathid;
+        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << "Base Engine \t \t" << orpathid;
         addToFileList(orpathid);
     }
 
-    FileBuffer* data = ReadFile::read(file);
+    /// EFO  Added to cross check for bad formatting        
+    if(Game::CheckBraces == true)    
+    {
+            QFile file2(pathid);
+            if (!file2.open(QIODevice::ReadOnly)) {
+                qDebug() << "Error opening file for brace check:" << pathid;
+                return;
+            }
+        
+            int braceOpenCount = 0;
+            int braceCloseCount = 0;    
+            int quoteCount = 0;
+            QString result;
+            
+            while (!file2.atEnd()) {
+                QByteArray line = file2.readLine();
+                for (char c : line) {
+                    if (c == '"') {
+                        quoteCount++;
+                    }
+                       else if (c == '(') {
+                        braceOpenCount++;
+                    } else if (c == ')') {
+                        braceCloseCount++;
+                    }
+                 }                
+            }
+            file2.close();
+            if(braceOpenCount != braceCloseCount) qWarning() << "Possible Brace Mismatch in : " << pathid ;
+            if(quoteCount % 2 > 0) qWarning() << "Possible Quote Mismatch in : " << pathid ;
+    }
+   
+    
+    FileBuffer* data = ReadFile::read(file);       
     file->close();
     data->toUtf16();
     data->skipBOM();
     QString loadedPath;
+    
     
     /// Reading the input file
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
@@ -164,12 +200,11 @@ void Eng::load(){
         float loadoroffset[] = {0,0,0};
         int loadcontainers = 0;
         float loadarealength = 0;
-        float loadbase = 2.6;
-        
+        float loadbase = 2.6;        
         //qDebug() << sh;
         if (sh == ("simisa@@@@@@@@@@jinx0d0t______")) {    /// Header Record
             continue;
-        }
+        }               
         if (sh == ("include")) {
             QString incPath = ParserX::GetStringInside(data).toLower();
             QString incPathb = ParserX::GetStringInside(data).toLower();
@@ -179,6 +214,7 @@ void Eng::load(){
                 addToFileList(loadedPath);
             if(data->insertFile(incpath + "/" + incPathb, mstsincpath + "/" + incPathb, &loadedPath))  //// alternate path
                 addToFileList(loadedPath);
+              //qDebug() << "eng 186 parsing: " << loadedPath;
             continue;
         }
         if (sh == ("wagon")) {   //// Wagon files
@@ -190,9 +226,18 @@ void Eng::load(){
                 //qDebug() << sh;
                 if (sh == ("include")) {
                     QString incPath = ParserX::GetStringInside(data).toLower();
+                    QString incPathb = ParserX::GetStringInside(data).toLower();
+                    incPathb = incPathb.replace("../","/"); //// EFO trying to fix older files - will it break newer?
                     ParserX::SkipToken(data);
                     if(data->insertFile(incpath + "/" + incPath, mstsincpath + "/" + incPath, &loadedPath))
                         addToFileList(loadedPath);
+                    if(data->insertFile(incpath + "/" + incPathb, mstsincpath + "/" + incPath, &loadedPath))
+                        addToFileList(loadedPath);
+                    if(Game::debugOutput) qDebug() << "No handler to read this file just yet: " << loadedPath;
+                      
+                    //// Need to add a file read/parse routine here similar to the loadOR functionality     
+                    ////    look for:    //// Load OR exception handling needed.  It's faux JSON
+
                     continue;
                 }
                 if (sh == ("name")) {
@@ -214,10 +259,100 @@ void Eng::load(){
                     continue;
                 }
                 if (sh == ("size")) {
-                    sizex = ParserX::GetNumberInside(data);
-                    sizey = ParserX::GetNumberInside(data);
-                    sizez = ParserX::GetNumberInside(data);
-                    //qDebug() << "wymiary taboru: " << sizex << " " << sizey << " " << sizez;
+                    
+                    double convunitx = 1;
+                    double convunity = 1;
+                    double convunitz = 1;
+                    
+                    QString unitx = "";
+                    QString unity = "";
+                    QString unitz = "";
+                    
+                    QString temp0 = "";
+                    QString temp1 = "";
+                    QString temp2 = "";
+                    QString tempx0 = "";
+                    QString tempx1 = "";
+                    QString tempx2 = "";
+                            
+                    // sizex = ParserX::GetNumberInside(data);
+                    // sizey = ParserX::GetNumberInside(data);
+                    // sizez = ParserX::GetNumberInside(data);                    
+                    
+                    temp0 = ParserX::GetString(data);
+                    temp1 = ParserX::GetString(data);                    
+                    temp2 = ParserX::GetString(data);                    
+
+                    //// EFO have to truncate anything with a + to separate feet and inches... 
+                    
+                    if (temp0.contains("+")) 
+                    { 
+                        tempx0 = temp0;
+                        temp0.truncate(temp0.indexOf("+"));
+                        qDebug() << "Compound size width value " << tempx0 << " truncated to  " << temp0 << "in " << pathid;
+                    }
+                    
+                    if (temp1.contains("+")) 
+                    { 
+                        tempx1 = temp1;                        
+                        temp1.truncate(temp1.indexOf("+"));
+                        qDebug() << "Compound size height value " << tempx1 << " truncated to  " << temp1 << "in " << pathid;
+                    }
+                    
+                    if (temp2.contains("+")) 
+                    { 
+                        tempx2 = temp2;                                                
+                        temp2.truncate(temp2.indexOf("+"));                        
+                        qDebug() << "Compound size length value " << tempx2 << " truncated to  " << temp2 << "in " << pathid;
+                    }
+                    
+                                        
+                    if (temp0.endsWith("m"))
+                    { unitx = "m" ; convunitx = 1; }                                        
+                    if (temp0.endsWith("cm"))
+                    { unitx = "cm" ; convunitx = 0.01; }                                        
+                    if (temp0.endsWith("in"))
+                    { unitx = "in" ; convunitx = 0.0254; }                    
+                    if (temp0.endsWith("ft"))
+                    { unitx = "ft" ; convunitx = 0.3048; }                    
+                                        
+                    sizex = temp0.replace(unitx,"").toFloat();
+                    sizex = sizex*convunitx;
+                    
+                    
+                    if (temp1.endsWith("m"))
+                    { unity = "m" ; convunity = 1; }                                        
+                    if (temp1.endsWith("cm"))
+                    { unity = "cm" ; convunity = 0.01; }                                        
+                    if (temp1.endsWith("in"))
+                    { unity = "in" ; convunity = 0.0254; }                    
+                    if (temp1.endsWith("ft"))
+                    { unity = "ft" ; convunity = 0.3048; }                    
+                    
+                    sizey = temp1.replace(unity,"").toFloat();                    
+                    sizey = sizey*convunity;
+                    
+                    
+                    if (temp2.endsWith("m"))
+                    { unitz = "m" ; convunitz = 1; }
+                    if (temp2.endsWith("cm"))
+                    { unitz = "cm" ; convunitz = 0.01; }                                                            
+                    if (temp2.endsWith("in"))
+                    { unitz = "in" ; convunitz = 0.0254; }                    
+                    if (temp2.endsWith("ft"))
+                    { unitz = "ft" ; convunitz = 0.3048; }                    
+                           
+                    sizez = temp2.replace(unitz,"").toFloat();                                        
+                    sizez = sizez*convunitz;                    
+                    
+                    if(convunitx != 1 || convunity != 1 || convunitz != 1)
+                    { if(Game::debugOutput)  qDebug() << "Size Converted to Metric: " << engName << ": "
+                            << temp0 + unitx << " -> " << sizex 
+                            << " " << temp1 + unity << " -> " << sizey 
+                            << " " << temp2 + unitz << " -> " << sizez 
+                            ;
+                    }
+                    
                     ParserX::SkipToken(data);
                     continue;
                 }
@@ -232,11 +367,22 @@ void Eng::load(){
                 if (sh == ("mass")) {
                     float temp;
                     QString temp1;
+                    QString temp2;
                     QString temp0;
                     QString unit;
                     float convunit = 1.0;
+                    int spacepos = 0;
                     
                     temp1 = ParserX::GetString(data);
+                    if(temp1.contains("#"))   /// this is a sometimes used comment within the mass field...
+                    {
+                        temp2 = temp1;  // copy the raw data                        
+                        spacepos = temp1.indexOf("#"); /// find the comment separator                   
+                        temp1.truncate(spacepos);  // truncate at that position
+                        temp1 = temp1.trimmed(); // clean up any remaining spaces
+                        if(Game::debugOutput) qDebug() << __FILE__ << __LINE__ << shape.name << " Mass Truncated: \t" "" << temp1 << " was " << temp2;
+                    }
+                                        
                     temp0 = temp1;
                     if(temp1.endsWith("kg"))  { unit = "KG";   convunit = 1000.0;    temp1 = temp1.replace("kg"  ,"");  }
                     if(temp1.endsWith("t")) { unit = "MET";    convunit = 1.0;       temp1 = temp1.replace("t"   ,"");  }
@@ -250,8 +396,7 @@ void Eng::load(){
                     mass = temp;
                     if (temp1.toFloat() != temp) // if(Game::debugOutput) 
                         {
-                            qDebug().noquote() << __FILE__ << __LINE__ << shape.name << " Adjusted Mass: \t" "" << mass << " was " << temp0;
-                            
+                            if(Game::debugOutput) qDebug().noquote() << __FILE__ << __LINE__ << shape.name << " Adjusted Mass: \t" "" << mass << " was " << temp0 << " " << unit;                            
                         }
                        //     qDebug() << __FILE__ << __LINE__ << shape.name << " Adjusted Mass: \t" "" << mass << " was " << temp1 << " " << unit;
 
@@ -264,8 +409,7 @@ void Eng::load(){
                     coupling.push_back(Coupling());
                     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
                         if (sh == ("type")) {
-                            coupling.back().type = ParserX::GetString(data);
-                            //qDebug() << "c: "<< coupling.back().type;
+                            coupling.back().type = ParserX::GetString(data);                            
                             ParserX::SkipToken(data);
                             continue;
                         }
@@ -596,11 +740,13 @@ void Eng::load(){
         }
         ParserX::SkipToken(data);
         continue;
-    }
+    }           
     //qDebug() << typeHash;
     delete data;
     loaded = 1;
     //qDebug() << loaded;
+    
+    
     return;
 }
 
@@ -1198,28 +1344,4 @@ void Eng::fillContentHierarchyInfo(QVector<ContentHierarchyInfo*>& list, int par
 }
 
 
-/*
- 
-void Eng::loadORPosition() {
-  
- * foot value * 0.3048 = meters 
-  
-    ContainerType.C20ft     :  LengthM = 6.095f;  HeightM = 2.6f;
-    ContainerType.C40ft     :  LengthM = 12.19f;  HeightM = 2.6f;
-    ContainerType.C45ft     :  LengthM = 13.7f;   HeightM = 2.6f;
- *  
-    ContainerType.C48ft     :  LengthM = 14.6f;   HeightM = 2.9f;
-    ContainerType.C53ft     :  LengthM = 16.15f;  HeightM = 2.9f;
-    ContainerType.C40ftHC   :  LengthM = 12.19f;  HeightM = 2.9f;
-    ContainerType.C45ftHC   :  LengthM = 13.7f;   HeightM = 2.9f;
-
-   
-    LoadPosition.Center     :  zOffset = 0;
-    LoadPosition.CenterRear :  zOffset += container.LengthM / 2;
-    LoadPosition.CenterFront:  zOffset -= container.LengthM / 2;
-    LoadPosition.Rear       :  zOffset += (LoadingAreaLength - container.LengthM) / 2;
-    LoadPosition.Front      :  zOffset -= (LoadingAreaLength - container.LengthM) / 2;
-
-
-*/    
     

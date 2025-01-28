@@ -171,6 +171,14 @@ TerrainTools::TerrainTools(QString name)
     sIntensity->setMinimum(1);
     sIntensity->setMaximum(100);
     sIntensity->setValue(paintBrush->alpha*100);
+
+    seasonType = new QComboBox;
+    seasonType->setStyleSheet("combobox-popup: 0;");
+    seasonType->addItem("Daytime");
+    seasonType->addItem("Night");
+    seasonType->addItem("Snow");
+    
+    
     hType = new QComboBox;
     hType->setStyleSheet("combobox-popup: 0;");
     hType->addItem("Add - simple");
@@ -203,8 +211,12 @@ TerrainTools::TerrainTools(QString name)
     vlist->addWidget(fheight,row++,1,1,2);
     vlist->addWidget(GuiFunct::newQLabel("Height type:", labelWidth),row,0);
     vlist->addWidget(hType,row++,1,1,2);
-    vbox->addItem(vlist);
+
+    vlist->addWidget(GuiFunct::newQLabel("Texture Type:", labelWidth),row,0);
+    vlist->addWidget(seasonType,row++,1,1,2);
     
+
+    vbox->addItem(vlist);
     
     // enbankment
     sEsize = new QSlider(Qt::Horizontal);
@@ -231,6 +243,10 @@ TerrainTools::TerrainTools(QString name)
     leEcut->setValidator(new QIntValidator(1, 10, this));
     leEradius = GuiFunct::newQLineEdit(25,3);
     leEradius->setValidator(new QIntValidator(1, 100, this));
+    sun1 = GuiFunct::newQLineEdit(25,3);
+    sun2 = GuiFunct::newQLineEdit(25,3);       
+    sun3 = GuiFunct::newQLineEdit(25,3);    
+    
     QLabel *label3 = new QLabel("Embankment settings:");
     label3->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
     label3->setContentsMargins(3,0,0,0);
@@ -252,6 +268,20 @@ TerrainTools::TerrainTools(QString name)
     vlist2->addWidget(GuiFunct::newQLabel("Max Radius:", labelWidth),row,0);
     vlist2->addWidget(leEradius,row,1);
     vlist2->addWidget(sEradius,row++,2);
+    
+    /*
+    
+    vlist2->addWidget(GuiFunct::newQLabel("Sky 1:", labelWidth),row,0);
+    vlist2->addWidget(sun1,row++,1);
+    vlist2->addWidget(GuiFunct::newQLabel("Sky 2:", labelWidth),row,0);
+    vlist2->addWidget(sun2,row++,1);
+    vlist2->addWidget(GuiFunct::newQLabel("Sky 3:", labelWidth),row,0);
+    vlist2->addWidget(sun3,row++,1);
+    
+     */
+    
+    
+    
     vbox->addItem(vlist2);
     
     vbox->addStretch(1);
@@ -336,11 +366,24 @@ TerrainTools::TerrainTools(QString name)
     QObject::connect(leEradius, SIGNAL(textEdited(QString)),
                       this, SLOT(setEradius(QString)));
     
+    QObject::connect(sun1, SIGNAL(textEdited(QString)),
+                      this, SLOT(setSun1(QString)));    
+
+    QObject::connect(sun2, SIGNAL(textEdited(QString)),
+                      this, SLOT(setSun2(QString)));    
+    
+    QObject::connect(sun3, SIGNAL(textEdited(QString)),
+                      this, SLOT(setSun3(QString)));    
+
+    
     QObject::connect(fheight, SIGNAL(textEdited(QString)),
                       this, SLOT(setFheight(QString)));
     
     QObject::connect(hType, SIGNAL(currentIndexChanged(int)),
                       this, SLOT(setHtype(int)));
+
+    QObject::connect(seasonType, SIGNAL(currentIndexChanged(int)),
+                      this, SLOT(setSeasonType(int)));
     
     this->setBrushSize(this->sSize->value());
     this->setBrushAlpha(this->sIntensity->value());
@@ -572,6 +615,37 @@ void TerrainTools::setHtype(int val){
     this->paintBrush->hType = val;
 }
 
+void TerrainTools::setSeasonType(int val){
+    qDebug() << "Val = " << val;    
+    if(val == 0)
+    {
+        
+        // Game::sunLightDirection[] = {-1.0,2.0,1.0};
+        Game::sunLightDirection[0] = -1;
+        Game::sunLightDirection[1] = 2;
+        Game::sunLightDirection[2] = 1;        
+        Game::season = "Spring";        
+    }
+    if(val == 1 )
+    {
+        Game::sunLightDirection[0] = -10;
+        Game::sunLightDirection[1] = -10;
+        Game::sunLightDirection[2] = -10;        
+        Game::season = "Night";
+    }
+    if(val == 2)
+    {
+        Game::sunLightDirection[0] = 2;
+        Game::sunLightDirection[1] = 2;
+        Game::sunLightDirection[2] = 2;        
+        Game::season = "Winter";
+    }
+    qDebug() << "season = " << Game::season;        
+}
+
+
+
+
 // embarkment
 
 void TerrainTools::setEsize(int val){
@@ -626,6 +700,20 @@ void TerrainTools::setEradius(QString val){
     this->sEradius->setValue(ival);
     this->paintBrush->eRadius = (float)ival/100;
 }
+
+void TerrainTools::setSun1(QString val){
+        Game::skyColor[0] = val.toFloat();
+}
+
+void TerrainTools::setSun2(QString val){
+        Game::skyColor[1] = val.toFloat();
+}
+
+void TerrainTools::setSun3(QString val){
+        Game::skyColor[2] = val.toFloat();
+}
+
+
 
 //
 

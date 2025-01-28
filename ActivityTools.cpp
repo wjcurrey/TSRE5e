@@ -278,6 +278,13 @@ ActivityTools::ActivityTools(QString name)
     vlist->addWidget(&cHornAtCrossings, row++, 1, 1, 2);
     QObject::connect(&cHornAtCrossings, SIGNAL(stateChanged(int)), this, SLOT(cHornAtCrossingsEnabled(int)));
     
+    vlist->addWidget(new QLabel("Horn Pattern:"), row, 0);
+    vlist->addWidget(&eORTSAICrossingHornPattern, row++, 1, 1, 2);
+    //eORTSAICrossingHornPattern.setFixedWidth(300);
+    QObject::connect(&eORTSAICrossingHornPattern, SIGNAL(textEdited(QString)), this, SLOT(eORTSAICrossingHornPatternEnabled(QString)));
+
+
+    
     eFuelCoal = GuiFunct::newQLineEdit(25,3);
     eFuelDiesel = GuiFunct::newQLineEdit(25,3);
     eFuelWater = GuiFunct::newQLineEdit(25,3);
@@ -556,6 +563,9 @@ void ActivityTools::activitySelected(QString n){
         cHornAtCrossings.setChecked(true);
     else
         cHornAtCrossings.setChecked(false);
+    
+    eORTSAICrossingHornPattern.setText(a->ortsAICrossingHornPattern);
+    
     cHornAtCrossings.blockSignals(false);
    
     if(a->playerServiceDefinition == NULL){
@@ -1009,6 +1019,14 @@ void ActivityTools::cHornAtCrossingsEnabled(int val){
         a->setOrtsHornAtCrossigns(true);
     else
         a->setOrtsHornAtCrossigns(false);
+}
+
+void ActivityTools::eORTSAICrossingHornPatternEnabled(QString val){
+    int id = actShow.currentData().toInt();
+    Activity *a = ActLib::Act[id];
+    if(a == NULL)
+        return;
+    a->setOrtsAICrossingHornPattern(val);
 }
 
 void ActivityTools::eFuelCoalEnabled(QString val){

@@ -752,11 +752,13 @@ void WorldObj::save(QTextStream* out){
     
 }
 
+//// EFO adding bool placed
 Ref::RefItem* WorldObj::getRefInfo(){
     Ref::RefItem* r = new Ref::RefItem();
     r->type = this->type;
     r->filename.push_back(this->fileName);
     r->staticFlags = this->staticFlags;
+//    r->placed = true;
     return r;
 }
 

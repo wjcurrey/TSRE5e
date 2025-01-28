@@ -77,6 +77,7 @@ void RulerObj::load(int x, int y) {
 
     if(this->points.size() == 0){
         Point point;
+        
         Vec3::copy(point.position, this->position);
         this->points.push_back(point);
         if(TwoPointRuler){

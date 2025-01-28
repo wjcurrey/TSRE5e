@@ -9,6 +9,7 @@
  */
 
 #include "EditFileNameDialog.h"
+#include "Game.h"
 
 EditFileNameDialog::EditFileNameDialog() : QDialog(){
     //this->setFixedSize(200, 100);
@@ -40,6 +41,6 @@ void EditFileNameDialog::cancel(){
     this->close();
 }
 void EditFileNameDialog::ok(){
-    this->isOk = true;
-    this->close();
+        this->isOk = true;
+        this->close();        
 }

@@ -20,6 +20,7 @@
 #include "RouteEditorGLWidget.h"
 #include "ShapeLib.h"
 #include "Trk.h"
+#include "Camera.h"
 
 
 
@@ -111,7 +112,7 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     pyBox.setEnabled(false);   
     pzBox.setEnabled(false);
     
-    if(Game::convertUnit != 'm')
+    if(Game::convertUnitD != 'm')
     {
       pyBoxx.setEnabled(false);    
       vbox->addWidget(&pyBoxx, 0,7);
@@ -124,6 +125,11 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     vbox->addWidget(&yBox,1,4);
     vbox->addWidget(zLabel,1,5);
     vbox->addWidget(&zBox,1,6);
+    
+//      pRot.setEnabled(false);    
+//      vbox->addWidget(&pRot, 1,7);
+    
+    
     v->addItem(vbox);
         
     vbox = new QGridLayout;
@@ -170,9 +176,19 @@ NaviWindow::NaviWindow(QWidget* parent) : QWidget(parent) {
     QObject::connect(&markerList, SIGNAL(activated(QString)),
                       this, SLOT(mkrListSelected(QString)));
     
-
+//    QObject::connect(&pRot, SIGNAL(textEdited(QString)),
+//                      this, SLOT(camRotChanged(QString)));
+    
     tileInfo.setText(" ");
 }
+
+/// EFO New... declared as public slot -> this function
+//void NaviWindow::camRotChanged(QString camrot)
+//{
+    /// EFO plug in rotation here
+    // this->pRot.setText(camrot);
+    
+//}
 
 void NaviWindow::latLonChanged(QString val){
     this->jumpType = "latlon";
@@ -184,7 +200,7 @@ void NaviWindow::xyChanged(QString val){
 void NaviWindow::jumpTileSelected(){
     if(aCoords == NULL)
         aCoords = new PreciseTileCoordinate();
-    
+             
     if(this->jumpType == "xy"){
         aCoords->setWxyz(xBox.text().toInt(), yBox.text().toInt(), zBox.text().toInt());
         aCoords->TileX = txBox.text().toInt();
@@ -218,10 +234,17 @@ void NaviWindow::naviInfo(int all, int hidden){
 }
 
 void NaviWindow::pointerInfo(float* coords){
+
+    // truncate the conversion value    
+    // QString fimpx = QString::number((coords[1] * Game::convertDistance),'f',0);
+           
     this->pxBox.setText(QString::number(coords[0]));
     this->pyBox.setText(QString::number(coords[1]));
-    this->pyBoxx.setText(QString::number(coords[1] * Game::convertHeight) + " " + Game::convertUnit );
+    //this->pyBoxx.setText(fimpx + " " + Game::convertUnitD );
+    this->pyBoxx.setText(QString::number((coords[1] * Game::convertDistance),'f',0) + " " + Game::convertUnitD );
     this->pzBox.setText(QString::number(-coords[2]));
+
+            
 }
 
 void NaviWindow::posInfo(PreciseTileCoordinate* coords){
@@ -316,6 +339,7 @@ void NaviWindow::hideEvent(QHideEvent *e){
 void NaviWindow::recStatus(QString statName, QString statVal ){   
     //qDebug() << "status: " << statVal;
     // this->status1->setText(QString(statVal));
+//    if(statName.contains("camRot")) pRot.setText(statVal);
 
 }
   

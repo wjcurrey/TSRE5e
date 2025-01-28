@@ -71,6 +71,17 @@ void Path::load(){
         if (sh == ("simisa@@@@@@@@@@jinx0p0t______")) {
             continue;
         }
+        
+        if (sh == ("_comment")) 
+        {   ParserX::SkipToken(data);
+            continue;
+        }
+
+        if (sh == ("_skip")) 
+        {   ParserX::SkipToken(data);
+            continue;
+        }
+            
         if (sh == ("serial")) {
             serial = ParserX::GetNumber(data);
             ParserX::SkipToken(data);

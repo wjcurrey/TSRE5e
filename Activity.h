@@ -105,6 +105,8 @@ public:
     int nextActivityObjectUID = -1;
     int nextEventUID = 0;
     int ortsAIHornAtCrossings = -9999;
+//// EFO Add missing ortsAICrossingHornPattern    
+    QString ortsAICrossingHornPattern = "";
     QVector<ActivityObject*> activityObjects;
     QVector<QPair<int, int>> platformNumPassengersWaiting;
     QVector<ActivityObject*> restrictedSpeedZone;
@@ -131,6 +133,12 @@ public:
     void setDisplayName(QString val);
     void setOrtsHornAtCrossigns(bool val);
     bool isOrtsHornAtCrossigns();
+
+    /// EFO adding missing functionality
+    void setOrtsAICrossingHornPattern(QString val);
+    bool isOrtsAICrossingHornPattern();
+    
+    
     void setDifficulty(int val);
     void setDuration(int h, int m);
     void setStartTime(int h, int m, int s);

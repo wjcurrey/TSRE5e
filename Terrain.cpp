@@ -65,9 +65,7 @@ void Terrain::load(){
     }
     VBO = new QOpenGLBuffer();
     VAO = new QOpenGLVertexArrayObject();
-
-   
-   
+  
     int esdAlternativeTexture = 0x01;
     QString seasonPath;
     if((esdAlternativeTexture & Game::TextureFlags[Game::season]) != 0)
@@ -79,9 +77,6 @@ void Terrain::load(){
         if(esdAlternativeTexture & Game::TextureFlags["snowtrack"] != 0)
             seasonPath = "snow/";
     }
-    
-    
-    
     
     
     texturepath = Game::root + "/routes/" + Game::route + "/terrtex/"+seasonPath;

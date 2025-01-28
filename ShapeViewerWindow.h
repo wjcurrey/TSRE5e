@@ -48,6 +48,7 @@ public slots:
     void viewHierarchySelected(bool show);
     void viewTexturesSelected(bool show);
     void vResetShapeViewSelected(); 
+    void vProfileShapeViewSelected();     
     void copyImgShapeView();
     void saveImgShapeView();
     void vGetImgShapeViewSelected(); 
@@ -81,6 +82,7 @@ private:
     QAction *vHierarchyView;
     QAction *vTexturesView;
     QAction *vResetShapeView;
+    QAction *vProfileShapeView;    
     QAction *vGetImgShapeView;
     QAction *vSaveImgShapeView;
     QAction *vSetColorShapeView;

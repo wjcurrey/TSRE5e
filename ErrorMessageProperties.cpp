@@ -91,7 +91,7 @@ void ErrorMessageProperties::showMessage(ErrorMessage* msg){
         eAction.setPlainText(currentMessage->action);
     }
     
-    if(currentMessage->obj != NULL){
+    if((currentMessage->obj != NULL) && (currentMessage->coords != NULL)){
         bSelect.setEnabled(true);
         bSelect.setText("Select Object");
     } else {

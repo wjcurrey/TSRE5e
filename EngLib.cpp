@@ -88,7 +88,7 @@ int EngLib::loadAll(QString gameRoot, bool gui){
     QDir dir(path);
     QDir trainDir;
     trainDir.setFilter(QDir::Files);
-    trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag"<<"*.eot");
+    trainDir.setNameFilters(QStringList()<<"*.eng"<<"*.wag"<<"*.eot"<<"*.inc");
     if(Game::debugOutput) qDebug() << path;
     if(!dir.exists())
         if(Game::debugOutput) qDebug() << "Path not exist" << path;

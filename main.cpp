@@ -31,7 +31,7 @@
 QFile logFile;
 QTextStream logFileOut;
 
-
+    
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg){
     const char symbols[] = { 'I', 'E', '!', 'X' };
     QString output = QString("[%1] %2").arg( symbols[type] ).arg( msg );
@@ -117,7 +117,7 @@ void LoadRouteEditor(){
         // Create Server Client
         Game::serverClient = new RouteEditorClient();
     }
-    
+
     RouteEditorWindow *window = new RouteEditorWindow();
     if(Game::fullscreen){
         window->setWindowFlags(Qt::CustomizeWindowHint);
@@ -130,8 +130,6 @@ void LoadRouteEditor(){
         const QScreen* primaryScreen = QApplication::primaryScreen();
         const QSize windowSize = window->size();
 
-        
-       
         // Calculate the centered position based on both monitors
         const QRect primaryGeometry = primaryScreen->geometry();
         const QPoint centeredPos((primaryGeometry.width() - windowSize.width()) / 2,
@@ -215,6 +213,9 @@ CommandLineParseResult parseCommandLineArgs(QCommandLineParser &parser){
     parser.addOption(RouteOption);
     const QCommandLineOption AceConvOption("aceconv", "Run Ace Converter.");
     parser.addOption(AceConvOption);
+    /// EFO New Option
+    const QCommandLineOption RouteEditOption("routeedit", "Run Route Editor.");
+    parser.addOption(RouteEditOption);
     const QCommandLineOption ConEditOption("conedit", "Run Consist Editor.");
     parser.addOption(ConEditOption);
     const QCommandLineOption PlayOption("play", "Play Activity.");
@@ -259,6 +260,11 @@ CommandLineParseResult parseCommandLineArgs(QCommandLineParser &parser){
     if (parser.isSet(ConEditOption)) {
         consoleArgs["CON"] = "TRUE";
     }
+    
+    /// EFO New Option
+    if (parser.isSet(RouteEditOption)) {
+        consoleArgs["RE"] = "TRUE";
+    }
     if (parser.isSet(PlayOption)) {
         consoleArgs["PLAY"] = "TRUE";
     }
@@ -276,7 +282,9 @@ int main(int argc, char *argv[]){
    // #endif
 
 
-                    
+    /// set the version here to avoid changing Game.cpp so much
+//    Game::AppVersion = "v8.005a";
+    
     // EFO set log to date/time so it isn't overwritten
     logFile.setFileName("tsre-log-" + QDateTime::currentDateTime().toString("yyyyMMdd-hhmm") + ".txt");
     
@@ -312,7 +320,7 @@ int main(int argc, char *argv[]){
 
     qSetMessagePattern("%{file}:%{function}:%{line}: \t%{message}");
 
-    
+        
     if(!Game::UseWorkingDir){
         QDir::setCurrent(QCoreApplication::applicationDirPath());
     }
@@ -338,7 +346,9 @@ int main(int argc, char *argv[]){
     //app.set
     Game::PixelRatio = app.devicePixelRatio();
     if(Game::debugOutput) qDebug() << "devicePixelRatio"<< app.devicePixelRatio();
+
     app.setStyle(QStyleFactory::create("Fusion"));
+
     if(!Game::systemTheme){
         //app.setStyle(QStyleFactory::create("Fusion"));
         QPalette darkPalette;
@@ -382,7 +392,7 @@ int main(int argc, char *argv[]){
 //        Game::StyleRedText = "#FF5555";
 
     }
-    
+
     Game::InitAssets();
     
     //Game::window.resize(1280, 720);
@@ -422,6 +432,14 @@ int main(int argc, char *argv[]){
         qDebug() << "Run ace converter";
         return app.exec();
     }
+    
+    /// EFO New Option
+    if(consoleArgs["RE"] == "TRUE"){
+        qDebug() << "Run route editor";
+        LoadRouteEditor();
+        return app.exec();
+    }
+    
     if(consoleArgs["CON"] == "TRUE"){
         // Run ace converter
         qDebug() << "Run con editor";
@@ -450,8 +468,14 @@ int main(int argc, char *argv[]){
         return app.exec();
     }
         
-    // Run route editor   //// EFO Detour
-     LoadRouteEditor();
+    /// EFO New Setting 
+    if(Game::startapp.contains("c")) 
+        LoadConEditor();
+    else if(Game::startapp.contains("s")) 
+        LoadShapeViewer("");
+    else if(Game::startapp.contains("r")) 
+        LoadRouteEditor();   
+    else LoadRouteEditor();
     
     // LoadConEditor();
 

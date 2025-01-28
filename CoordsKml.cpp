@@ -51,8 +51,11 @@ CoordsKml::CoordsKml(QString path) {
     reader.readNext();
     QString name;
     QXmlStreamAttributes attr;
+    int linecounter;
     while (!reader.isEndDocument()) {
         //qDebug() << reader.name().toString();
+        if(reader.name().toString().trimmed() == "") linecounter++;
+        if(linecounter > 10000) {  qWarning() << "Aborting read of " << path << " after excessive bad line reads."; break; }
         if (reader.isStartElement()) {
             name = reader.name().toString();
             attr = reader.attributes();

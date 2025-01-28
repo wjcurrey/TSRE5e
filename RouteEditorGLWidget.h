@@ -122,7 +122,7 @@ public slots:
     void pickObjRotElevForPlacement();
     void pickObjRotForCamera();
     void pickObjRotForCameraFlip();
-    void resetCamN(); void resetCamS(); void resetCamE(); void resetCamW(); void resetCamZ(); 
+    void resetCamN(); void resetCamS(); void resetCamE(); void resetCamW(); void resetCamD(); void resetCamZ(); 
     void tangentOrigin(); void tangentTarget(); void tangentMath(); void TangentApplyRot();
 
     void initRoute2();

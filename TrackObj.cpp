@@ -59,6 +59,83 @@ WorldObj* TrackObj::clone(){
 TrackObj::~TrackObj() {
 }
 
+//// EFO Adding for the track obj vs. just the TDB check as this might be safer for a track dragged without the TDB being changed
+ErrorMessage* TrackObj::checkForErrors(){
+    
+    if(abs(position[0]) > 2047 || abs(position[2]) > 2047){
+        ErrorMessage *e = new ErrorMessage(
+                ErrorMessage::Type_Warning, 
+                ErrorMessage::Source_World, 
+                QString("TrackObj " + fileName + " seems to be located too far from it's Tile. ") + QString::number(x) + " " + QString::number(y) + " : " + QString::number(UiD),
+                            "This location may cause unwanted behavior. \n"
+                            "Jump to it's location or select it and check if it should be moved or removed. "
+                            );
+        e->setObject((GameObj*)this);
+        e->setLocationXYZ(x, -y, position[0], position[1], -position[2]);
+        ErrorMessagesLib::PushErrorMessage(e);
+        return e;
+    }
+
+
+    /*
+   if((fileName.toLower().contains(("swt"))) or (fileName.toLower().contains(("pnt"))))
+    {
+        if(this->jNodePosn.size() == 0)
+        {
+            qDebug() << "possible missing jNodePosN " << fileName;
+                  
+             jNodePosn.push_back(std::array<float,5>());
+             jNodePosn.back()[0] = x;
+             jNodePosn.back()[1] = y;
+             jNodePosn.back()[2] = position[0];
+             jNodePosn.back()[3] = position[1];
+             jNodePosn.back()[4] = position[2];
+             modified = true;
+               
+             ErrorMessage *e = new ErrorMessage();
+             ErrorMessage::Type_Warning, 
+             ErrorMessage::Source_World, 
+             QString("TrackObj missing JNodePosN: " + QString::number(position[1]) +
+                        " " + QString::number(x) + 
+                        " " + QString::number(y) +
+                        " " + QString::number(position[0]) + 
+                        " " + QString::number(position[1]) + 
+                        " " + QString::number(position[2]) );
+             
+            e->setObject((GameObj*)this);
+            e->setLocationXYZ(x, -y, position[0], position[1], -position[2]);
+            ErrorMessagesLib::PushErrorMessage(e);
+             
+        }
+      
+    }
+    */
+            
+    /// EFO look for deep underground...        
+    if(position[1] < Game::deepUnderground ) {
+                                  
+        if(Game::debugOutput) qDebug() << "Warning: Object " << fileName << " at " << x << " " << y << " "  << position[0] << " " << position[1] << " " << position[2] << " is considerably underground.";
+        
+        ErrorMessage *e = new ErrorMessage(
+                ErrorMessage::Type_Warning, 
+                ErrorMessage::Source_World, 
+                QString("TrackObj " + fileName + " is deep underground: ") + QString::number(position[1]),
+                    fileName + " at " + 
+                        " " + QString::number(x) + 
+                        " " + QString::number(y) +
+                        " " + QString::number(position[0]) + 
+                        " " + QString::number(position[1]) + 
+                        " " + QString::number(position[2]) + 
+                        " might be a stray track piece or other object that got lost when moving without the terrain visible.\n\n To fix, you can use \"Transform\" to adjust the position values or possibly the \"Z\" and \"H\" key to try to bring it back to the surface."
+                );
+        e->setObject((GameObj*)this);
+        e->setLocationXYZ(x, -y, position[0], position[1], -position[2]);
+        ErrorMessagesLib::PushErrorMessage(e);
+    }                        
+
+    return NULL;
+}
+
 int TrackObj::updateTrackSectionInfo(QHash<unsigned int,unsigned int> shapes, QHash<unsigned int,unsigned int> sect){
     int count = 0;
     if(shapes[sectionIdx] > 0){

@@ -28,6 +28,7 @@
 #include "ContentHierarchyInfo.h"
 #include "RenderItem.h"
 #include "Renderer.h"
+#include "Route.h"
 
 SFile::SFile() {
     pathid = "";
@@ -71,10 +72,15 @@ void SFile::load() {
     pathid = evaluatePathId();  
     
     QFile *file = new QFile(pathid);
-
     
     if (!file->open(QIODevice::ReadOnly)){
-        if(Game::debugOutput) qDebug() << "SFile 77 S Shape: not exist "<<pathid;
+        if(Game::debugOutput) qDebug() << "SFile 77 S Shape: not exist "<<pathid;                
+        
+        int stringpos = pathid.lastIndexOf("/") + 1;
+        int stringsub = pathid.length() - stringpos;
+        QString shortpath = pathid.mid(stringpos,stringsub); 
+        // qDebug() << "shortpath = " << shortpath;
+        Route::missingList.append(shortpath);
         file->close();
         return;
     }

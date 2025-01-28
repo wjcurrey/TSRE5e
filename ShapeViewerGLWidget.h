@@ -50,6 +50,7 @@ public:
     QImage *screenShot = NULL;
     void setMode(QString n);
     void resetRot();
+    void resetCamRoster(float profile);
     void getImg();
     void setBackgroundGlColor(float r, float g, float b);
     void fillCurrentShapeHierarchyInfo(ShapeHierarchyInfo *info);

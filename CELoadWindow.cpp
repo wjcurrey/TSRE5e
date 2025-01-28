@@ -109,6 +109,11 @@ CELoadWindow::CELoadWindow() {
     }
     
     this->listRoutes();
+    
+    Game::seasonalEditing = false;
+    Game::season = "";
+
+
 }
 
 void CELoadWindow::dirSelected(){

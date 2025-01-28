@@ -702,6 +702,21 @@ void PropertiesTrackObj::editFileNameEnabled(){
     eWindow.exec();
     //qDebug() << waterWindow->changed;
     if(eWindow.isOk){
+        
+        //QString filename = Game::root + "/routes/" + Game::route + "/shapes/" + eWindow.name.text();
+        QString filename = Game::root + "/global/shapes/" + eWindow.name.text();            
+        QFile file(filename);            
+        if (!file.exists()) 
+        { 
+            qWarning() << "Rename failed - " << eWindow.name.text() << " does not exist" ;            
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Shape Not Found");
+            msgBox.setText("Rename Failed");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.exec();                    
+            return;
+        }
+        
         Undo::SinglePushWorldObjData(worldObj);
         worldObj->fileName = eWindow.name.text();
         worldObj->position[2] = -worldObj->position[2];

@@ -48,6 +48,8 @@ public slots:
     void setBrushAlpha(QString val);
     void setFheight(QString val);
     void setHtype(int val);
+    void setSeasonType(int val);
+    
     // embarkment
     void setEsize(int val);
     void setEsize(QString val);
@@ -57,8 +59,15 @@ public slots:
     void setEcut(QString val);
     void setEradius(int val);
     void setEradius(QString val);
+    void setSun1(QString val);
+    void setSun2(QString val);
+    void setSun3(QString val);    
+
+
+    
     void msg(QString text, QString val);
     void texPreviewEnabled(int val);
+
     
 signals:
     void enableTool(QString name);
@@ -89,6 +98,7 @@ private:
     QLineEdit *leIntensity;
     QLineEdit *fheight;
     QComboBox* hType;
+    QComboBox* seasonType;
     
     QSlider *sEsize;
     QSlider *sEemb;
@@ -98,6 +108,9 @@ private:
     QLineEdit *leEemb;
     QLineEdit *leEcut;
     QLineEdit *leEradius;
+    QLineEdit *sun1;    
+    QLineEdit *sun2;    
+    QLineEdit *sun3;        
     
     QMap<QString, QPushButton*> buttonTools;
 

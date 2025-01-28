@@ -45,6 +45,7 @@ LoadWindow::LoadWindow() {
     connect(neww, SIGNAL (released()), this, SLOT (setNewRoute()));
     exit = new QPushButton("Exit");
     exit->setStyleSheet(QString("background-color: ")+Game::StyleRedButton);
+
     
 
     nowaTrasa = new QLineEdit();
@@ -99,12 +100,12 @@ LoadWindow::LoadWindow() {
     //nowaTrasa->hide();
 
     QObject::connect(exit, SIGNAL (released()), this, SLOT(close()));
-    QObject::connect(&routeList, SIGNAL(itemClicked(QListWidgetItem*)),
+    QObject::connect(&routeList, SIGNAL(itemClicked(QTableWidgetItem*)),
                       this, SLOT(setLoadRoute()));
     //QObject::connect(nowaTrasa, SIGNAL(textChanged(QString)),
     //                  this, SLOT(setNewRoute()));
     
- QObject::connect(&routeList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+ QObject::connect(&routeList, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
                       this, SLOT(routeLoad()));
     
     listRoots();
@@ -125,6 +126,10 @@ LoadWindow::LoadWindow() {
         neww->hide();
     }
 }
+
+
+
+
 
 void LoadWindow::handleBrowseButton(QString directory){
     if(directory == ""){
@@ -205,13 +210,53 @@ void LoadWindow::listRoutes(){
     QDir dir(Game::root+"/routes");
     dir.setFilter(QDir::Dirs);
     
+
+    //// EFO this is new code to support multiple columns and clickable sorting
+    
+    routeList.clearContents();
+
+    // Set column headers
+    routeList.setColumnCount(2);
+    routeList.rowHeight(10);
+    routeList.setSortingEnabled(1);
+    routeList.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    routeList.verticalHeader()->setVisible(false);
+    
+    QStringList headers = {"Directory Name", "Last Modified"};
+    routeList.setHorizontalHeaderLabels(headers);
+
+    // Get directory entries
+    QFileInfoList entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time );
+
+    // Populate table with directory information
+    for (const QFileInfo& entry : entries) {
+        int row = routeList.rowCount();
+        routeList.insertRow(row);
+
+        QTableWidgetItem* nameItem = new QTableWidgetItem(entry.fileName());
+        routeList.setItem(row, 0, nameItem);
+
+        QTableWidgetItem* dateItem = new QTableWidgetItem(entry.lastModified().toString("yyyy-MM-dd"));
+        routeList.setItem(row, 1, dateItem);
+    }
+    routeList.resizeColumnsToContents();
+    routeList.resizeRowsToContents();
+    
+    
+/*   This is Goku's original code -- it had a single column list and used a QListView
+ *   EFO commented out and replaced with a QTableWidgetItem to support two columns and sorting    
+    routeList.clear();
+    dir.setSorting(QDir::Time);
+    dir.setSorting(QDir::Name);
+    
     foreach(QString dirFile, dir.entryList()){
         if(dirFile == "." || dirFile == "..")   
             continue;
         if(!Game::checkRoute(dirFile))  
             continue;
         this->routeList.addItem(dirFile);  
-    }
+    }    
+  */
 } 
 
 void LoadWindow::setLoadRoute(){

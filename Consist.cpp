@@ -131,6 +131,42 @@ void Consist::load(){
         return;
     }
 
+    /// EFO  Added to cross check for bad formatting    
+    if(Game::CheckBraces == true)    
+    {
+            QFile file2(pathid);
+            if (!file2.open(QIODevice::ReadOnly)) {
+                qDebug() << "Error opening file for brace check:" << pathid;
+                return;
+            }
+        
+            int braceOpenCount = 0;
+            int braceCloseCount = 0;    
+            int quoteCount = 0;
+            QString result;
+            
+            while (!file2.atEnd()) {
+                QByteArray line = file2.readLine();
+                for (char c : line) {
+                    if (c == '"') {
+                        quoteCount++;
+                    }
+                       else if (c == '(') {
+                        braceOpenCount++;
+                    } else if (c == ')') {
+                        braceCloseCount++;
+                    }
+                 }                
+            }
+            file2.close();
+            if(braceOpenCount != braceCloseCount) qWarning() << "Possible Brace Mismatch in : " << pathid ;
+            if(quoteCount % 2 > 0) qWarning() << "Possible Quote Mismatch in : " << pathid ;
+    }
+
+    
+    
+    
+    
     FileBuffer* data = ReadFile::read(file);
     data->off = 0;
     file->close();

@@ -116,6 +116,9 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
         }
     }
     if (timeNow % 250 < lastTime % 250) {    
+        
+        gluu->setMatrixUniforms();
+        
         /// try to send camera status every half second or so?
         if (Game::lockCamera) emit updStatus(QString("camera"), QString("Camera Locked")); else emit updStatus(QString("camera"), QString("Camera Unlocked"));
         if (Game::cameraStickToTerrain) emit updStatus(QString("camterr"), QString("Cam Terrain Locked")); else emit updStatus(QString("camterr"), QString("Cam Terrain Unlocked"));
@@ -132,6 +135,9 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
         
         if(defaultPaintBrush->direction == 1) emit updStatus(QString("brushdir"), QString("Terrain Brush: +")); else emit updStatus(QString("brush"), QString("Terrain Brush: -"));  /// EFO Added to 
 
+        /// Try to capture player cam rotation
+
+        
         //        if(resizeTool == true)  reloadRefFile updStatus(QString("resize"), QString("Resize: ON")); else emit updStatus(QString("resize"), QString("Resize: OFF"));  /// EFO Added to 
         //        emit updStatus(QString("Stat3"), QString(""));           
     }
@@ -140,7 +146,7 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
         
         unsigned long long int worktime = (timeNow - timeSaved)/60000 ;
         emit updStatus(QString("timer"), QString( QString::number(worktime ))); /// EFO Added to                         
-        
+        emit updStatus(QString("camRot"), QString(QString::number(camera->getRotX())));        
     }
 
 
@@ -439,6 +445,7 @@ void RouteEditorGLWidget::paintGL(){
     gluu->setMatrixUniforms();
 
     if (stickPointerToTerrain && Game::viewTerrainShape)
+
         if (!selection && !Game::playerMode) pushRenderPointer();
 
     route->pushRenderItems(camera->pozT, camera->getPos(), camera->getTarget(), camera->getRotX(), 3.14f / 3, renderMode);
@@ -561,7 +568,7 @@ void RouteEditorGLWidget::paintGL2() {
     for(int i = 0; i < route->env->waterCount; i++)
         Game::terrainLib->renderWater(gluu, camera->pozT, camera->getPos(), camera->getTarget(), 3.14f / 3, renderMode, i);
 
-    if (!stickPointerToTerrain || !Game::viewTerrainShape)
+    if (!stickPointerToTerrain || !Game::viewTerrainShape)    
         if (!selection && !Game::playerMode) drawPointer();
     
     // render compass
@@ -593,7 +600,7 @@ void RouteEditorGLWidget::paintGL2() {
     }
     // Handle Selection
     handleSelection();
-
+    
     // Set Info
     if (this->isActiveWindow()) {
         emit this->naviInfo(route->getTileObjCount((int) camera->pozT[0], (int) camera->pozT[1]), route->getTileHiddenObjCount((int) camera->pozT[0], (int) camera->pozT[1]));
@@ -840,7 +847,8 @@ void RouteEditorGLWidget::pushRenderPointer() {
     static float winZ[4];
     int viewport[4];
     //float wcoord[4];
-
+    
+    
     glGetIntegerv(GL_VIEWPORT, viewport);
     //glGetFloatv(GL_MODELVIEW_MATRIX, mvmatrix);
     //glGetFloatv(GL_PROJECTION_MATRIX, projmatrix);
@@ -877,7 +885,8 @@ void RouteEditorGLWidget::drawPointer() {
     int viewport[4];
     //float wcoord[4];
 
-    
+
+
     glGetIntegerv(GL_VIEWPORT, viewport);
     //glGetFloatv(GL_MODELVIEW_MATRIX, mvmatrix);
     //glGetFloatv(GL_PROJECTION_MATRIX, projmatrix);
@@ -1211,9 +1220,11 @@ void RouteEditorGLWidget::keyPressEvent(QKeyEvent * event) {
                 Undo::PushTrackDB(Game::roadDB, true);
                 route->toggleToTDB((WorldObj*)selectedObj);
                 Undo::StateEnd();
-                if (selectedObj != NULL) selectedObj->unselect();
-                lastSelectedObj = selectedObj;
-                setSelectedObj(NULL);
+                // EFO keep object selected
+                // next three lines commented out
+                 if (selectedObj != NULL) selectedObj->unselect();
+                 lastSelectedObj = selectedObj;
+                 setSelectedObj(NULL);
                 break;
             case Qt::Key_X:
                 if (selectedObj == NULL)
@@ -1626,11 +1637,14 @@ void RouteEditorGLWidget::jumpTo(int X, int Z, float x, float y, float z) {
 
 }
 
+/// EFO Object Selected
 void RouteEditorGLWidget::objectSelected(GameObj* obj){
     if (selectedObj != NULL) {
         selectedObj->unselect();
         setSelectedObj(NULL);
     }
+    toolEnabled = "selectTool";   /// set the selected tool 
+    
     if(obj == NULL)
         return;
     obj->select();
@@ -1899,18 +1913,27 @@ void RouteEditorGLWidget::pickObjRotForPlacement(){
 }
 
 void RouteEditorGLWidget::pickObjRotForCamera(){
+    double spinval = (M_PI );
     if (selectedObj != NULL) {
         if(selectedObj->typeObj == GameObj::worldobj){
+            int camobjtx = ((WorldObj*)selectedObj)->x;
+            int camobjty = ((WorldObj*)selectedObj)->y;
+            
             double camobjx = ((WorldObj*)selectedObj)->position[0];
             double camobjy = ((WorldObj*)selectedObj)->position[1]+10;
-            double camobjz = ((WorldObj*)selectedObj)->position[2];
-            
+            double camobjz = ((WorldObj*)selectedObj)->position[2];            
+            double currcam = camera->getRotX();
+                                    
+            camera->setPozT(camobjtx,camobjty);
             camera->setPos(camobjx,camobjy,camobjz);
+            
             double camrotw = ((WorldObj*)selectedObj)->qDirection[1];
             double camrotz = ((WorldObj*)selectedObj)->qDirection[3];
-            double camrot = (2.0 * std::atan2(camrotw, camrotz));
-            camera->setPlayerRot(camrot,NULL);
+            double camrot = (2.0 * std::atan2(camrotw, camrotz));           
+                                                                   
+            camera->setPlayerRot(camrot,NULL);                                    
             selectedObj->unselect(); setSelectedObj(NULL);            
+            
          }
     }
 }
@@ -1925,6 +1948,8 @@ void RouteEditorGLWidget::pickObjRotForCameraFlip(){
 void RouteEditorGLWidget::resetCamN() {
     double camrot = (M_PI);
     double camelev = camera->getRotY();
+    if(camelev < (M_PI/-4)) camelev = 0; 
+   
     camera->setPlayerRot(camrot,camelev);  
             if(selectedObj != NULL) selectedObj->unselect(); 
             setSelectedObj(NULL);
@@ -1934,6 +1959,7 @@ void RouteEditorGLWidget::resetCamN() {
 void RouteEditorGLWidget::resetCamS() {
     double camrot = 0;
     double camelev = camera->getRotY();
+    if(camelev < (M_PI/-4)) camelev = 0; 
     camera->setPlayerRot(camrot,camelev);  
             if(selectedObj != NULL) selectedObj->unselect(); 
             setSelectedObj(NULL);
@@ -1942,6 +1968,7 @@ void RouteEditorGLWidget::resetCamS() {
 void RouteEditorGLWidget::resetCamE() {
     double camrot = (M_PI/2);
     double camelev = camera->getRotY();
+    if(camelev < (M_PI/-4)) camelev = 0; 
     camera->setPlayerRot(camrot,camelev);  
             if(selectedObj != NULL) selectedObj->unselect(); 
             setSelectedObj(NULL);
@@ -1949,6 +1976,15 @@ void RouteEditorGLWidget::resetCamE() {
 void RouteEditorGLWidget::resetCamW() {
     double camrot = (M_PI/-2);
     double camelev = camera->getRotY();
+    if(camelev < (M_PI/-4)) camelev = 0; 
+    camera->setPlayerRot(camrot,camelev);  
+            if(selectedObj != NULL) selectedObj->unselect(); 
+            setSelectedObj(NULL);
+}
+
+void RouteEditorGLWidget::resetCamD() {
+    double camrot = 0;
+    double camelev = (M_PI/-2);
     camera->setPlayerRot(camrot,camelev);  
             if(selectedObj != NULL) selectedObj->unselect(); 
             setSelectedObj(NULL);
@@ -1956,7 +1992,7 @@ void RouteEditorGLWidget::resetCamW() {
 
 void RouteEditorGLWidget::resetCamZ() {
     double camrot = 0;
-    double camelev = 0;
+    double camelev = 0;    
     camera->setPlayerRot(camrot,camelev);  
             if(selectedObj != NULL) selectedObj->unselect(); 
             setSelectedObj(NULL);
@@ -2174,6 +2210,11 @@ void RouteEditorGLWidget::showContextMenu(const QPoint & point) {
         QObject::connect(defaultMenuActions["resetCamW"], SIGNAL(triggered()), this, SLOT(resetCamW()));
     }
 
+    if(defaultMenuActions["resetCamD"] == NULL){
+        defaultMenuActions["resetCamD"] = new QAction(tr("Face &Down")); 
+        QObject::connect(defaultMenuActions["resetCamD"], SIGNAL(triggered()), this, SLOT(resetCamD()));
+    }
+    
     if(defaultMenuActions["resetCamZ"] == NULL){
         defaultMenuActions["resetCamZ"] = new QAction(tr("Default")); 
         QObject::connect(defaultMenuActions["resetCamZ"], SIGNAL(triggered()), this, SLOT(resetCamZ()));
@@ -2408,6 +2449,7 @@ void RouteEditorGLWidget::showContextMenu(const QPoint & point) {
             menuCamera.addAction(defaultMenuActions["resetCamS"]);
             menuCamera.addAction(defaultMenuActions["resetCamE"]);
             menuCamera.addAction(defaultMenuActions["resetCamW"]);
+            menuCamera.addAction(defaultMenuActions["resetCamD"]);            
             menuCamera.addAction(defaultMenuActions["resetCamZ"]);            
 
     menu.addSeparator();
