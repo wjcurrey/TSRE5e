@@ -181,6 +181,7 @@ SpeedPost.cpp \
 SpeedPostDAT.cpp \
 SpeedpostObj.cpp \
 StaticObj.cpp \
+StatusWindow.cpp \
 TDB.cpp \
 TDBClient.cpp \
 TFile.cpp \
@@ -400,6 +401,7 @@ SpeedPost.h \
 SpeedPostDAT.h \
 SpeedpostObj.h \
 StaticObj.h \
+StatusWindow.h \
 TDB.h \
 TDBClient.h \
 TFile.h \
