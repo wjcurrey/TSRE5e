@@ -39,7 +39,7 @@
 //////// Version
 //////////////////////////////////
 
-QString Game::AppVersion = "Trainsim.Com Fork v0.8.005m";  // over-ride from main.cpp
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.005u";  // over-ride from main.cpp
 
 
 bool Game::ServerMode = false;
@@ -145,6 +145,7 @@ bool Game::loadAllWFiles = false;
 bool Game::autoFix = false;
 bool Game::gui = true;
 bool Game::listFiles = false;
+bool Game::objSelected = false;
 
 QString Game::geoPath = "hgst";
 
@@ -208,6 +209,7 @@ bool  Game::lockCamera = false;
 QColor *Game::selectedColor = new QColor("#FF0000");       /// EFO default red
 QColor *Game::selectedTerrColor = new QColor("#FF0000");   /// EFO default red
 QColor *Game::wireLineColor = new QColor("#FFFF00");       /// EFO default yellow
+QColor *Game::terrBrushColor = new QColor("#000000");   // Default black
 
 QString Game::mainPos;   /// EFO Null handling exists
 QString Game::statusPos;  /// EFO Null handling exists
@@ -229,7 +231,7 @@ float Game::convertMass = 1;  /// EFO will set to pounds = 2.20462 if useImperia
 QString Game::convertUnitM = " t";
 float Game::convertSpeed = 1;  /// EFO will set to mph = 0.621371 if useImperial is set to true;
 QString Game::convertUnitS = " mph";
-int  Game::deepUnderground = -100;
+float  Game::deepUnderground = -100;
 
 int   Game::markerHeight = 30;
 int   Game::markerText = 16;
@@ -244,6 +246,10 @@ QString Game::includeFolder = "openrails";
 
 int Game::logfileMax = 99999;
 int Game::logfileDays = 99999;
+
+QStringList Game::preloadTextures;
+
+bool Game::resetTools = false;
 
 bool Game::CheckBraces = false;
 bool Game::UnsafeMode = false;
@@ -531,8 +537,9 @@ void Game::load() {
                     useOnlyPositiveQuaternions = false; 
             }
             if(setname =="routemergestring")
-                routeMergeString = setval;
-      
+                routeMergeString = args[1]; 
+            
+            
             if(setname =="serverlogin"){
                 serverLogin = args[1].trimmed();
             }
@@ -593,6 +600,7 @@ void Game::load() {
                     routeRebuildTDB = false; 
             }
 
+   
 
             
             
@@ -711,6 +719,11 @@ void Game::load() {
         if(setname =="terrainbrushintensity") {
             terrainTools[5] = setval.toInt();
         }
+        if(setname=="terrainbrushcolor") {
+            terrBrushColor = new QColor(setval);
+        }
+        
+        
         // END EFO Configure Terrain Tools
         
         
@@ -1040,7 +1053,13 @@ void Game::load() {
               objectsToRemove = setval.split(",") ;
               qDebug() << "Removal objects found: " << objectsToRemove.size();              
             }
-        
+
+        if(setname == "preloadtextures" ) 
+            {
+              // qDebug() << "Removal Found";
+              preloadTextures = setval.split(",") ;
+            }
+                
         if(setname == "checkbraces" ) 
         {
              if((setval == "true") or (setval == "1") or (setval == "on"))
@@ -1091,6 +1110,17 @@ void Game::load() {
     
     cleanupLogs();
 
+    if(Game::seasonalEditing)
+    {
+        QMessageBox infobox;        
+        infobox.setWindowTitle("Seasonal Editing On");
+        infobox.setInformativeText("If you plan to do terrain painting, exit TSRE, open up your \"Settings.txt\" file, and comment out seasonal editing or set it to false.\n\n Terrain painting, auto-paint, and some shapes may not render correctly with seasonal editing turned on.");
+        infobox.setFixedWidth(150);
+        infobox.exec();
+    }
+
+
+    
 }
 /*
 bool Game::loadRouteEditor(){

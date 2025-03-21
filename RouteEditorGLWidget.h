@@ -82,7 +82,6 @@ public slots:
     void editFind(int radius = 0);
     void editUndo();
     void showTrkEditr();
-    void rebuildTDB(); /// EFO hail mary    
     
     void showContextMenu(const QPoint & point);
     void createNewTiles(QMap<int, QPair<int, int>*> list);
@@ -125,7 +124,7 @@ public slots:
     void resetCamN(); void resetCamS(); void resetCamE(); void resetCamW(); void resetCamD(); void resetCamZ(); 
     void tangentOrigin(); void tangentTarget(); void tangentMath(); void TangentApplyRot();
 
-    void initRoute2();
+    void initRoute2(); 
      
 signals:
     void showWindow();
@@ -151,6 +150,7 @@ signals:
     
     // EFO Status Updates
     void updStatus(QString statName, QString statValue);
+    void preloadTexturesSignal();
 
     
 protected:
@@ -200,6 +200,7 @@ private:
     GameObj* StartObject = NULL;
     GameObj* EndObject = NULL;    
     GameObj* lastSelectedObj = NULL;
+    WorldObj* CamObj = NULL;
     WorldObj* copyPasteObj = NULL;
     GroupObj* groupObj = NULL;
     GroupObj* copyPasteGroupObj = NULL;

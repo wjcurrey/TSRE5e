@@ -843,6 +843,7 @@ std::unordered_map< int, const char* > TS::IdName = {
     { PickupItem ,"pickupitem"},
     { PlatformItem ,"platformitem"},
     { HazzardItem ,"hazzarditem"},
+    { HazardItem ,"hazarditem"},    
     { CarSpawnerItem ,"carspawneritem"},
     { SidingItem ,"sidingitem"},
     { LevelCrItem ,"levelcritem"},
@@ -1465,5 +1466,6 @@ std::unordered_map< int, const char* > TS::IdName = {
     { TSRE_Terrain_RawFile, "TSRE_Terrain_RawFile"},
     { TSRE_Terrain_FtFile, "TSRE_Terrain_FtFile"},
     { TSRE_Requested_TD_File, "TSRE_Requested_TD_File"},
-    { TSRE_Requested_TD_Lo_File, "TSRE_Requested_TD_Lo_File"}
+    { TSRE_Requested_TD_Lo_File, "TSRE_Requested_TD_Lo_File"},
+    { Crossover, "crossover" }
 };       

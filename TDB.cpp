@@ -80,6 +80,7 @@ void TDB::loadTdb(){
     lsectionLineHeight = Game::sectionLineHeight;
     
     if(Game::debugOutput) qDebug() << "Line Heights set" << lsectionLineHeight << " " << lwireLineHeight;
+    
     while (!((sh = ParserX::NextTokenInside(data).toLower()) == "")) {
         if (sh == "trackdb") {
             loadUtf16Data(data);
@@ -774,7 +775,7 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     /////////////////////////////////////////////////////
     this->trackNodes[vecId] = new TRnode();
     newNode = this->trackNodes[vecId];
-    if(Game::debugOutput) qDebug() << "TDB775: New VectorID " << vecId;
+    // if(Game::debugOutput) qDebug() << "TDB775: New VectorID " << vecId;
     newNode->typ = 1;
     newNode->iTrv = 1;
     newNode->trVectorSection = new TRnode::TRSect[newNode->iTrv];
@@ -802,9 +803,9 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     newNode->TrPinS[1] = end2Id;
     newNode->TrPinK[1] = 1;
     /////////////////////////////////////////////////////
-    if(Game::debugOutput) qDebug() << "TDB803 SectionIdx:"<< sect;
+    // if(Game::debugOutput) qDebug() << "TDB803 SectionIdx:"<< sect;
     float dlugosc = this->tsection->sekcja[sect]->getDlugosc();
-    if(Game::debugOutput) qDebug() << "TDB805 Length: " << dlugosc;
+    // if(Game::debugOutput) qDebug() << "TDB805 Length: " << dlugosc;
     Vector3f aa;
     this->tsection->sekcja[sect]->getDrawPosition(&aa, dlugosc);
     //if(qe[1] > M_PI)
@@ -834,7 +835,7 @@ int TDB::newTrack(int x, int z, float* p, float* qe, int* ends, int r, int sect,
     newNode->UiD[5] = zz;
     newNode->UiD[6] = pp[0];
     newNode->UiD[7] = pp[1];
-    if(Game::debugOutput) qDebug() << "uid7" << newNode->UiD[7];
+    // if(Game::debugOutput) qDebug() << "uid7" << newNode->UiD[7];
     newNode->UiD[8] = pp[2];
     newNode->UiD[9] = qe[0];
     newNode->UiD[10] = qe[1] + angle;
@@ -909,9 +910,9 @@ int TDB::joinTracks(int iendp) {
                 if (j == iendp)
                     continue;
                 if (endp->equals(n)) {
-                    if(Game::debugOutput) qDebug() << "polacze " << iendp << " " << j;
-                    if(Game::debugOutput) qDebug() << n->TrPinS[0] << " " << n->TrPinK[0];
-                    if(Game::debugOutput) qDebug() << endp->TrPinS[0] << " " << endp->TrPinK[0];
+                    //if(Game::debugOutput) qDebug() << "polacze " << iendp << " " << j;
+                    //if(Game::debugOutput) qDebug() << n->TrPinS[0] << " " << n->TrPinK[0];
+                    //if(Game::debugOutput) qDebug() << endp->TrPinS[0] << " " << endp->TrPinK[0];
                     joinVectorSections(endp->TrPinS[0], n->TrPinS[0]);
                     return 0;
                 }
@@ -1720,8 +1721,13 @@ bool TDB::placeTrack(int x, int z, float* p, float* q, int sectionIdx, int uid, 
     qe[1] = pitch;
     qe[2] = 0;
     
+    /// EFO  Try to protect against Dynatrax or other shapes that might be missing
     TrackShape* shp = this->tsection->shape[sectionIdx];
-    if(Game::debugOutput) qDebug() << "TDB1722: " << shp->filename;
+    if(shp == NULL){
+        qDebug() << "SectionIdx " << sectionIdx << " not found in TSection, not added to database";
+        return false;
+    }
+    
     float pp[3];
     float qee[3];
     int endp;
@@ -1917,7 +1923,7 @@ bool TDB::ifTrackExist(int x, int y, int UiD){
                     if(n->trVectorSection[j].param[2] == x)
                         if(n->trVectorSection[j].param[3] == y)
                             if(n->trVectorSection[j].param[4] == UiD){
-                                if(Game::debugOutput) qDebug() << "jest";
+                                if(Game::debugOutput) qDebug() << "Found in DB";
                                 return true;
                     }
             }
@@ -3443,13 +3449,16 @@ int TDB::findBiggest() {
 
 void TDB::saveEmpty(bool road) {    
     QString sh;
-    QString path;
+    QString path; 
+    QString bkpath;
     QString extension = "tdb";
     if(road) extension = "rdb";
     path = Game::root + "/routes/" + Game::route + "/" + Game::routeName + "." + extension;
     path.replace("//", "/");
     if(Game::debugOutput) qDebug() << "TDB3473: "<< path;
+    bkpath = path + "-" + QDateTime::currentDateTime().toString("yyyyMMdd-hhmm") + ".bkup";
     QFile file(path);
+    file.copy(path,bkpath);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
     out.setRealNumberPrecision(Game::rnp);
@@ -3505,7 +3514,9 @@ void TDB::save() {
     out << "SIMISA@@@@@@@@@@JINX0T0t______\n\n";
     saveToStream(out);
     file.close();
-    qDebug() << "TDB Complete";
+    if(this->road)
+    qDebug() << "RDB Complete";
+    else qDebug() << "TDB Complete";
     saveTit();
     if(!this->road) 
         this->tsection->saveRoute();
@@ -3745,6 +3756,9 @@ void TDB::saveTit() {
 
     file.close();
     //qDebug() << "TDB 3767";
+    if(this->road)
+    qDebug() << "RIT Saved";
+    else
     qDebug() << "TIT Saved";
 }
 
@@ -4030,12 +4044,14 @@ void TDB::checkDatabase(){
         }
         
         if(Game::loadAllWFiles){
-            if (trackItems[i]->type == "crossoveritem" || trackItems[i]->type == "emptyitem"){
+            if (trackItems[i]->type == "crossoveritem"){  /// EFO Don't delete these
+                return;
+            } else if (trackItems[i]->type == "emptyitem"){
                 if(objects[i].size() > 0){
                     ErrorMessage *e = new ErrorMessage(
                             ErrorMessage::Type_Error, 
                             tdbName, 
-                            QString("Item wrongly referenced in W files. Id: ") + QString::number(i) + ". Type: " + trackItems[i]->type
+                            QString("Item wrongly referenced or missing in W files. Id: ") + QString::number(i) + ". Type: " + trackItems[i]->type
                             );
                     e->setObject((GameObj*)trackItems[i]);
                     if(isPosition)
@@ -4110,7 +4126,11 @@ void TDB::checkDatabase(){
             continue;
         if (n->typ == -1) 
             continue;
+        
 
+
+                
+        
 /*
         /// EFO TRACK BURIED deep underground, moving to TrackObj.cpp around line 61        
         if(n->UiD[7] < Game::deepUnderground)
@@ -4136,6 +4156,7 @@ void TDB::checkDatabase(){
   */        
         
         if (n->typ == 1) {
+            
             if(n->iTrv == 0){
                 ErrorMessage *e = new ErrorMessage(
                     ErrorMessage::Type_Error, 
@@ -4144,6 +4165,57 @@ void TDB::checkDatabase(){
                 );
                 ErrorMessagesLib::PushErrorMessage(e);
             }
+//            if(n->iTrv == 1)
+//                            qDebug() << "N values:  " << 
+//                       " TrP1:      " << n->TrP1 << "\n" <<
+//                       " TrP2:      " << n->TrP2 << "\n" <<                    
+//                       " TrPinK[0]: " << n->TrPinK[0] << "\n" <<
+//                       " TrPinK[1]: " << n->TrPinK[1] << "\n" <<                    
+//                       " TrPinK[2]: " << n->TrPinK[2] << "\n" <<                    
+//                       " TrPinS[0]: " << n->TrPinS[0] << "\n" <<
+//                       " TrPinS[1]: " << n->TrPinS[1] << "\n" <<                    
+//                       " TrPinS[2]: " << n->TrPinS[2] << "\n" <<                                        
+//
+//                       " args[0]:   " << n->args[0] << "\n" <<                                        
+//                       " args[1]:   " << n->args[1] << "\n" <<                                        
+//                       " args[2]:   " << n->args[2] << "\n" <<                                        
+//                       " args[3]:   " << n->args[3] << "\n" <<                                        
+//                       " args[4]:   " << n->args[4] << "\n" <<                                        
+//                       " args[5]:   " << n->args[5] << "\n" <<                                        
+//                       " args[6]:   " << n->args[6] << "\n" <<                                        
+//                       " args[7]:   " << n->args[7] << "\n" <<                                        
+//                       " args[8]:   " << n->args[8] << "\n" <<                                        
+//                       " args[9]:   " << n->args[9] << "\n" <<                                        
+//
+//                       " iTri:      " << n->iTri << "\n" <<                                                            
+//                       " iTrv:      " << n->iTrv << "\n" <<                                                                                 
+//                       " trItemRef: " << n->trItemRef << "\n" <<                                        
+//                       " typ:       " << n->typ << "\n" <<                                        
+//                    
+//                    "";
+//
+                    
+            if((n->iTrv == 1) // not a junction
+                      & (!tdbName == 'RoadDB')
+                      & (abs((n->TrPinS[0]) - (n->TrPinS[1])) == 2))  // values will always be 2 apart if it's an orphan track
+                
+              {
+                ErrorMessage *e = new ErrorMessage(
+                    ErrorMessage::Type_Info, 
+                    tdbName, 
+                    QString("TrackNode: ") + QString::number(i) + ". may be a single track piece. " 
+                        + QString::number(n->TrPinS[0]) + " "
+                        + QString::number(n->TrPinS[1]) + " " 
+                );
+                e->setLocationXYZ(
+                        n->trVectorSection->param[8],
+                        n->trVectorSection->param[9],
+                        n->trVectorSection->param[10], 
+                        n->trVectorSection->param[11], 
+                        n->trVectorSection->param[12]);
+                ErrorMessagesLib::PushErrorMessage(e);
+            }
+
         }
         if (n->typ == 2) {
             int originId = n->TrPinS[0];
@@ -4194,7 +4266,5 @@ void TDB::checkDatabase(){
             old = trackItems[trackNodes[i]->trItemRef[j]]->getTrackPosition();
         }*/
     }
-    //
-    //ErrorMessage *e = new ErrorMessage();
-    //ErrorMessagesLib::PushErrorMessage(e);
+        
 }

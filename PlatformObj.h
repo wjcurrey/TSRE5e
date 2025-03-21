@@ -14,6 +14,7 @@
 #include "WorldObj.h"
 #include <QString>
 #include "FileBuffer.h"
+#include "TextObj.h"
 
 class TrackItemObj;
 class OglObj;
@@ -67,6 +68,13 @@ private:
     TrackItemObj* spointer3d = NULL;
     TrackItemObj* spointer3dSelected = NULL;
     OglObj* line = NULL;
+
+    TextObj* txt = NULL;
+    TextObj* txt2 = NULL;
+    TextObj* txt3 = NULL;
+    TextObj* txt4 = NULL;        
+
+    
     float* drawPositionB = NULL;
     float* drawPositionE = NULL;
     int rotB = 0;
@@ -74,6 +82,9 @@ private:
     int selectionValue = 0;
     void renderTritems(GLUU* gluu, int selectionColor);
     void makelineShape();
+    QString getDisplayText();
+    float getDisplayScaling(QString trRef);
+    
 };
 
 

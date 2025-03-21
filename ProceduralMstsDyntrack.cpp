@@ -8,6 +8,7 @@
  *  See LICENSE.md or https://www.gnu.org/licenses/gpl.html
  */
 
+#include <QFileInfo>
 #include "ProceduralMstsDyntrack.h"
 #include "Game.h"
 #include "Vector2f.h"
@@ -706,18 +707,28 @@ void ProceduralMstsDyntrack::GenShape(QVector<OglObj*> &shape, QVector<TSection>
     }
     //qDebug() << ptr << "" << str;
     
-    /// EFO block to grab season path and render snow
-    QString seasonPath = "";
-    if((Game::TextureFlags[Game::season]) != 0)
-        seasonPath = "/" + Game::season.toLower();
-
-    if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnown" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
-        if(Game::TextureFlags["snow"] != 0)
-            seasonPath = "/snow";
-    }
-    /// end EFO block to grab season path and render snow                        
-    
     QString resPath = Game::root + "/routes/" + Game::route + "/textures";
+    QString seasonPath = "";    
+    if(Game::seasonalEditing)
+    {
+        
+        /// EFO block to grab season path and render snow
+        
+        if((Game::TextureFlags[Game::season]) != 0)
+            seasonPath = "/" + Game::season.toLower();
+
+        if(Game::season.toLower() == "winter" || Game::season.toLower() == "autumnsnown" || Game::season.toLower() == "wintersnow" || Game::season.toLower() == "springsnow" ){
+            if(Game::TextureFlags["snow"] != 0)
+                seasonPath = "/snow";
+        }
+        
+        if(!QFileInfo::exists(resPath.toLower() + seasonPath + "/acleantrack1.ace"))
+            seasonPath = "";        
+    
+        /// end EFO block to grab season path and render snow                        
+    }
+    
+    
     QString* texturePath = new QString(resPath.toLower() + seasonPath + "/acleantrack1.ace");  // EFO added seasonPath
     shape.push_back(new OglObj());
     shape.push_back(new OglObj());

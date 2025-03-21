@@ -114,6 +114,10 @@ PropertiesSpeedpost::PropertiesSpeedpost() {
     label->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
     label->setContentsMargins(3,0,0,0);
     vbox->addWidget(label);
+    
+    
+    
+    
     QPushButton *hacks = new QPushButton("Hacks", this);
     QObject::connect(hacks, SIGNAL(released()),
                       this, SLOT(hacksButtonEnabled()));
@@ -317,6 +321,8 @@ void PropertiesSpeedpost::showObj(GameObj* obj){
     this->numberlabel->hide();
     this->lSpeedFor->hide();
     this->ptb.hide();
+    
+
     
     if(stype == "milepost"){
         if(sobj->getSpeedInsteadNumber()){

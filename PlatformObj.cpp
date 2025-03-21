@@ -27,6 +27,7 @@
 #include "ReadFile.h"
 #include "ErrorMessagesLib.h"
 #include "ErrorMessage.h"
+#include "TextObj.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -210,7 +211,7 @@ void PlatformObj::initTrItems(float* tpos){
         isRoad = 1;
         tdb = Game::roadDB;
     }
-
+    Game::resetTools = true;  // fake signal
     int trItemId[2];
 
     tdb->newPlatformObject(trItemId, trNodeId, metry, this->typeID);
@@ -560,7 +561,7 @@ void PlatformObj::render(GLUU* gluu, float lod, float posx, float posz, float* p
         gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
         if(pointer3d == NULL){
             pointer3d = new TrackItemObj(Game::pointerIn);  /// was type 1   /// newSymbols
-            pointer3d->setMaterial(0.9,0.9,0.7);
+            pointer3d->setMaterial(0,1,0);
         }
         pointer3d->render(selectionColor);
         gluu->mvPopMatrix();
@@ -623,7 +624,7 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
         
         if(this->typeID == this->platform){
             line->setMaterial(0.0, 1.0, 0.0);
-            spointer3d->setMaterial(0.0, 1.0, 0.0);
+            spointer3d->setMaterial(0.3, 0.8, 0.5);  /// emerald green ?
             spointer3dSelected->setMaterial(0.5, 1.0, 0.5);
         }
         if(this->typeID == this->siding){
@@ -658,7 +659,27 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
         spointer3dSelected->render(selectionColor | 1*useSC);
     else
         spointer3d->render(selectionColor | 1*useSC);
+    
+        //QString trRefb = this->getDisplayText();        
+        //float scalingb = this->getDisplayScaling(trRefb);            
+        //txt = new TextObj(trRefb, 30, scalingb);    
+    
+        txt = new TextObj(this->getDisplayText(), 30, this->getDisplayScaling(this->getDisplayText()));
+        if(this->typeID == this->platform)
+            txt->setColor(80,200,120);   /// Emerald Green
+        if(this->typeID == this->siding)
+            txt->setColor(255,200,0);   /// Yellow
+        
+        txt->render();
+        txt2 = txt;
+        txt2->render(M_PI);
+        
+
+    
     gluu->mvPopMatrix();
+
+
+
     
     gluu->mvPushMatrix();
     Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, drawPositionE[0] + 0 * (drawPositionE[5] - this->x), drawPositionE[1] + 1, -drawPositionE[2] + 0 * (-drawPositionE[6] - this->y));
@@ -671,6 +692,19 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
         spointer3dSelected->render(selectionColor | 3*useSC);
     else
         spointer3d->render(selectionColor | 3*useSC);
+
+        txt3 = new TextObj(this->getDisplayText(), 30, this->getDisplayScaling(this->getDisplayText()));    
+        if(this->typeID == this->platform)
+            txt3->setColor(80,200,120);   /// Emerald Green
+        if(this->typeID == this->siding)
+            txt3->setColor(255,200,0);   /// Yellow
+
+        txt3->render();
+        txt4 = txt3;
+        txt4->render(M_PI);            
+
+
+    
     gluu->mvPopMatrix();
     
     gluu->mvPushMatrix();
@@ -679,8 +713,38 @@ void PlatformObj::renderTritems(GLUU* gluu, int selectionColor){
     if(selectionColor == 0)
         line->render();
     gluu->mvPopMatrix();
+    
 };
 
+float PlatformObj::getDisplayScaling(QString trRef)
+{
+        float scaling = 1;
+
+            if(trRef.length() >= 8) scaling = 0.75;
+            if(trRef.length() >= 16) scaling = 0.5;
+            if(trRef.length() >= 32) scaling = 0.25;
+
+        return scaling;
+}
+
+QString PlatformObj::getDisplayText()
+{
+        QString trRef = "";                                   
+        QString trRefS = "";                                   
+        QString trRefP = "";                                   
+    
+        trRefS = getStationName();                    
+        trRefP = getPlatformName();                    
+
+        if((trRefS.length() > 0) & (trRefP.length() > 0))
+            trRef = trRefS + ":" + trRefP;
+        else if (trRefP.length() > 0)
+            trRef = trRefP;
+        else if (trRefS.length() > 0)
+            trRef = trRefS;
+
+        return trRef;
+}
 void PlatformObj::makelineShape(){
         line = new OglObj();
         float *ptr, *punkty;// = new float[6];

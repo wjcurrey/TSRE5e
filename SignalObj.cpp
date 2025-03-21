@@ -302,6 +302,8 @@ void SignalObj::initTrItems(float* tpos){
     TDB* tdb = Game::trackDB;
     if(Game::debugOutput) qDebug() <<"new signal  "<<this->fileName;
 
+    Game::resetTools = true;  // fake signal
+    
     tdb->newSignalObject(this->fileName, this->signalUnit, this->signalUnits, trNodeId, metry, this->typeID);
     
     this->signalSubObj = 0;
@@ -470,7 +472,23 @@ void SignalObj::linkSignal(int trackId, int dist){
     TDB* tdb = Game::trackDB;
     if(tdb->trackItems[this->signalUnit[subObjSelected].itemId] == NULL)
         return;
-    tdb->trackItems[this->signalUnit[subObjSelected].itemId]->linkSignal(trackId, dist);
+    tdb->trackItems[this->signalUnit[subObjSelected].itemId]->linkSignal(trackId, dist);       
+/// EFO Redraw?? 
+
+    qDebug() << "signalUnits: " << signalUnits ;    
+    spointer3d->setMaterial(0.3,0.8,0.3);
+    for(int i = 1; i < 32; i++){
+        if((signalUnit[i].enabled) & (signalUnit[i].head))
+        {
+            if(!getLinkedJunctionValue(i) > 0 )
+            spointer3d->setMaterial(1,1,0);    
+        }
+    }
+   
+    setModified();
+    delete[] drawPositions;
+    drawPositions = NULL;
+   
 }
 
 bool SignalObj::isSubObjEnabled(int i){
@@ -746,8 +764,18 @@ void SignalObj::renderTritems(GLUU* gluu, int selectionColor){
     ///////////////////////////////
     if (drawPositions == NULL) {
         if(spointer3d == NULL){
-            spointer3d = new TrackItemObj(Game::pointerOut);   /// EFO orig ())  new shape  newSymbols
-            spointer3d->setMaterial(1,0,0);
+            spointer3d = new TrackItemObj(Game::pointerOut);   /// EFO orig ())  new shape  newSymbols          
+            // qDebug() << this->getLinkedJunctionValue(1);
+
+        spointer3d->setMaterial(0,1,0);
+        for(int i = 1; i < 32; i++){
+          if((signalUnit[i].enabled) & (signalUnit[i].head))
+             {
+                 if(!getLinkedJunctionValue(i) > 0 )
+                 spointer3d->setMaterial(1,0,0);    
+             }
+          }
+            
         }
         if(spointer3dSelected == NULL){
             spointer3dSelected = new TrackItemObj(Game::pointerOut);    /// EFO orig())  new shape   newSymbols

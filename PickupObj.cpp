@@ -168,7 +168,7 @@ void PickupObj::initTrItems(float* tpos){
     
     TDB* tdb = Game::trackDB;
     qDebug() <<"new pickup  "<<this->fileName;
-
+Game::resetTools = true;  // fake signal
     trItemIdCount = 2;
     tdb->newPickupObject(trItemId, trNodeId, metry, this->typeID);
     drawPosition = NULL;

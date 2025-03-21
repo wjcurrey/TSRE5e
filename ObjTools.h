@@ -83,7 +83,7 @@ private:
     std::deque<Ref::RefItem*> lastItemsPtr;
     QVector<Ref::RefItem*> currentItemList;
     QCheckBox stickToTDB;
-    QCheckBox stickToRDB;
+    QCheckBox stickToRDB;   
     QLineEdit autoPlacementLength;
     QLineEdit searchBox;
     //QPushButton *selectTool;

@@ -1348,6 +1348,9 @@ void SFile::fillShapeTextureInfo(QHash<int, ShapeTextureInfo*>& list, unsigned i
             tInfo->loaded = "YES";
             tInfo->resolution = QString::number(ttex->width) + "x" + QString::number(ttex->height);
             tInfo->textureId = image[texture[primstate[prim_state].arg4].image].tex;
+            
+            Route::texturesList.append(tInfo->textureName);
+            
         }
     }
 }

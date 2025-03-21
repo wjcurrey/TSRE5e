@@ -40,7 +40,8 @@ public:
     static TRitem* newSpeedPostItem(int trItemId, float metry, int speedPostType);
     static TRitem* newLevelCrItem(int trItemId, float metry);
     static TRitem* newSoundRegionItem(int trItemId, float metry);
-    static TRitem* newHazardItem(int trItemId, float metry);
+    static TRitem* newHazardItem(int trItemId, float metry);    
+
     static TRitem* newCrossOverItem(int trItemId, float metry, int trItemId2, int shapeIdx);
     
     static QString speedpostTypeName(SType val);
@@ -128,10 +129,12 @@ public:
 
 private:
     float trItemSData1;
-    
+    QString trRef;
     float* drawPosition = NULL;
     int speedpostTrItemDataLength = 0;
     static TrackItemObj* pointer3d; 
+    
+    
 };
 
 #endif	/* TRITEM_H */

@@ -113,6 +113,7 @@ void StatusWindow::recStatus(QString statName, QString statVal ){
     if(statName.contains("rotate"))    { status7.setText(statVal); if(statVal.endsWith("ON")) status7.setStyleSheet(statY); else status7.setStyleSheet(statS);  }    
     if(statName.contains("translate")) { status8.setText(statVal); if(statVal.endsWith("ON")) status8.setStyleSheet(statY); else status8.setStyleSheet(statS);  }    
     if(statName.contains("place"))     { status9.setText(statVal); if(statVal.endsWith("ON")) status9.setStyleSheet(statG); else status9.setStyleSheet(statS);  }             
-    if(statName.contains("timer"))     { status10.setText(statVal + "m elapsed without Save"); if(statVal.toInt() > 10) status10.setStyleSheet(statY); else status10.setStyleSheet(statS);  }                 
+    if(statName.contains("timer"))     { status10.setText(statVal + "m elapsed without Save"); if(statVal.toInt() > 10) status10.setStyleSheet(statY); else status10.setStyleSheet(statS);  }
+    if(statName.contains("object"))    { if(statVal.size() > 0) {status11.setText(statVal + " Object Selected"); status11.setStyleSheet(statY); } else {status11.setText(statVal + ""); status11.setStyleSheet(statS);}  }
 }
     

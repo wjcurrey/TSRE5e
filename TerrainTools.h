@@ -38,6 +38,8 @@ public slots:
     void waterHeightTileToolEnabled(bool val);
     void fixedTileToolEnabled(bool val);
     void setTexToolEnabled();
+    void preloadTexTool(QString filename);
+    
     void chooseColorEnabled();
     void updateTexPrev();
     void setBrushTextureId(int val);
@@ -63,10 +65,12 @@ public slots:
     void setSun2(QString val);
     void setSun3(QString val);    
 
-
+    void resetDefaultValues();
+    void setPinPointBrush();
     
     void msg(QString text, QString val);
     void texPreviewEnabled(int val);
+    void preloadTextures();
 
     
 signals:
@@ -89,6 +93,8 @@ private:
     QSignalMapper texPreviewSignals;
     
     QPushButton* colorw;
+    QPushButton* resetDefaults;
+    QPushButton* setPinPoint;    
     
     // brush gui
     

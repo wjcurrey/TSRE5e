@@ -18,6 +18,7 @@
 #include "TDB.h"
 #include "Route.h"
 #include "Camera.h"
+#include "RouteEditorGLWidget.h"
 
 
 CameraFree::CameraFree(float* pt) {
@@ -194,14 +195,14 @@ void CameraFree::update(float fps) {
     
         if(moveF){
             if (jestcontrol == 1) {
-                moveUp();
+                moveUp(fps);
             } else {
                 moveForward(fps);
             }
         }
         if(moveB){
             if (jestcontrol == 1) {
-                moveDown();
+                moveDown(fps);
             } else {
                 moveBackward(fps);
             }
@@ -257,15 +258,17 @@ void CameraFree::moveRight(float fps) {
     check_coords();
 }
 
-void CameraFree::moveUp() {
+/// EFO added FPS here, was 10/60
+void CameraFree::moveUp(float fps) {
 //    playerPos[1] += przesy;
-        playerPos[1] = playerPos[1] + (10.0 / 60) * przesy;    
+        playerPos[1] = playerPos[1] + (30.0 / fps) * przesy;    
 
 }
 
-void CameraFree::moveDown() {
+/// EFO added FPS here, was 10/60
+void CameraFree::moveDown(float fps) {
 //    playerPos[1] -= przesy;
-        playerPos[1] = playerPos[1] - (10.0 / 60) * przesy;    
+        playerPos[1] = playerPos[1] - (30.0 / fps) * przesy;    
 
 }
 
@@ -378,6 +381,19 @@ void CameraFree::keyUp(QKeyEvent * e) {
         case Qt::Key_S: // D
             moveB = false;
             break;
+        /// EFO added page up/down to mimic space up/down
+        case Qt::Key_PageUp:            
+            jestcontrol = 0;
+            if(!Game::objSelected == true)
+                moveF = false;
+            break;
+        /// EFO added page up/down to mimic space up/down
+        case Qt::Key_PageDown:
+            jestcontrol = 0;            
+            if(Game::objSelected == false)
+                moveB = false;
+            break;
+            
         default:
             break;
     }
@@ -424,6 +440,19 @@ void CameraFree::keyDown(QKeyEvent * e) {
             lockYaxis = !lockYaxis;
             Game::lockCamera = !Game::lockCamera;
             break;
+        /// EFO added page up/down to mimic space up/down
+        case Qt::Key_PageUp:
+            jestcontrol = 1;
+            if(Game::objSelected == false)
+                moveF = true;
+            break;
+        /// EFO added page up/down to mimic space up/down
+        case Qt::Key_PageDown:
+            jestcontrol = 1;
+            if(Game::objSelected == false)
+                moveB = true;
+            break;
+            
         default:
             break;
     }

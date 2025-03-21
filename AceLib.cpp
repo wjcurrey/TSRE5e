@@ -94,7 +94,8 @@ void AceLib::run() {
     }
     //// EFO MOD Check to see if texture is square.... 
 
-    if ( texture->width % 2 != 0 || texture->height % 2 != 0 || (texture->width != texture->height) ) { 
+    if ( texture->width % 2 != 0 || texture->height % 2 != 0 ) { 
+            // || (texture->width != texture->height) ) {  //  Now allowing rectangles that are squareable
         
         if(Game::UnsafeMode == true) 
         {
@@ -114,7 +115,6 @@ void AceLib::run() {
         }
     }
 
-    
     
     texture->bytesPerPixel = (texture->bpp / 8);
     texture->imageSize = (texture->bytesPerPixel * texture->width * texture->height);

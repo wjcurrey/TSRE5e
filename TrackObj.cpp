@@ -77,6 +77,7 @@ ErrorMessage* TrackObj::checkForErrors(){
     }
 
 
+    
     /*
    if((fileName.toLower().contains(("swt"))) or (fileName.toLower().contains(("pnt"))))
     {
@@ -112,7 +113,7 @@ ErrorMessage* TrackObj::checkForErrors(){
     */
             
     /// EFO look for deep underground...        
-    if(position[1] < Game::deepUnderground ) {
+    if(position[1] <= Game::deepUnderground ) {
                                   
         if(Game::debugOutput) qDebug() << "Warning: Object " << fileName << " at " << x << " " << y << " "  << position[0] << " " << position[1] << " " << position[2] << " is considerably underground.";
         

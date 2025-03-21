@@ -1,5 +1,4 @@
-/*  This file is part of TSRE5.
- *
+/*
  *  TSRE5 - train sim game engine and MSTS/OR Editors. 
  *  Copyright (C) 2016 Piotr Gadecki <pgadecki@gmail.com>
  *
@@ -41,7 +40,18 @@ TerrainTools::TerrainTools(QString name)
     connect(&texPreviewSignals, SIGNAL(mapped(int)), this, SLOT(texPreviewEnabled(int)));
 
     paintBrush = new Brush();
+    
+    if(Game::terrBrushColor)        
+    {
+        paintBrush->color[0] = Game::terrBrushColor->red();
+        paintBrush->color[1] = Game::terrBrushColor->green();
+        paintBrush->color[2] = Game::terrBrushColor->blue();
+    }
+    else Game::terrBrushColor = new QColor("#000000");
+        
+              
 
+    
     QDir dir(QString("tsre_appdata/")+Game::AppDataVersion+"/brush/");
     dir.setFilter(QDir::Files);
     dir.setNameFilters(QStringList()<<"*.png");
@@ -107,9 +117,10 @@ TerrainTools::TerrainTools(QString name)
     vlist1->addWidget(buttonTools["putTerrainTexTool"],row,1);
     vlist1->addWidget(loadTerrainTexTool,row,2);
     
-    colorw = new QPushButton("#000000", this);
-    colorw->setStyleSheet("background-color:black;");
+    colorw = new QPushButton(Game::terrBrushColor->name(), this);
+    colorw->setStyleSheet("background-color:" + Game::terrBrushColor->name() + ";");
 
+    
     QLabel *label0;
     QVBoxLayout *vbox = new QVBoxLayout;
     vbox->setSpacing(2);
@@ -149,7 +160,7 @@ TerrainTools::TerrainTools(QString name)
     vlist1->addWidget(texPreviewLabels[3], 3, 2);
     vlist1->addWidget(texPreviewLabels[4], 3, 1);
     vlist1->addWidget(texPreviewLabels[5], 3, 0);
-    vlist1->addWidget(texPreviewLabels[6], 3, 3);
+    vlist1->addWidget(texPreviewLabels[6], 3, 3);    
     vbox->addItem(vlist1);
     vbox->setAlignment(vlist1, Qt::AlignHCenter);
     //vbox->addWidget(texPreviewLabel);
@@ -246,12 +257,14 @@ TerrainTools::TerrainTools(QString name)
     sun1 = GuiFunct::newQLineEdit(25,3);
     sun2 = GuiFunct::newQLineEdit(25,3);       
     sun3 = GuiFunct::newQLineEdit(25,3);    
+    resetDefaults = new QPushButton("Reset Defaults", this);
+    setPinPoint = new QPushButton("Set Pinpoint", this);    
     
     QLabel *label3 = new QLabel("Embankment settings:");
     label3->setStyleSheet(QString("QLabel { color : ")+Game::StyleMainLabel+"; }");
     label3->setContentsMargins(3,0,0,0);
     vbox->addWidget(label3);
-    
+
     QGridLayout *vlist2 = new QGridLayout;
     vlist2->setSpacing(2);
     vlist2->setContentsMargins(3,0,1,0);
@@ -269,6 +282,9 @@ TerrainTools::TerrainTools(QString name)
     vlist2->addWidget(leEradius,row,1);
     vlist2->addWidget(sEradius,row++,2);
     
+    vlist2->addWidget(setPinPoint,row,0);        
+    vlist2->addWidget(resetDefaults,row++,1,1,2);    
+    
     /*
     
     vlist2->addWidget(GuiFunct::newQLabel("Sky 1:", labelWidth),row,0);
@@ -279,7 +295,6 @@ TerrainTools::TerrainTools(QString name)
     vlist2->addWidget(sun3,row++,1);
     
      */
-    
     
     
     vbox->addItem(vlist2);
@@ -328,6 +343,12 @@ TerrainTools::TerrainTools(QString name)
     QObject::connect(colorw, SIGNAL(released()),
                       this, SLOT(chooseColorEnabled()));
     
+    QObject::connect(resetDefaults, SIGNAL(released()),
+                      this, SLOT(resetDefaultValues()));
+
+    QObject::connect(setPinPoint, SIGNAL(released()),
+                      this, SLOT(setPinPointBrush()));
+
     // brush
     QObject::connect(sSize, SIGNAL(valueChanged(int)),
                       this, SLOT(setBrushSize(int)));
@@ -394,6 +415,7 @@ TerrainTools::TerrainTools(QString name)
     this->fheight->setText("0");
     
     // EFO pre-populate terrainTools values from Settings
+
     if(Game::terrainTools != NULL)
     {
       this->setEsize(Game::terrainTools[0]);
@@ -401,8 +423,25 @@ TerrainTools::TerrainTools(QString name)
       this->setEcut(Game::terrainTools[2]);
       this->setEradius(Game::terrainTools[3]);
       this->setBrushSize(Game::terrainTools[4]);
-      this->setBrushAlpha(Game::terrainTools[5]);   
+      this->setBrushAlpha(Game::terrainTools[5]); 
+      
+      sSize->setValue(paintBrush->size);
+      sIntensity->setValue(paintBrush->alpha*100);
+      sEsize->setValue(paintBrush->eSize);
+      sEemb->setValue(paintBrush->eEmb);
+      sEcut->setValue(paintBrush->eCut);
+      sEradius->setValue(paintBrush->eRadius);                  
     }
+    else
+    {
+      Game::terrainTools[0] = 1;
+      Game::terrainTools[1] = 5;
+      Game::terrainTools[2] = 5;
+      Game::terrainTools[3] = 9;
+      Game::terrainTools[4] = 1;
+      Game::terrainTools[5] = 10; 
+    }
+    
 }
 
 
@@ -523,6 +562,42 @@ void TerrainTools::fixedTileToolEnabled(bool val){
         emit enableTool("");
     }
 }
+
+void TerrainTools::preloadTextures(){
+    if(Game::debugOutput) qDebug() << "Preloading" ; 
+    if(Game::preloadTextures.size() > 0) 
+    {
+        foreach (QString val, Game::preloadTextures)
+        {        
+            preloadTexTool(val);        
+        }                
+    }
+    QTime cTime = QTime::currentTime().addMSecs(300);  
+    while (QTime::currentTime() < cTime){
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+    texPreviewEnabled(0);
+}
+
+void TerrainTools::preloadTexTool(QString filename)
+{
+    QString path = Game::root+"/routes/"+Game::route+"/terrtex";
+    filename = path + '/' + filename; 
+    if(Game::debugOutput) qDebug() << "preloading " << filename;
+    int result = TexLib::getTex(filename);     
+    if(result == -1)
+        {    
+            int tid = TexLib::addTex(filename);
+            this->paintBrush->texId = tid;
+            this->paintBrush->tex = TexLib::mtex[tid];
+
+            texLastItems.push_back(qMakePair(this->paintBrush->texId, this->paintBrush->tex));
+            if(texLastItems.size() > 7){
+                texLastItems.removeFirst();
+            }
+        }
+}
+
 
 void TerrainTools::setTexToolEnabled(){
     QFileDialog fd;
@@ -764,12 +839,12 @@ void TerrainTools::updateTexPrev(){
 }
 
 void TerrainTools::texPreviewEnabled(int val){
-    qDebug() << "TerrTools679:" << val;
+    //qDebug() << "TerrTools679:" << val;
     if(val == 6){
         nextBrushShape();
         return;
     }
-    qDebug() << "TerrTools684:" <<texLastItems.size() ;
+    // qDebug() << "TerrTools 829:" << val ;
     int idx = texLastItems.size() - val - 1;
     if(idx > texLastItems.size() - 1) return;
     if(idx < 0) return;
@@ -804,5 +879,48 @@ void TerrainTools::msg(QString text, QString val){
         buttonTools["waterTerrTool"]->setText(t+val);
         t = buttonTools["gapsTerrainTool"]->text().left(buttonTools["gapsTerrainTool"]->text().length() - 1);
         buttonTools["gapsTerrainTool"]->setText(t+val);
+    } else if(text == "preloadTextures")
+    { 
+        qDebug() << "emit received";
+        preloadTextures();
     }
+}
+
+void TerrainTools::setPinPointBrush()
+{
+      setBrushSize(1);
+      setBrushAlpha(1);   
+      
+      sSize->setValue(paintBrush->size);
+      sIntensity->setValue(paintBrush->alpha*100);
+      
+}
+void TerrainTools::resetDefaultValues()
+{
+    if(Game::terrBrushColor)        
+    {
+        paintBrush->color[0] = Game::terrBrushColor->red();
+        paintBrush->color[1] = Game::terrBrushColor->green();
+        paintBrush->color[2] = Game::terrBrushColor->blue();
+        colorw->setStyleSheet("background-color:" + Game::terrBrushColor->name() + ";");
+        colorw->setText(Game::terrBrushColor->name());
+    }
+    if(Game::terrainTools != NULL)
+    {
+      setEsize(Game::terrainTools[0]);
+      setEemb(Game::terrainTools[1]);
+      setEcut(Game::terrainTools[2]);
+      setEradius(Game::terrainTools[3]);
+      setBrushSize(Game::terrainTools[4]);
+      setBrushAlpha(Game::terrainTools[5]);   
+      sSize->setValue(paintBrush->size);
+      sIntensity->setValue(paintBrush->alpha*100);
+      sEsize->setValue(paintBrush->eSize);
+      sEemb->setValue(paintBrush->eEmb);
+      sEcut->setValue(paintBrush->eCut);
+      sEradius->setValue(paintBrush->eRadius);
+    }
+   
+    preloadTextures();
+
 }

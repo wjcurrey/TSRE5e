@@ -30,6 +30,7 @@ public slots:
     // EFO added two
     void enableCustomDetailLevelEnabled(int val);  
     void customDetailLevelEdited(QString val);    
+    void shiftSignal();
     void flipSignal();
     void showSubObjList();
     void checkboxAnimEdited(int val);
