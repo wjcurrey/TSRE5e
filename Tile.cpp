@@ -153,15 +153,29 @@ void Tile::checkForErrors(){
             
             QString trimmedFile = obj->fileName;
             int sdl = obj->staticDetailLevel;
+            QString sfl = ParserX::MakeFlagsString(obj->staticFlags) + " " + obj->type; 
             
             if(sdl = -1) sdl = 0;
+                        
             
             int index = trimmedFile.indexOf("shapes\\\\");
             if ((index != -1)) {
                 trimmedFile = trimmedFile.mid(index + 8); // Skip "shapes\\\\"
                 if(Game::debugOutput == true) qDebug() << trimmedFile << " was " << obj->fileName;
             }
+
             
+            if((route->staticFlagList.contains(sfl) == false)) 
+            {                                
+                route->staticFlagList.append(sfl);                
+            }
+
+                        
+            if((route->staticFlagList.contains(sfl) == false)) 
+            {                                
+                route->staticFlagList.append(sfl);                
+            }
+
             if(obj->type != "trackobj")
             if((route->fileList.contains(trimmedFile, Qt::CaseInsensitive) == false))
             {                                

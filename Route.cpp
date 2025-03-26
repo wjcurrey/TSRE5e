@@ -84,6 +84,7 @@ Route::Route() {
     QStringList Route::shapesList ;    
     QStringList Route::texturesList ;    
     QStringList Route::missingList;
+    QStringList Route::staticFlagList;
 
 void Route::load(){
 
@@ -207,9 +208,9 @@ void Route::load(){
         confirmMerge();
     }
     
-    if((Game::UnsafeMode) && (Game::routeRebuildTDB)){
-        RebuildTDB();
-    }
+//    if((Game::UnsafeMode) && (Game::routeRebuildTDB)){
+//        RebuildTDB();
+//    }
     
     
 }
@@ -2564,11 +2565,26 @@ void Route::ListFiles(){
         file.close();
     }  
 
+    
+    
     /// EFO List track pieces
     file.setFileName("./" + Game::route + "_trackUsed.txt");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         QStringList sortedFileList = trackList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            out << fileName << " \n";
+        }
+        file.close();
+    }  
+
+
+    /// EFO List static flags
+    file.setFileName("./" + Game::route + "_staticFlags.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        QStringList sortedFileList = staticFlagList;
         sortedFileList.sort();
         for (const QString& fileName : sortedFileList) {
             out << fileName << " \n";
@@ -2640,6 +2656,8 @@ void Route::RebuildTDB(){
         
         for(int bi = 0; bi < tTile->jestObiektow; bi++){            
             WorldObj *wObj = tTile->obiekty[bi];
+            
+            
 
             if(wObj == NULL) continue;
             //if(wObj->isTrackItem()) continue;
@@ -2650,6 +2668,9 @@ void Route::RebuildTDB(){
 //               qDebug() << "SectionIDX " << wObj->sectionIdx << " greater than MaxIDS " << tsection->tsectionMaxIdx;
 //               continue;                
 //            }
+            
+            
+            
             if((Game::routeRebuildTDB == true) && (Game::UnsafeMode == true))
             {                
                 if(wObj->type == "trackobj" || wObj->type == "dyntrack"){
