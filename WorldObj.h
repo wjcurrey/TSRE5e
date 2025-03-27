@@ -47,7 +47,7 @@ public:
         soundregion = 18,
         groupobject = 19,
         ruler = 20,
-        polyforest = 21     
+        polyforest = 21
     };
     TypeID typeID = this->undefined;
     enum ShadowType {
@@ -96,6 +96,7 @@ public:
     float *endp = NULL;
     int sectionIdx;
     int trLoaded = 0;
+    bool flipped = false;
         
 
     

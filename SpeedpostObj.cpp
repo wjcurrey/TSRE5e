@@ -123,6 +123,8 @@ void SpeedpostObj::load(int x, int y) {
     this->modified = false;
     this->drawPosition = NULL;
     this->pointer3d = NULL;
+    this->txt = NULL;
+    this->txt2 = NULL;
     setMartix();
 }
 
@@ -397,7 +399,7 @@ void SpeedpostObj::flip(bool flipShape){
 
 void SpeedpostObj::expandTrItems(){
     TDB* tdb = Game::trackDB;
-    qDebug() <<"ex sound region  "<<this->fileName;
+    qDebug() <<"expand sound region  "<<this->fileName;
 
     float* playerT = Vec2::fromValues(this->x, this->y);
     float pos[3];
@@ -424,21 +426,21 @@ void SpeedpostObj::expandTrItems(){
     QVector<TDB::IntersectionPoint> ipoints;
     tdb->getSegmentIntersectionPositionOnTDB(ipoints, NULL, playerT, buffer, len, (float*)&pos);
     qDebug() << "intersection count: "<<ipoints.size();
-    
+        
     int tid = tdb->findTrItemNodeId(this->trItemId[1]);
     for(int i = 0; i < ipoints.size(); i++){
         qDebug() << ipoints[i].distance;
         
         if(ipoints[i].distance < 0.5)
             continue;
-        if(ipoints[i].idx == tid)
-            continue;
+//        if(ipoints[i].idx == tid)
+//            continue;
         
         int trNodeId = ipoints[i].idx;
         float metry = ipoints[i].m;
         
         qDebug() <<"new speedpost  "<<this->fileName;
-
+Game::resetTools = true;  // fake signal
         tdb->newSpeedPostObject(tdb->trackItems[this->trItemId[1]]->getSpeedpostType(), trItemId, trNodeId, metry, this->typeID);
         tdb->trackItems[this->trItemId.last()]->setSpeedpostRot(tdb->trackItems[this->trItemId[1]]->getSpeedpostRot());
         tdb->trackItems[this->trItemId.last()]->setSpeedpostNumber(tdb->trackItems[this->trItemId[1]]->getSpeedpostNumber());
@@ -519,6 +521,8 @@ void SpeedpostObj::initTrItems(float* tpos){
     trItemId.clear();
     TDB* tdb = Game::trackDB;
     qDebug() <<"new speedpost  "<<this->fileName;
+    
+    Game::resetTools = true;
 
     tdb->newSpeedPostObject(speedPostType, trItemId, trNodeId, metry, this->typeID);
     
@@ -535,6 +539,7 @@ void SpeedpostObj::set(QString sh, long long int val){
         qDebug() << "speedPostId "<<speedPostId<< " speedPostType " << speedPostType;
         SpeedPost *speedPost = Game::trackDB->speedPostDAT->speedPost[speedPostId];
         
+            
         if(speedPostType == TRitem::SIGN){
             fileName = speedPost->speedSignShapeName;
             speedSignShape = new float[speedPost->speedSignShapeCount*4+1];
@@ -680,6 +685,7 @@ void SpeedpostObj::set(QString sh, FileBuffer* data) {
         return;
     }
     WorldObj::set(sh, data);
+
     return;
 }
 
@@ -835,6 +841,7 @@ void SpeedpostObj::renderTritems(GLUU* gluu, int selectionColor){
         drawLine->render();
     int useSC;
     
+
     for(int i = 0; i < drawPositions.size(); i++){
         drawPosition = drawPositions[i];
         gluu->mvPushMatrix();
@@ -848,8 +855,38 @@ void SpeedpostObj::renderTritems(GLUU* gluu, int selectionColor){
             pointer3dSelected->render(selectionColor | (i+1)*useSC);
         else
             pointer3d->render(selectionColor | (i+1)*useSC);
+
+        if((Game::renderTrItems == false) && ((this->getNumber()) || (this->getSpeed())))
+        {
+            QString trRefN = "";
+            QString trRefS = "";
+            
+            trRefN = QString::number(this->getNumber());
+            trRefS = QString::number(this->getSpeed());
+            
+            if((this->getNumberInsteadSpeed()) || (this->getNumber()))
+            {
+                txt = new TextObj(trRefN, 4);    
+                txt->setColor(99,149,238);   /// CORNFLOWER BLUE
+            }
+
+            if((this->getSpeedInsteadNumber()) || (this->getSpeed()))
+            {
+                txt = new TextObj(trRefS, 4);                    
+                txt->setColor(69,242,72);  ///  GREEN
+            }
+
+            txt->render();
+            txt2 = txt;
+            txt2->render(M_PI);
+            txt->loaded = true;
+            
+        }
+             
+        
         gluu->mvPopMatrix();
     }
+
 };
 
 bool SpeedpostObj::getSimpleBorder(float* border){

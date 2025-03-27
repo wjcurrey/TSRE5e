@@ -193,7 +193,62 @@ TrackItemObj::TrackItemObj(int type) : OglObj() {
         this->setMaterial(0.0, 1.0, 0.0);
         this->init(punkty, ptr, RenderItem::V, GL_TRIANGLES);
         //delete[] punkty;
-    } else {   // classic box for level crossings and TrItem display
+    }
+     else if(type == 6) {
+        //// EFO  Arrow pointing down for platforms and sidings, value 3 is positive  
+        float punkty[30*3]{
+              -0.40, -0.25, 0,    // base-1 1
+               0.40, -0.25, 0,   // base-1 2 GOOD
+               0.40, -0.5, 0,    // base-1 3
+              
+               0.40, -0.5, 0,  // base-2 1
+              -0.40, -0.5, 0,     // base-2 2 GOOD        
+              -0.40, -0.25, 0,  // base-2 3
+              
+              -0.08, -0.5, 0,    // stem-1 1
+               0.08, -0.5, 0,   // stem-1 2 GOOD
+               0.08, -0.75, 0,    // stem-1 3
+              
+               0.08, -0.75, 0,  // stem-2 1
+              -0.08, -0.75, 0,     // stem-2 2 GOOD        
+              -0.08, -0.5, 0,  // stem-2 3
+
+              -0.25, -0.75, 0,    // tip 1
+                 0 , -1.25, 0,    // tip 2
+               0.25 , -0.75, 0,    // tip 3
+              
+              
+              //// invert for the bottom to 321
+
+               0.40, -0.5, 0,    // base-1 3
+               0.40, -0.25, 0,   // base-1 2 GOOD
+              -0.40, -0.25, 0,    // base-1 1
+              
+              -0.40, -0.25, 0,  // base-2 3
+              -0.40, -0.5, 0,     // base-2 2 GOOD        
+               0.40, -0.5, 0,  // base-2 1
+              
+               0.08, -0.75, 0,    // stem-1 3
+               0.08, -0.5, 0,   // stem-1 2 GOOD
+              -0.08, -0.5, 0,    // stem-1 1
+              
+              -0.08, -0.5, 0,  // stem-2 3
+              -0.08, -0.75, 0,     // stem-2 2 GOOD        
+               0.08, -0.75, 0,  // stem-2 1
+
+               0.25 , -0.75, 0,    // tip 3
+                 0 , -1.25, 0,    // tip 2
+              -0.25, -0.75, 0    // tip 1
+                      
+            };
+        int ptr = 30*3;
+        this->setMaterial(0.0, 0.0, 0.0);
+        this->init(punkty, ptr, RenderItem::V, GL_TRIANGLES);
+        //delete[] punkty;
+    }     
+    
+    
+    else {   // classic box for level crossings and TrItem display
         float punkty[36*3]{
             -0.5f,-0.5f,-0.5f, 
             -0.5f,-0.5f, 0.5f,

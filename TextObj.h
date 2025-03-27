@@ -33,6 +33,7 @@ public:
     void setOColor(int r, int g, int b);
     void setFontName(QString val);
     void setRotOffset(float val);
+    void setHeight(float val);
 private:
     QString text;
     QString fontName;
@@ -44,6 +45,7 @@ private:
     float size = 4;
     float scale = 1;
     float rotOffset = 3.14;
+    float textHeight;
     int resMult = 1;
 };
 

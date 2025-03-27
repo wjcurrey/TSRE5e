@@ -40,8 +40,8 @@ public:
     void moveBackward(float fps);
     void moveLeft(float fps);
     void moveRight(float fps);
-    void moveUp();
-    void moveDown();
+    void moveUp(float fps);
+    void moveDown(float fps);
     void patrzX(float f);
     void patrzY(float f);
     void check_coords();

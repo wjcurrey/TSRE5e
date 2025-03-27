@@ -28,6 +28,7 @@
 #include "LevelCrObj.h"
 #include "PickupObj.h"
 #include "HazardObj.h"
+#include "CrossoverObj.h"
 #include "RulerObj.h"
 #include "SoundRegionObj.h"
 #include "SoundSourceObj.h"

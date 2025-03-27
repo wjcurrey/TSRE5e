@@ -126,12 +126,14 @@ void Tile::wczytajObiekty() {
 }
 
 void Tile::checkForErrors(){
-    
+
     if(Game::trackDB == NULL)
         return;
     
     for (auto it = obiekty.begin(); it != obiekty.end(); ++it) {
         WorldObj* obj = (WorldObj*) it->second;
+        // CheckObj = (WorldObj*) it->second;
+        
         if(obj == NULL) 
             continue;
         ErrorMessage* e = obj->checkForErrors();
@@ -151,31 +153,47 @@ void Tile::checkForErrors(){
             
             QString trimmedFile = obj->fileName;
             int sdl = obj->staticDetailLevel;
+            QString sfl = ParserX::MakeFlagsString(obj->staticFlags) + " " + obj->type; 
             
             if(sdl = -1) sdl = 0;
+                        
             
             int index = trimmedFile.indexOf("shapes\\\\");
             if ((index != -1)) {
                 trimmedFile = trimmedFile.mid(index + 8); // Skip "shapes\\\\"
                 if(Game::debugOutput == true) qDebug() << trimmedFile << " was " << obj->fileName;
             }
+
             
+            if((route->staticFlagList.contains(sfl) == false)) 
+            {                                
+                route->staticFlagList.append(sfl);                
+            }
+
+                        
+            if((route->staticFlagList.contains(sfl) == false)) 
+            {                                
+                route->staticFlagList.append(sfl);                
+            }
+
             if(obj->type != "trackobj")
-            if((Route::fileList.contains(trimmedFile, Qt::CaseInsensitive) == false))
+            if((route->fileList.contains(trimmedFile, Qt::CaseInsensitive) == false))
             {                                
-                Route::fileList.append(trimmedFile.toLower());
+                route->fileList.append(trimmedFile.toLower());
+                
             }
             
-            if(obj->type == "trackobj")               
-            if((Route::trackList.contains(trimmedFile, Qt::CaseInsensitive) == false))
-            {                                
-                Route::trackList.append(trimmedFile.toLower());                
+            if(obj->type == "trackobj")
+            {    
+                if((route->trackList.contains(trimmedFile, Qt::CaseInsensitive) == false))
+                {                                
+                    route->trackList.append(trimmedFile.toLower());                
+                }
+        
             }
-
-
             // else
                //      qDebug() << trimmedFile << " " << obj->type << " " <<  obj->sectionIdx ;
-
+        }
 
         /// Moving this to the last step so that the TrackObj list is available
         if(Game::objectsToRemove.size() > 0){
@@ -197,12 +215,9 @@ void Tile::checkForErrors(){
                 }
             }
         }
-        }
-        
-                
-    }
-    
+    }                       
 }
+    
 
 void Tile::selectObjectsByXYRange(QVector<GameObj*>& objects, int minx, int maxx, int minz, int maxz){
     for (auto it = obiekty.begin(); it != obiekty.end(); ++it) {
@@ -272,7 +287,7 @@ void Tile::replaceWorldObj(WorldObj *nowy){
 }
 
 void Tile::load() {
-
+    route = new Route();    
     QString sh;
     QString path;
     path = Game::root + "/routes/" + Game::route + "/world/w" + getNameXY(x) + "" + getNameXY(-z) + ".w";

@@ -81,7 +81,6 @@ void PropertiesTrackItem::updateObj(GameObj* obj){
         return;
     }
     itemObj = (TRitem*)obj;
-
 }
 
 bool PropertiesTrackItem::support(GameObj* obj){

@@ -38,6 +38,7 @@ class FileBuffer;
 
 class Route : public QObject {
     Q_OBJECT
+    
 public:
     QHash<int, Tile*> tile;
     QVector<int> activityId;
@@ -73,6 +74,9 @@ public:
     void updateTileData(FileBuffer *data);
     WorldObj* updateWorldObjData(FileBuffer *data);
     void mergeRoute(QString route2Name, float offsetX, float offsetY, float offsetZ);
+    void confirmMerge();
+    void confirmUnsafe();
+
     WorldObj* getObj(int x, int z, int id);
     WorldObj* findNearestObj(int x, int z, float *pos);
     virtual Tile * requestTile(int x, int z, bool allowNew = true);
@@ -159,14 +163,14 @@ public:
     static QStringList shapesList;    
     static QStringList texturesList;        
     void ListFiles();
-    void rebuildTDB();
+    void RebuildTDB();
 
     
 signals:
     void objectSelected(GameObj* obj);
     void objectSelected(QVector<GameObj*> obj);
     void sendMsg(QString val);
-
+    
 protected:
     QString trkName;
     QString routeDir;

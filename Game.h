@@ -196,6 +196,7 @@ public:
     static QColor *selectedColor;
     static QColor *selectedTerrColor;        
     static QColor *wireLineColor;
+    static QColor *terrBrushColor;
     
     static bool loadConsists;
     static bool loadActivities;    
@@ -229,7 +230,7 @@ public:
     static bool imageSubstitution;
     static bool imageUpgrade;
     static QString includeFolder;
-    static int  deepUnderground;
+    static float  deepUnderground;
     static int logfileMax;
     static int logfileDays;
     static QString startapp;
@@ -243,6 +244,10 @@ public:
     static bool routeMergeTDB;
     static bool routeMergeTerrtex;    
     static bool routeRebuildTDB;    
+    static QStringList preloadTextures;
+    static bool objSelected;
+    static bool resetTools;
+    
 
 private:
     //static RouteEditorWindow* window;
@@ -251,6 +256,8 @@ private:
     static void DownloadAppData(QString path);
     static void CheckForOpenAl();
     static void cleanupLogs();
+    
+    
 };
 
 #endif	/* GAMESETTINGS_H */

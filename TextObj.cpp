@@ -20,7 +20,7 @@ TextObj::TextObj(int val, float s, float sc, int resm) : OglObj() {
     if(sc > 0)
         scale = sc;
     pos[0] = 0;
-    pos[1] = 0;
+    pos[1] = textHeight;
     pos[2] = 0;
     resMult = resm;
 }
@@ -32,7 +32,7 @@ TextObj::TextObj(QString val, float s, float sc, int resm) : OglObj() {
     if(sc > 0)
         scale = sc;
     pos[0] = 0;
-    pos[1] = 0;
+    pos[1] = textHeight;
     pos[2] = 0;
     resMult = resm;
 }
@@ -40,7 +40,7 @@ TextObj::TextObj(QString val, float s, float sc, int resm) : OglObj() {
 TextObj::TextObj() : OglObj() {
     this->text = " ";
     pos[0] = 0;
-    pos[1] = 0;
+    pos[1] = textHeight;
     pos[2] = 0;
 }
 
@@ -59,6 +59,10 @@ void TextObj::setFontName(QString val){
 
 void TextObj::setRotOffset(float val){
     rotOffset = val;
+}
+
+void TextObj::setHeight(float val){
+    textHeight = val;    
 }
 
 void TextObj::init(){

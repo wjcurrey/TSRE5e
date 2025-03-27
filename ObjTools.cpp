@@ -241,11 +241,11 @@ void ObjTools::refreshObjLists(){
 }
 
 void ObjTools::routeLoaded(Route* a){
-    this->route = a;       
+    this->route = a;           
     autoPlacementTarget.setCurrentIndex(2);
     route->placementAutoTargetType = 2;
     route->snapableOnlyRotation = Game::snapableOnlyRot;
-    
+       
     QStringList hash;
     QStringList hash2;
     QMapIterator<QString, QVector<Ref::RefItem>> i(route->ref->refItems);
@@ -299,7 +299,7 @@ void ObjTools::routeLoaded(Route* a){
       //std::cout << " " << it->first << ":" << it->second;
     }
     hash.sort(Qt::CaseInsensitive);
-    hash.removeDuplicates();
+    hash.removeDuplicates();    
     refTrack.addItems(hash);
     refTrack.setMaxVisibleItems(35);
     refTrack.view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -309,25 +309,82 @@ void ObjTools::routeLoaded(Route* a){
     refRoad.setMaxVisibleItems(35);
     refRoad.view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     //refTrack.s .sortItems(Qt::AscendingOrder);
-    
+        
     refTrack.setCurrentText("a1t");
     refTrackSelected("a1t");
+
+    if(Game::trackDB->loaded)  ///  EFO wrapping this in an IF because the TDB not existing causes a dump without warning
+    {
+        
+        qDebug() << "ObjTools build Signals";
     
-    SignalShape * signal;
-    QHashIterator<QString, SignalShape*> i2(Game::trackDB->sigCfg->signalShape);
-    //if(Game::trackDB->sigCfg->signalShape.size() > 0)
-    while (i2.hasNext()) {
-        i2.next();
-        signal = i2.value();
-        if(signal == NULL) continue;
-        Ref::RefItem item;
-        item.filename.push_back(signal->desc);
-        item.description = signal->desc;
-        item.clas = "signals";
-        item.type = "signal";
-        item.value = signal->listId;
-        route->ref->refItems[QString("#TSRE#")+"signals"].push_back(item);
+        SignalShape * signal;    
+
+        QHashIterator<QString, SignalShape*> i2(Game::trackDB->sigCfg->signalShape);        
+        // if(Game::trackDB->sigCfg->signalShape.size() > 0)   /// EFO un-commenting what was commented out
+        while (i2.hasNext()) {
+            i2.next();
+            signal = i2.value();
+            if(signal == NULL) continue;
+            Ref::RefItem item;
+            item.filename.push_back(signal->desc);
+            item.description = signal->desc;
+            item.clas = "signals";
+            item.type = "signal";
+            item.value = signal->listId;
+            route->ref->refItems[QString("#TSRE#")+"signals"].push_back(item);
+        }
+        
+        for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
+            if(Game::trackDB->speedPostDAT->speedPost[i]->speedSignShapeCount <= 0)
+                continue;
+            Ref::RefItem item;
+            item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
+            item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
+            item.clas = "speedsign";
+            item.type = "speedpost";
+            item.value = i*1000+TRitem::SIGN;
+            route->ref->refItems[QString("#TSRE#")+"speedsign"].push_back(item);
+        }
+        for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
+            if(Game::trackDB->speedPostDAT->speedPost[i]->speedResumeSignShapeCount <= 0)
+                continue;
+            Ref::RefItem item;
+            item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
+            item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
+            item.clas = "speedresume";
+            item.type = "speedpost";
+            item.value = i*1000+TRitem::RESUME;
+            route->ref->refItems[QString("#TSRE#")+"speedresume"].push_back(item);
+        }
+        for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
+            if(Game::trackDB->speedPostDAT->speedPost[i]->speedWarningSignShapeCount <= 0)
+                continue;
+            Ref::RefItem item;
+            item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
+            item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
+            item.clas = "speedwarning";
+            item.type = "speedpost";
+            item.value = i*1000+TRitem::WARNING;
+            route->ref->refItems[QString("#TSRE#")+"speedwarning"].push_back(item);
+        }
+        for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
+            if(Game::trackDB->speedPostDAT->speedPost[i]->milepostShapeCount <= 0)
+                continue;
+            Ref::RefItem item;
+            item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
+            item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
+            item.clas = "milepost";
+            item.type = "speedpost";
+            item.value = i*1000+TRitem::MILEPOST;
+            route->ref->refItems[QString("#TSRE#")+"milepost"].push_back(item);
+        }    
+    } else {
+      qWarning() << "No Track Database Found, will create at Route Save, and some loading functions have been skipped";
     }
+    
+    if(!Game::roadDB->loaded) qWarning() << "No Road Database Found, will create at Route Save";
+
     for (int i = 0; i < ForestObj::forestList.size(); i++){
         Ref::RefItem item;
         item.filename.push_back(ForestObj::forestList[i].name);
@@ -336,50 +393,6 @@ void ObjTools::routeLoaded(Route* a){
         item.type = "forest";
         item.value = i;
         route->ref->refItems[QString("#TSRE#")+"forests"].push_back(item);
-    }
-    for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
-        if(Game::trackDB->speedPostDAT->speedPost[i]->speedSignShapeCount <= 0)
-            continue;
-        Ref::RefItem item;
-        item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
-        item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
-        item.clas = "speedsign";
-        item.type = "speedpost";
-        item.value = i*1000+TRitem::SIGN;
-        route->ref->refItems[QString("#TSRE#")+"speedsign"].push_back(item);
-    }
-    for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
-        if(Game::trackDB->speedPostDAT->speedPost[i]->speedResumeSignShapeCount <= 0)
-            continue;
-        Ref::RefItem item;
-        item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
-        item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
-        item.clas = "speedresume";
-        item.type = "speedpost";
-        item.value = i*1000+TRitem::RESUME;
-        route->ref->refItems[QString("#TSRE#")+"speedresume"].push_back(item);
-    }
-    for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
-        if(Game::trackDB->speedPostDAT->speedPost[i]->speedWarningSignShapeCount <= 0)
-            continue;
-        Ref::RefItem item;
-        item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
-        item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
-        item.clas = "speedwarning";
-        item.type = "speedpost";
-        item.value = i*1000+TRitem::WARNING;
-        route->ref->refItems[QString("#TSRE#")+"speedwarning"].push_back(item);
-    }
-    for (int i = 0; i < Game::trackDB->speedPostDAT->speedPost.size(); i++){
-        if(Game::trackDB->speedPostDAT->speedPost[i]->milepostShapeCount <= 0)
-            continue;
-        Ref::RefItem item;
-        item.filename.push_back(Game::trackDB->speedPostDAT->speedPost[i]->name);
-        item.description = Game::trackDB->speedPostDAT->speedPost[i]->name;
-        item.clas = "milepost";
-        item.type = "speedpost";
-        item.value = i*1000+TRitem::MILEPOST;
-        route->ref->refItems[QString("#TSRE#")+"milepost"].push_back(item);
     }
     
     foreach (SoundListItem* it, route->soundList->sources){
@@ -425,9 +438,12 @@ void ObjTools::routeLoaded(Route* a){
     /// EFO add un-indexed shapes
     
     hash.clear();
-    
+
     QDir routeShapes(Game::root + "/routes/" + Game::route + "/shapes" );
     routeShapes.setFilter(QDir::Files);          
+    
+    if(!routeShapes.exists()) qDebug() << "No Route Shapes Directory Found";
+    
     foreach(QString dirFile, routeShapes.entryList()){
         if(dirFile.endsWith(".s", Qt::CaseInsensitive))                {
           

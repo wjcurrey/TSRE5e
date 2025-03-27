@@ -55,6 +55,7 @@ private:
     QComboBox kmm;
     QCheckBox chFlipShape;
     QLineEdit eMaxPlacingDistance;
+    
 };
 
 #endif	/* PROPERTIESSPEEDPOST_H */
