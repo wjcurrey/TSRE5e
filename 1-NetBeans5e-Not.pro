@@ -117,6 +117,7 @@ PropertiesConsist.cpp \
 PropertiesDyntrack.cpp \
 PropertiesForest.cpp \
 PropertiesGroup.cpp \
+PropertiesHazard.cpp \
 PropertiesLevelCr.cpp \
 PropertiesPickup.cpp \
 PropertiesPlatform.cpp \
@@ -145,6 +146,7 @@ RouteEditorClient.cpp \
 RouteEditorGLWidget.cpp \
 RouteEditorServer.cpp \
 RouteEditorWindow.cpp \
+RouteMergeDialog.cpp \
 Ruch.cpp \
 RulerObj.cpp \
 SFile.cpp SFileC.cpp \
@@ -217,6 +219,7 @@ TransferObj.cpp \
 TransformWorldObjDialog.cpp \
 Trk.cpp TrkWindow.cpp \
 Undo.cpp \
+UnsafeModeDialog.cpp \
 UnsavedDialog.cpp \
 UriImageDrawThread.cpp \
 Vector2f.cpp \
@@ -337,6 +340,7 @@ PropertiesConsist.h \
 PropertiesDyntrack.h \
 PropertiesForest.h \
 PropertiesGroup.h \
+PropertiesHazard.h \
 PropertiesLevelCr.h \
 PropertiesPickup.h \
 PropertiesPlatform.h \
@@ -365,7 +369,9 @@ RouteEditorClient.h \
 RouteEditorGLWidget.h \
 RouteEditorServer.h \
 RouteEditorWindow.h \
-Ruch.h RulerObj.h \
+RouteMergeDialog.h \
+Ruch.h \
+RulerObj.h \
 SFile.h \
 SFileC.h \
 SFileX.h \
@@ -436,6 +442,7 @@ TransformWorldObjDialog.h \
 Trk.h \
 TrkWindow.h \
 Undo.h \
+UnsafeModeDialog.h \
 UnsavedDialog.h \
 UriImageDrawThread.h \
 Vector2f.h \

@@ -2583,7 +2583,7 @@ void Route::ListFiles(){
     /// EFO List static flags
     file.setFileName("./" + Game::route + "_staticFlags.txt");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
+        QTextStream out(&file); 
         QStringList sortedFileList = staticFlagList;
         sortedFileList.sort();
         for (const QString& fileName : sortedFileList) {
