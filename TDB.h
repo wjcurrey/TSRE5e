@@ -140,6 +140,7 @@ public:
     void enableSignalSubObj(QString filename, SignalObj::SignalUnit &unit, int i, int tritemid);
     void newLevelCrObject(int* &itemId, int trNodeId, float metry, int type);
     void newHazardObject(int* &itemId, int trNodeId, float metry, int type);
+
     void newCrossOverObject(int id1, float m1, int id2, float m2, int shapeIdx);
     bool getSegmentIntersectionPositionOnTDB(float* posT, float* segment, float len, float* pos, float * q, float* tpos);
     bool getSegmentIntersectionPositionOnTDB(QVector<TDB::IntersectionPoint> &ipoints, TDB* segmentTDB, float* posT, float* segment, float len, float* pos);

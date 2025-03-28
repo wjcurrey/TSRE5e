@@ -39,7 +39,7 @@
 //////// Version
 //////////////////////////////////
 
-QString Game::AppVersion = "Trainsim.Com Fork v0.8.005m";  // over-ride from main.cpp
+QString Game::AppVersion = "Trainsim.Com Fork v0.8.005u";  // over-ride from main.cpp
 
 
 bool Game::ServerMode = false;
@@ -145,6 +145,7 @@ bool Game::loadAllWFiles = false;
 bool Game::autoFix = false;
 bool Game::gui = true;
 bool Game::listFiles = false;
+bool Game::objSelected = false;
 
 QString Game::geoPath = "hgst";
 
@@ -208,6 +209,7 @@ bool  Game::lockCamera = false;
 QColor *Game::selectedColor = new QColor("#FF0000");       /// EFO default red
 QColor *Game::selectedTerrColor = new QColor("#FF0000");   /// EFO default red
 QColor *Game::wireLineColor = new QColor("#FFFF00");       /// EFO default yellow
+QColor *Game::terrBrushColor = new QColor("#000000");   // Default black
 
 QString Game::mainPos;   /// EFO Null handling exists
 QString Game::statusPos;  /// EFO Null handling exists
@@ -229,7 +231,7 @@ float Game::convertMass = 1;  /// EFO will set to pounds = 2.20462 if useImperia
 QString Game::convertUnitM = " t";
 float Game::convertSpeed = 1;  /// EFO will set to mph = 0.621371 if useImperial is set to true;
 QString Game::convertUnitS = " mph";
-int  Game::deepUnderground = -100;
+float  Game::deepUnderground = -100;
 
 int   Game::markerHeight = 30;
 int   Game::markerText = 16;
@@ -245,13 +247,17 @@ QString Game::includeFolder = "openrails";
 int Game::logfileMax = 99999;
 int Game::logfileDays = 99999;
 
+QStringList Game::preloadTextures;
+
+bool Game::resetTools = false;
+
 bool Game::CheckBraces = false;
 bool Game::UnsafeMode = false;
 bool Game::extendedDebug = false;
 bool Game::routeMergeTerrain = false;
 bool Game::routeMergeTDB = false;
 bool Game::routeMergeTerrtex = false;
-bool Game::routeRebuildTDB;
+bool Game::routeRebuildTDB = false;
 
 int Game::rnp = 7;  //// can be 8
 
@@ -531,8 +537,9 @@ void Game::load() {
                     useOnlyPositiveQuaternions = false; 
             }
             if(setname =="routemergestring")
-                routeMergeString = setval;
-      
+                routeMergeString = args[1]; 
+            
+            
             if(setname =="serverlogin"){
                 serverLogin = args[1].trimmed();
             }
@@ -593,6 +600,7 @@ void Game::load() {
                     routeRebuildTDB = false; 
             }
 
+   
 
             
             
@@ -711,6 +719,11 @@ void Game::load() {
         if(setname =="terrainbrushintensity") {
             terrainTools[5] = setval.toInt();
         }
+        if(setname=="terrainbrushcolor") {
+            terrBrushColor = new QColor(setval);
+        }
+        
+        
         // END EFO Configure Terrain Tools
         
         
@@ -1040,7 +1053,13 @@ void Game::load() {
               objectsToRemove = setval.split(",") ;
               qDebug() << "Removal objects found: " << objectsToRemove.size();              
             }
-        
+
+        if(setname == "preloadtextures" ) 
+            {
+              // qDebug() << "Removal Found";
+              preloadTextures = setval.split(",") ;
+            }
+                
         if(setname == "checkbraces" ) 
         {
              if((setval == "true") or (setval == "1") or (setval == "on"))
@@ -1091,6 +1110,17 @@ void Game::load() {
     
     cleanupLogs();
 
+    if(Game::seasonalEditing)
+    {
+        QMessageBox infobox;        
+        infobox.setWindowTitle("Seasonal Editing On");
+        infobox.setInformativeText("If you plan to do terrain painting, exit TSRE, open up your \"Settings.txt\" file, and comment out seasonal editing or set it to false.\n\n Terrain painting, auto-paint, and some shapes may not render correctly with seasonal editing turned on.");
+        infobox.setFixedWidth(150);
+        infobox.exec();
+    }
+
+
+    
 }
 /*
 bool Game::loadRouteEditor(){
@@ -1278,151 +1308,156 @@ void Game::CreateNewSettingsFile(){
     out << "// TSRE " << Game::AppVersion << "\n";
     out << "// In this file, there are two comment marks in use -- # and // -- Both work the same  \n";    
     out << "\n";
-    out << "consoleOutput = false    // set to true for detailed debugging \n";
-    out << "\n";
-    out << "# main directory of your game data\n";
-    out << "gameRoot = C:/train simulator\n";
-    out << "\n";
-    out << "# route directory name to load on startup by default\n";
-    out << "routeName = asdasasdasd1233\n";
-    out << "\n";
-    out << "# optional start tile\n";
-    out << "#startTileX = -5306\n";
-    out << "#startTileY = 14961\n";
-    out << "\n";
-    out << "# route edit\n";
-    out << "#createNewIfNotExist = true\n";
-    out << "writeEnabled = true\n";
-    out << "writeTDB = true\n";
-    out << "#deleteTrWatermarks = true\n";
-    out << "#deleteViewDbSpheres = true\n";
-    out << "\n";
-    
-    
-    out << "    //////////////////////////////  Map and Terrain Features\n";
-    out << "//  mapImageResolution = 2048          // Image resolution for downloaded map imagery\n";
-    out << "//  geoPath = C:/hgst                       // Drive and folder for HGT files\n";
-    out << "//  Image Maps require a valid API key from either Google or MapBox\n";
-    out << "//\n";
-    out << "////  Image Maps require a valid API key from either Google or MapBox\n";
-    out << "//\n";
-    out << "////  Google           \n";
-    out << "// imageMapsUrl = http://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom={zoom}&size={res}x{res}&maptype=satellite&key=\n";
-    out << "//  MapAPIKey = yourMapAPIKey\n";
-    out << "//\n"; 
-    out << "//// MapBox\n";
-    out << "//// See https://docs.mapbox.com/api/maps/static-images/ for parameter options\n";
-    out << "//\n";
-    out << " imageMapsUrl = https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{lon},{lat},{zoom}/{res}x{res}?access_token=\n";
-    out << " MapAPIKey = yourMapAPIKey\n";
-    out << "//// MapBox needs this offset setting to be -1:\n";
-    out << " imageMapsZoomOffset = -1\n";
-
-    
-    
-    
-    out << "# misc\n";
-    out << "#systemTheme = true\n";
-    out << "#colorConView = #FF0000\n";
-    out << "#colorShapeView = #00FF00\n";
-    out << "#toolsHidden = true\n";
-    out << "usenNumPad = true\n";
-    out << "tileLod = 1\n";
-    out << "objectLod = 4000\n";
-    out << "maxObjLag = 10\n";
-    out << "allowObjLag = 1000\n";
-    out << "#cameraFov = 20.0\n";
-    out << "leaveTrackShapeAfterDelete = false\n";
-    out << "#renderTrItems = true\n";
-    out << "#useImperial = false\n";
-    out << "#ortsEngEnable = false\n";
-    out << "#oglDefaultLineWidth = 2\n";
-    out << "shadowsEnabled = 1\n";
-    out << "#shadowMapSize = 8192\n";
-    out << "#textureQuality = 4\n";
-    out << "ignoreMissingGlobalShapes = true\n";
-    out << "snapableOnlyRot = false\n";
-    out << "#imageMapsUrl = \n";
-    out << "#MapAPIKey = \n";
-    out << "#AASamples = 16\n";
-    out << "#mapImageResolution = 2048\n";
-    out << "#cameraStickToTerrain = true\n";
-    out << "#mouseSpeed = 0.1\n";
-    out << "#mainWindowLayout = W\n";
-    out << "#ceWindowLayout = CU1\n";
-    out << "#useQuadTree = false\n";
-    out << "#fogColor = #D0D0FF\n";
-    out << "#fogDensity = 0.5\n";
-    out << "#defaultElevationBox = 0\n";
-    out << "#defaultMoveStep = 0.25\n";
-    out << "#ActivityToPlay = \"\"\n";
-    out << "#autoFix = false\n";
-    out << "#cameraSpeedMax = 40.0\n";
-    out << "#cameraSpeedMin = 1.0\n";
-    out << "#cameraSpeedStd = 3.0\n";
-    out << "#debugOutput = false\n";
-    out << "#fpsLimit=0\n";
-    out << "#fullscreen = false\n";
-    out << "#hudEnabled = false\n";
-    out << "#hudScale = 1.0\n";
-    out << "#ignoreLoadLimits = false\n";
-    out << "#imageMapsZoomOffset = 0\n";
-    out << "#legacySypport = false\n";
-    out << "#loadAllWFiles = false\n";
-    out << "#loadConsists = false\n";
-    out << "#loadActivities = false\n";
-    out << "#lockCamera = false\n";
-    out << "#mainWindow = 200,200\n";
-    out << "#naviWindow = 0,200\n";
-    out << "#markerLines = false\n";
-    out << "#maxAutoPlacement = 999\n";
-    out << "#mstsShadows = false\n";
-    out << "#newSymbols = true\n";
-    out << "#numRecentItems=11\n";
-    out << "#objectsToRemove=\"\"\n";
-    out << "#playerMode=false\n";
-    out << "#proceduralTracks=false\n";
-    out << "#routeMergeString=\"\"\n";
-    out << "#season=\"\"\n";
-    out << "#seasonalEditing=false\n";
-    out << "#sectionLineHeight=2.8\n";
-    out << "#selectedTerrWidth=2\n";
-    out << "#selectedColor=#BBBB00\n";
-    out << "#selectedTerrColor=#FF2000\n";
-    out << "#selectedWidth=2\n";
-    out << "#serverAuth=\"\"\n";
-    out << "#serverLogin=\"\"\n";
-    out << "#shadoLowMapSize=1024\n";
-    out << "#snapableRadius=20\n";
-    out << "#sortTileObjects=true\n";
-    out << "#soundEnabled=false\n";
-    out << "#statusWindow=0,100\n";
-    out << "#terrainTools = \"1,5,5,9,1,10\"\n";
-    out << "#trackElevationPm=700\n";
-    out << "#useNetworkingEng=false\n";
-    out << "#useOnlyPositiveQuaternions=false\n";
-    out << "#useSuperelevation=false\n";
-    out << "#viewCompass = false\n";
-    out << "wireLineHeight = 3\n";        
-    out << "// imagesubstitution = true\n";
-    out << "// imageupgrade = true\n";
-    out << "// includefolder = \"openrails\"\n";
-    out << "// logfiledays = 10\n";
-    out << "// logfilemax = 100\n";
-    out << "// markerheight = 10\n";
-    out << "// markertext = 2.5\n";
-    out << "// railprofile = = 0.7175, 0.7895\n";
-    out << "// sigoffset = 2.5\n";
-    out << "// skycolor = #FFFFFF\n";
-    out << "// usetdbemptyitems = true\n";
-    out << "// useworkingdir = false\n";
-    out << "// viewmarkers = true\n";
-    out << "// warningbox = true\n";
-//    out << "// LocalTSectionOnly = false\n";
-    out << "// startapp = C    /// options R C S \n";
-    out << "// deepunderground = -100   // depth in meters to flag for misplaced objects\n";
-    out << "// listFiles = false // LoadAllWFiles must also be true, gives list of all shapes and track used by route \n";
-    
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// System Tokens (affects all modules) \n " ; 
+    out << "\n " ; 
+    out << "consoleOutput = false          // displays log output in realtime in command window \n " ; 
+    out << "debugOutput = false            // enables extended logging detail \n " ; 
+    out << "fullscreen = false             // Prevents screen from being maximized \n " ; 
+    out << "imageSubstitution = true       // allow for ACE or DDS to be shown if missing DDS or ACE \n " ; 
+    out << "imageUpgrade = true            // show DDS if available, false uses shapefile defined texture only \n " ; 
+    out << "logfiledays = 20               // delete files older than X days \n " ; 
+    out << "logfilemax = 50000             // keep only X logs \n " ; 
+    out << "mainWindow = 100, 100          // X, Y of main windows and load window \n " ; 
+    out << "mainWindowLayout = \"PWTS\"      // Order of windows: P = Properties, T = Tools W = World \n " ; 
+    out << "maxObjLag = 10  \n " ; 
+    out << "mouseSpeed = 1.0  \n " ; 
+    out << "shadowLowMapSize = 1024  \n " ; 
+    out << "shadowMapSize = 2048  \n " ; 
+    out << "shadowsEnabled = false          // affects performance if true  \n " ; 
+    out << "soundEnabled = false          \n " ; 
+    out << "startapp = r                    // r=Route Edit   c=Consist Edit   s=Shapeviewer    \n " ; 
+    out << "systemTheme = false             // setting to true uses your Windows pallete  \n " ; 
+    out << "unsafemode = false              // Only set to true for risky features  \n " ; 
+    out << "useImperial = on                // Converts some display values from metric  \n " ; 
+    out << "usenNumPad = true           \n " ; 
+    out << "useWorkingDir = false           // false saves logs to the TSRE folder  \n " ; 
+    out << "warningBox = true               // Warn before exiting without a save  \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor Startup Tokens  \n " ; 
+    out << "// gameRoot = \"\"             // your ORTS Content drive/folder  \n " ; 
+    out << "// routeName = \"\"            // add route name to skip route selection menu  \n " ; 
+    out << "createNewIfNotExist = true       // Create routeName if not already present  \n " ; 
+    out << "// startTileX = \"\"                  // optional start location  \n " ; 
+    out << "// startTileY = \"\"                  // optional start location  \n " ; 
+    out << "// geoPath = {path}                // Drive and folder housing HGT files  \n " ; 
+    out << "loadActivities = true            // Check route activities for errors  \n " ; 
+    out << "loadAllWFiles = true             // Load entire route to check errors  \n " ; 
+    out << "// routeMergeString = \"\"          // For merging a second route with offsets X Y Z applied  e.g. \"IRM:0:0:0\"  \n " ; 
+    out << "// routeMergeTDB = false            // set to true to merge TDBs  \n " ; 
+    out << "// routeMergeTerrain = false        // set to true to overwrite overlapping terrain heights  \n " ; 
+    out << "// routeMergeTerrtex = false        // set to true to overwrite overlapping terrain textures  \n " ; 
+    out << "#season = \"Spring\"               // Requires seasonalEditing, winter/autumn/spring/summer/night  \n " ; 
+    out << "#seasonalEditing = on            //   \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor File Management Tokens  \n " ; 
+    out << "autoFix = true                   // repair TDB anomalies  \n " ; 
+    out << "deepunderground = -100           // flag pieces that aren't on the terrain  \n " ; 
+    out << "deleteTrWatermarks = true        // removes detail not used by ORTS  \n " ; 
+    out << "deleteViewDbSpheres = true       // removes detail not used by ORTS  \n " ; 
+    out << "legacySupport = false            // enable retention of ViewDBSphere and VDBID when true   \n " ; 
+    out << "listfiles = true                 // create lists of files used/unused on exit  \n " ; 
+    out << "objectsToRemove = \"\"             // Requires listfiles and LoadAllWFiles, comma separated list of shapes  \n " ; 
+    out << "routeRebuildTDB = true           // Requires unsafemode  \n " ; 
+    out << "sortTileObjects = true           // Orders items by detail level on save   \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor Editing Preset Tokens  \n " ; 
+    out << "defaultElevationBox = 0  \n " ; 
+    out << "defaultMoveStep = 0.25  \n " ; 
+    out << "ignoreMissingGlobalShapes = true  // false shows only track/road shapes present in Global\\Shapes  \n " ; 
+    out << "leaveTrackShapeAfterDelete = false // Use only when deleting track/road but keeping TDB lines  \n " ; 
+    out << "maxAutoPlacement = 999            // max distance in meters for auto-placement  \n " ; 
+    out << "mapImageResolution = 512          // Image resolution for downloaded map imagery  \n " ; 
+    out << "numRecentItems = 15               // Length of recently used items list  \n " ; 
+    out << "preloadTextures = \"rock.ace\"      // supports ace, bmp, dds, png files in TERRTEX folder  \n " ; 
+    out << "sigOffset = 2.5                   // offset for signal object placement  \n " ; 
+    out << "snapableRadius = 20               // max distance to snap to nearest object  \n " ; 
+    out << "snapableOnlyRot = false           // false allows free rotation  \n " ; 
+    out << "terrainBrushColor = \"#1B2E29\"  \n " ; 
+    out << "terrainBrushIntensity = 70  \n " ; 
+    out << "terrainBrushSize = 25  \n " ; 
+    out << "terrainCut = 2  \n " ; 
+    out << "terrainEmbankment = 2   \n " ; 
+    out << "terrainRadius = 9   \n " ; 
+    out << "terrainSize = 1   \n " ; 
+    out << "textureQuality = 1  \n " ; 
+    out << "trackElevationMaxPm = 100         // maximum grade permille   \n " ; 
+    out << "useOnlyPositiveQuaternions = false   \n " ; 
+    out << "useQuadTree = true  \n " ; 
+    out << "useTdbEmptyItems = true           // Preserves node numbering when deleting items from TDB  \n " ; 
+    out << "writeEnabled = true               // set to false for read-only  \n " ; 
+    out << "writeTDB = true                   // set to false to manually decide what to add to TDB via Z key  \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor MapBox Tokens  \n " ; 
+    out << "// imageMapsUrl = https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{lon},{lat},{zoom}/{res}x{res}?access_token=  \n " ; 
+    out << "// imageMapsZoomOffset = -1         /// required for MapBox  \n " ; 
+    out << "// MapAPIKey = {your API key}  \n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor Google Maps Tokens  \n " ; 
+    out << "// imageMapsUrl = http://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom={zoom}&size={res}x{res}&maptype=satellite&key=  \n " ; 
+    out << "// MapAPIKey = {your API key}  \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor Viewport Tokens  \n " ; 
+    out << "AASamples = 16  \n " ; 
+    out << "allowObjLag = 1000          \n " ; 
+    out << "cameraFov = 35   \n " ; 
+    out << "cameraSpeedMax = 40                // Camera movement with SHIFT  \n " ; 
+    out << "cameraSpeedMin = 1                 // Camera movement with CTRL  \n " ; 
+    out << "cameraSpeedStd = 3                 // Camera movement normal  \n " ; 
+    out << "cameraStickToTerrain = true        // Stop camera from going underground, toggled with \"/\" key  \n " ; 
+    out << "// fogColor =   \n " ; 
+    out << "// fogDensity =  \n " ; 
+    out << "hudEnabled = TRUE                 //  \n " ; 
+    out << "hudScale = 1                      // HUD text scale  \n " ; 
+    out << "lockCamera = true                 // same as hitting the . when moving about with the camera, can be unset  \n " ; 
+    out << "markerHeight = 10                 // Height of the marker stick  \n " ; 
+    out << "markerLines = true                // Show markers when route loads  \n " ; 
+    out << "markerText = 2.5                  // Text size for marker text  \n " ; 
+    out << "MSTSshadows = false               // dumb down shadows when true  \n " ; 
+    out << "naviWindow = 50, 50               // X, Y of Navigation window for RE   \n " ; 
+    out << "newSymbols = true                 // default is true, false uses the older TSRE pyramids   \n " ; 
+    out << "objectLod = 4000                  // 2000 is plenty for most purposes   \n " ; 
+    out << "oglDefaultLineWidth = 1           // width of standard lines  \n " ; 
+    out << "railProfile = 0.7175, 0.7895      // rail edges for dynamic track  \n " ; 
+    out << "renderTrItems = false             // Show the black markers for TrItems  \n " ; 
+    out << "sectionLineHeight = 5.0           // grey section line height   \n " ; 
+    out << "selectedColor = #B612FF           // object selection line color  \n " ; 
+    out << "selectedWidth = 2                 // object selection line width  \n " ; 
+    out << "selectedTerrColor = #FFB612       // terrain selection line color  \n " ; 
+    out << "selectedTerrWidth = 4             // terrain selection line width  \n " ; 
+    out << "skyColor =  #E0FFFF  \n " ; 
+    out << "statusWindow=0,100                // X, Y of Status Window  \n " ; 
+    out << "tileLod = 2                       // tiles in each direction to load  \n " ; 
+    out << "toolsHidden = false               // only show the viewport  \n " ; 
+    out << "useSuperelevation = false         // apply superelevation when rendering curves  \n " ; 
+    out << "viewCompass = true                // show compass at top center  \n " ; 
+    out << "viewMarkers = true                // view markers selected in Navi window  \n " ; 
+    out << "wireLineHeight = 6.8              // yellow TDB line height  \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Route Editor Multi-User Tokens  \n " ; 
+    out << "# fpsLimit = 59  \n " ; 
+    out << "# playerMode =   \n " ; 
+    out << "# proceduralTracks = true        \n " ; 
+    out << "# serverAuth = yes               \n " ; 
+    out << "# serverLogin = yes@yes.com  \n " ; 
+    out << "# useNetworkEng = false      \n " ; 
+    out << "\n " ; 
+    out << "\n " ; 
+    out << "//// Consist Editor Tokens  \n " ; 
+    out << "ceWindowLayout = \"cu1\"               // C - Consists, 1 = Main List,  2 = Second List,   \n " ; 
+    out << "colorConView = #a2a2a2               \n " ; 
+    out << "colorShapeView = #a2a2a2            \n " ; 
+    out << "includeFolder = \"openrails\"          // Optional override for OpenRailsCZSK Project  \n " ; 
+    out << "loadConsists = true                  // set to false to skip loading consists   \n " ; 
+    out << "ortsEngEnable = true                 // Give precedence to settings in /OpenRails folders  \n " ; 
+    out << "\n " ; 
            
     out.flush();
     file.close();

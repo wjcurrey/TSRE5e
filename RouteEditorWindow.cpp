@@ -67,6 +67,8 @@
 #include "LoadWindow.h"
 #include "CELoadWindow.h"
 #include "TexLib.h"
+#include "PropertiesPolyForest.h"
+#include "PropertiesHazard.h"
 
 
 
@@ -113,6 +115,8 @@ RouteEditorWindow::RouteEditorWindow() {
     objProperties["TrackItem"] = new PropertiesTrackItem;
     objProperties["ActivityPath"] = new PropertiesActivityPath;
     objProperties["ActivityConsist"] = new PropertiesConsist;
+    objProperties["Hazard"] = new PropertiesHazard;
+    
     // last 
     objProperties["Undefined"] = new PropertiesUndefined;
     
@@ -630,6 +634,7 @@ RouteEditorWindow::RouteEditorWindow() {
       QObject::connect(glWidget, SIGNAL(updStatus(QString, QString)), naviWindow, SLOT(recStatus(QString, QString)));
       /// EFO connect the status buttons to the other windows
       
+      QObject::connect(glWidget, SIGNAL(preloadTexturesSignal()), terrainTools, SLOT(preloadTextures()));
 
       
 }
@@ -663,9 +668,21 @@ void RouteEditorWindow::closeEvent(QCloseEvent * event ){
         for (const QString& fileName : sortedFileList) {
             out << fileName << " \n";
         }
-        file.close();
+        file.close();        
     }      
-    
+/*
+    QFile file2("./" + Game::route + "_texturesUsed.txt");    
+    if (file2.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file2);
+        QStringList sortedFileList = Route::texturesList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            out << fileName << " \n";
+        }
+        file.close();        
+    }
+ * */          
+        
     if(unsavedItems.size() == 0){
         if(Game::debugOutput) qDebug() << "Nothing to Save";
         emit exitNow();
@@ -886,6 +903,7 @@ void RouteEditorWindow::hideAllTools(){
 void RouteEditorWindow::showProperties(GameObj* obj){
     // hide all
     //for (std::vector<PropertiesAbstract*>::iterator it = objProperties.begin(); it != objProperties.end(); ++it) {
+    
     foreach (PropertiesAbstract *it, objProperties){
         if(it == NULL) continue;
         it->hide();

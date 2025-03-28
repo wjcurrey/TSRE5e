@@ -132,13 +132,13 @@ ErrorMessage* HazardObj::checkForErrors(){
             ErrorMessagesLib::PushErrorMessage(e);
             return e;
         }
-        if(item->type != "hazzarditem"){
+        if((item->type != "hazarditem") && (item->type != "hazzarditem"))  {
             ErrorMessage *e = new ErrorMessage(
                 ErrorMessage::Type_Error, 
                 ErrorMessage::Source_World, 
                 QString("Object '") + type + "' - referenced trackItem has wrong type. UiD: " + QString::number(UiD) + ". ",
                         QString("World Object doesn't match TDB data. Is World Database and TDB out of sync? \n")+
-                        "Expected: hazzarditem but found: "+item->type+" .\n"
+                        "Expected: hazarditem but found: "+item->type+" .\n"
                         "This may cause fatal errors."
                 );
             e->setLocationXYZ(x, -y, position[0], position[1], -position[2]);
@@ -285,7 +285,7 @@ void HazardObj::renderTritems(GLUU* gluu, int selectionColor){
         drawPosition[0] += 2048 * (drawPosition[5] - this->x);
         drawPosition[2] -= 2048 * (-drawPosition[6] - this->y);
         if(pointer3d == NULL){
-            pointer3d = new TrackItemObj(1);
+            pointer3d = new TrackItemObj(6);
             pointer3d->setMaterial(0.8,0.2,0.8);
         }
     }
@@ -301,7 +301,22 @@ void HazardObj::renderTritems(GLUU* gluu, int selectionColor){
     gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
     useSC = (float)selectionColor/(float)(selectionColor+0.000001);
     pointer3d->render(selectionColor | 1*useSC);
+   
+    if(Game::renderTrItems == false)            
+    {
+        trRef.clear();
+        trRef = QString::number(this->trItemId[1]);
+        TextObj* txt;  /// EFO
+        TextObj* txt2;  /// EFO
+        txt = new TextObj(trRef, 4);    
+        txt->setColor(200,55,200);
+        txt->render();
+        txt2 = txt;
+        txt2->render(M_PI);
+    }
     gluu->mvPopMatrix();
+
+        
 
 };
 

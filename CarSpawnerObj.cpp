@@ -395,7 +395,7 @@ void CarSpawnerObj::initTrItems(float* tpos){
     }
 
     int trItemId[2];
-
+Game::resetTools = true;  // fake signal
     tdb->newPlatformObject(trItemId, trNodeId, metry, this->typeID);
 
     this->trItemIdCount = 4;

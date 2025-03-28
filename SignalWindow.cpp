@@ -110,7 +110,8 @@ void SignalWindow::bLinkEnabled(int i) {
     }
     this->sobj->subObjSelected = i;
     setLinkButton->setDisabled(false);
-    setLinkButton->setText(QString("Set Link [")+QString::number(i)+"]");
+    setLinkButton->setText(QString("Set [Head ")+QString::number(i+1)+"]");
+    setLinkButton->setStyleSheet("border-style: outset;border-color:yellow;border-width: 2px;");
     int ids[3];
     int linkId = sobj->getLinkedJunctionValue(i);
     if(linkId < 1){
@@ -124,6 +125,8 @@ void SignalWindow::bLinkEnabled(int i) {
     eLink2.setText(QString::number(ids[1]));
     eLink3.setText(QString::number(ids[2]));
     
+    setLinkButton->setStyleSheet("");
+
     /*SignalWindowLink window;
     window.setWindowTitle("Link Signal");
     window.exec();
@@ -253,16 +256,16 @@ void SignalWindow::setLinkInfo(int i) {
             this->bSub[i].setText("No Junction");
             this->bSub[i].setEnabled(false);
         }
-    } else {
+    } else {        
         this->bSub[i].setEnabled(true);
-        this->bSub[i].setStyleSheet("color: green");
-        this->bSub[i].setText("Linked: " + QString::number(linkId, 10));
+        this->bSub[i].setStyleSheet("border-style: outset;border-color:green;border-width: 2px;");
+        this->bSub[i].setText("Linked: " + QString::number(linkId));
     }
 }
 
 SignalWindow::~SignalWindow() {
 }
 
-void SignalWindow::exitNow() {
+void SignalWindow::exitNow() {       
     this->close();
 }

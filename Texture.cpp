@@ -121,9 +121,7 @@ unsigned char * Texture::getImageData(int width, int height){
     
     float scalew = (float)this->width/width;
     float scaleh = (float)this->height/height;
-    
-    qDebug() << "Texture125:" << this->width <<" "<< this->height;
-    
+        
     int lineWidth = (this->width*bytesPerPixel);
     //if( lineWidth%4 !=0) 
     //    lineWidth = lineWidth + 4 - lineWidth%4;
@@ -163,9 +161,9 @@ void Texture::advancedCrop(float* texCoords, int w, int h){
     texCoords2[5] = texCoords[5]*16.0;//*width;
     texCoords2[6] = texCoords[6]*16.0;//*height;
     
-    qDebug() << "Texture166:" << width << height << bytesPerPixel << "--" << w << h;
-    qDebug() << "Texture167:"<< texCoords2[1] << texCoords2[2] << texCoords2[3] << texCoords2[4] << texCoords2[5] << texCoords2[6];
-    qDebug() << "Texture168:"<< texCoords[1] << texCoords[2] << texCoords[3] << texCoords[4] << texCoords[5] << texCoords[6];
+    //qDebug() << "Texture166:" << width << height << bytesPerPixel << "--" << w << h;
+    //qDebug() << "Texture167:"<< texCoords2[1] << texCoords2[2] << texCoords2[3] << texCoords2[4] << texCoords2[5] << texCoords2[6];
+    //qDebug() << "Texture168:"<< texCoords[1] << texCoords[2] << texCoords[3] << texCoords[4] << texCoords[5] << texCoords[6];
     
     unsigned char* newData = new unsigned char[w*h*this->bytesPerPixel];    
     

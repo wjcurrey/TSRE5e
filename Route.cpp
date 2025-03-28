@@ -67,6 +67,11 @@
 #include "RouteEditorWindow.h"
 #include "ShapeLib.h"
 #include "SFile.h"
+#include "RouteMergeDialog.h"
+#include "UnsafeModeDialog.h"
+#include "TerrainTools.h" // EFO
+#include <iostream>
+
 
 
 Route::Route() {
@@ -79,12 +84,19 @@ Route::Route() {
     QStringList Route::shapesList ;    
     QStringList Route::texturesList ;    
     QStringList Route::missingList;
+    QStringList Route::staticFlagList;
 
 void Route::load(){
 
     Game::currentRoute = this;
     trkName = Game::trkName;
     routeDir = Game::route;
+
+    ///  Check for Unsafe early
+    if(Game::UnsafeMode){
+        this->confirmUnsafe();
+    }
+
     
      if(Game::debugOutput) qDebug() << "# Load Route";
     
@@ -139,6 +151,13 @@ void Route::load(){
     if(Game::loadAllWFiles){
         preloadWFiles(Game::gui);
     }
+    
+    if((Game::UnsafeMode) && (Game::routeRebuildTDB)){
+        TDB::saveEmpty(true);
+        TDB::saveEmpty(false);
+    }
+
+    
     this->trackDB = new TDB(tsection, false); 
     this->trackDB->loadTdb(); 
     this->roadDB = new TDB(tsection, true); 
@@ -185,17 +204,17 @@ void Route::load(){
  
     // Route Merge. 
     if(Game::routeMergeString.length() > 0){
-        QStringList args = Game::routeMergeString.split(":");
-        if(args.size() == 4){
-            float offsetX = args[1].toFloat();
-            float offsetY = args[2].toFloat();
-            float offsetZ = args[3].toFloat();
-            mergeRoute(args[0], offsetX, offsetY, offsetZ);
-            setAsCurrentGameRoute();
-        }
+ 
+        confirmMerge();
     }
-       
+    
+//    if((Game::UnsafeMode) && (Game::routeRebuildTDB)){
+//        RebuildTDB();
+//    }
+    
+    
 }
+
 
 void Route::load(QString name){
     if(!Game::useQuadTree)
@@ -315,6 +334,7 @@ void Route::mergeRoute(QString route2Name, float offsetX, float offsetY, float o
     QHash<unsigned int, unsigned int> fixedShapeIds;
     unsigned int oldTrackNodeCount = this->trackDB->iTRnodes; 
     unsigned int oldRoadNodeCount = this->roadDB->iTRnodes;    
+    
     
     if(Game::routeMergeTDB)
     {
@@ -1969,9 +1989,11 @@ WorldObj* Route::makeFlexTrack(int x, int z, float* p) {
 }
 
 void Route::addToTDB(WorldObj* obj) {
+    //qDebug() << "1971";
     if(obj == NULL) return;
     if(obj->typeObj != WorldObj::worldobj)
         return;
+    //qDebug() << "A2TDB 1981";    
     int x = obj->x;//post[0];
     int z = obj->y;//post[1];
     float p[3];
@@ -1991,28 +2013,51 @@ void Route::addToTDB(WorldObj* obj) {
     q[1] = obj->qDirection[1];
     q[2] = obj->qDirection[2];
     q[3] = obj->qDirection[3];
+    //qDebug() << "A2TDB 2001";
     
     if (obj->type == "trackobj") {
+        //qDebug() << "A2TDB 2003";
         TrackObj* track = (TrackObj*) obj;
         //this->trackDB->placeTrack(x, z, p, q, r, nowy->UiD);
         //float scale = (float) sqrt(track->qDirection[0] * track->qDirection[0] + track->qDirection[1] * track->qDirection[1] + track->qDirection[2] * track->qDirection[2]);
         //float elevation = ((track->qDirection[0] + 0.0000001f) / fabs(scale + 0.0000001f))*(float) -acos(track->qDirection[3])*2;
         //float elevation = -3.14/16.0;
         //q[0] = elevation;
+                //qDebug() << "A2TDB 2010";
+        
+//        if(track->sectionIdx > trackDB->tsection->tsectionMaxIdx )
+//        {
+//            qDebug() << "Section IDX out of range for TrackObj";
+//            return;
+//        }
+        
         if(this->tsection->isRoadShape(track->sectionIdx))
             this->roadDB->placeTrack(x, z, (float*) &p, (float*) &q, track->sectionIdx, obj->UiD);
         else
             this->trackDB->placeTrack(x, z, (float*) &p, (float*) &q, track->sectionIdx, obj->UiD, &track->jNodePosn);
+        //qDebug() << "A2TDB 2015";                
         //obj->setPosition(p);
         //obj->setQdirection(q);
         //obj->setMartix();
         //track->setJNodePosN();
     } else if(obj->type == "dyntrack"){
+        //qDebug() << "A2TDB 2021";        
         Undo::Clear();
         DynTrackObj* dynTrack = (DynTrackObj*) obj;
+        
+                
+        /// EFO If the sectionIdx is out of range
+        if(dynTrack->sectionIdx > trackDB->tsection->routeMaxIdx)
+        {
+            int prevSectionIdx = dynTrack->sectionIdx;
+            dynTrack->sectionIdx = -1;
+            qWarning() << "DT SectionIDX " << prevSectionIdx << " is greater than max in local TSection -- " << trackDB->tsection->routeMaxIdx << " -- resetting to be safe." ;
+        } 
         if(dynTrack->sectionIdx == -1){
             this->trackDB->fillDynTrack(dynTrack);
+            if(Game::debugOutput) qDebug() << "DT SectionIDX " << dynTrack->sectionIdx << " being written to tSection... ";
         }
+        //qDebug() << "A2TDB 2038";
         this->trackDB->placeTrack(x, z, (float*) &p, (float*) &q, dynTrack->sectionIdx, obj->UiD);
         obj->setPosition(p);
         obj->setQdirection(q);
@@ -2060,29 +2105,36 @@ void Route::toggleToTDB(WorldObj* obj) {
 }
 
 void Route::addToTDBIfNotExist(WorldObj* obj) {
+    //qDebug() << "A2TDB 2086";
     if(obj == NULL) return;
+    //qDebug() << "A2TDB 2088";
     if(obj->typeObj != WorldObj::worldobj)
         return;
+    //qDebug() << "A2TDB 2089";
     if(obj->typeID == obj->groupobject) {
         GroupObj *gobj = (GroupObj*)obj;
         for(int i = 0; i < gobj->objects.size(); i++ ){
-            addToTDBIfNotExist(gobj->objects[i]);
+            addToTDBIfNotExist(gobj->objects[i]);   //qDebug() << "A2TDB 2095 Exit";
         }
         return;
     }
     
     if (obj->type != "trackobj" && obj->type != "dyntrack") {
+            //qDebug() << "A2TDB 2100 Exit";
             return;
     }
+       
     if(roadDB->ifTrackExist(obj->x, obj->y, obj->UiD) || trackDB->ifTrackExist(obj->x, obj->y, obj->UiD)){
-        return;
-    }
+            //qDebug() << "A2TDB 2105 Exit";
+            return;
+        }
     
+    //qDebug() << "A2TDB 2110";    
     Undo::StateBegin();
     Undo::PushTrackDB(trackDB, false);
     Undo::PushTrackDB(roadDB, true);
     Undo::StateEnd();
-    
+    //qDebug() << "A2TDB 2115";    
     addToTDB(obj);
 }
 
@@ -2513,6 +2565,8 @@ void Route::ListFiles(){
         file.close();
     }  
 
+    
+    
     /// EFO List track pieces
     file.setFileName("./" + Game::route + "_trackUsed.txt");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -2525,14 +2579,134 @@ void Route::ListFiles(){
         file.close();
     }  
 
+
+    /// EFO List static flags
+    file.setFileName("./" + Game::route + "_staticFlags.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file); 
+        QStringList sortedFileList = staticFlagList;
+        sortedFileList.sort();
+        for (const QString& fileName : sortedFileList) {
+            out << fileName << " \n";
+        }
+        file.close();
+    }  
+
     
     qDebug() << " Done listing out files.... ";
 }
 
-/// EFO hail mary
-void Route::rebuildTDB()
-{
 
-    
-    
+
+void Route::confirmMerge() {
+
+    RouteMergeDialog dialog;
+    int result = dialog.exec(); // Shows the dialog, waits for user interaction
+    qDebug() << "Dialog result: " << result;
+    if (result == QDialog::Accepted) {
+        qDebug() << "Merge Started" ;
+        
+        QStringList args = Game::routeMergeString.split(":");
+        if(args.size() == 4)
+            {
+             // execute with offset
+                float offsetX = args[1].toFloat();
+                float offsetY = args[2].toFloat();
+                float offsetZ = args[3].toFloat();
+                mergeRoute(args[0], offsetX, offsetY, offsetZ);
+            }
+        else  // execute without offset
+                mergeRoute(args[0], 0,0,0);
+ 
+ 
+            setAsCurrentGameRoute();
+
+        } 
+    else
+        qDebug() << "Merge Canceled" ;
+
 }
+
+/// EFO hail mary, stealing from ToggleToTDB and making it do both a delete and an add
+void Route::RebuildTDB(){
+    QProgressDialog *progress = NULL;
+    bool gui = true;
+
+        
+    if(gui){
+        progress = new QProgressDialog("Rebuilding TDB ...", "", 0, this->tile.size());
+        progress->setWindowModality(Qt::WindowModal);
+        progress->setCancelButton(NULL);
+        progress->setWindowFlags(Qt::CustomizeWindowHint);
+        progress->show();
+    }
+    int pi = 0;    
+    qDebug() << "SectionIDX Max " << tsection->tsectionMaxIdx;
+    qDebug() << "Read Tiles for TDB Rebuild";
+    foreach (Tile* tTile, this->tile){
+
+        if(progress != NULL){
+            progress->setValue((++pi));
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+        }
+        
+        if (tTile == NULL) 
+            continue;
+
+        
+        for(int bi = 0; bi < tTile->jestObiektow; bi++){            
+            WorldObj *wObj = tTile->obiekty[bi];
+            
+            
+
+            if(wObj == NULL) continue;
+            //if(wObj->isTrackItem()) continue;
+            
+            /// Can't handle Dynatrax automatically
+//            if((wObj->sectionIdx >= tsection->tsectionMaxIdx) && (wObj->type == "trackobj"))
+//            {
+//               qDebug() << "SectionIDX " << wObj->sectionIdx << " greater than MaxIDS " << tsection->tsectionMaxIdx;
+//               continue;                
+//            }
+            
+            
+            
+            if((Game::routeRebuildTDB == true) && (Game::UnsafeMode == true))
+            {                
+                if(wObj->type == "trackobj" || wObj->type == "dyntrack"){
+                    
+                    if( (std::isnan(wObj->position[0])) || (std::isnan(wObj->position[1])) || (std::isnan(wObj->position[2])))
+                    {
+                        qDebug() << "Tile object skipped due to missing position values " << bi << " " << wObj->fileName << " " << wObj->type;
+                        continue;
+                    }
+                    
+                    qDebug() << "Tile object " << bi << " " << wObj->fileName << " " << wObj->type;
+                    try{
+                    addToTDBIfNotExist(wObj);
+                    } 
+                    catch(...)
+                        { qDebug() << "failed to add to TDB"; }
+                   
+                }
+            }
+        }
+            
+    }
+
+}
+
+void Route::confirmUnsafe() {
+    UnsafeModeDialog dialog;
+    int result = dialog.exec(); // Shows the dialog, waits for user interaction
+    qDebug() << "Unsafe Mode Dialog result: " << result;
+    if (result == QDialog::Accepted) {
+        qDebug() << "Unsafe Mode Confirmed" ;
+        } 
+    else
+        {
+            Game::UnsafeMode = false;
+            qDebug() << "Unsafe Mode Disabled" ;
+        }
+}
+

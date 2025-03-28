@@ -15,6 +15,7 @@
 #include <QString>
 #include "FileBuffer.h"
 #include <QVector>
+#include "TextObj.h"
 
 class TrackItemObj;
 class OglObj;
@@ -63,6 +64,10 @@ public:
     bool isNumberDot();
     void setNumberDot(bool val);
     void render(GLUU* gluu, float lod, float posx, float posz, float* playerW, float* target, float fov, int selectionColor, int renderMode);
+    
+
+
+    
 private:
     int speedPostId = -1;
     int speedPostType = -1;
@@ -82,6 +87,9 @@ private:
     int selectionValue = 0;
     bool getSimpleBorder(float* border);
     bool getBoxPoints(QVector<float> &points);
+    
+    TextObj* txt = NULL;
+    TextObj* txt2 = NULL;
 };
 
 #endif	/* SPEEDPOSTOBJ_H */

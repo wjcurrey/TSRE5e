@@ -51,6 +51,9 @@
 #include "ClientInfo.h"
 #include "StatusWindow.h"
 #include "Texture.h"
+#include "ObjTools.h"
+#include "RouteMergeDialog.h"
+#include "TerrainTools.h" // Include the dialog header
 
 
 RouteEditorGLWidget::RouteEditorGLWidget(QWidget *parent)
@@ -105,7 +108,21 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
     if (timeNow % 200 < lastTime % 200) {
         //qDebug() << "new second" << timeNow;
         if (selectedObj != NULL)
-            emit updateProperties(selectedObj);
+        {            
+          emit updateProperties(selectedObj);
+        
+      // Only set if it's a world object
+            if(selectedObj->typeObj == 2)
+            {
+                Game::objSelected = true;            
+                emit updStatus(QString("object"), QString("World"));                
+            }
+              else
+              {
+                Game::objSelected = false;
+                emit updStatus(QString("object"), QString(""));
+              }
+        }        
         Undo::StateEndIfLongTime();
     }
     
@@ -113,11 +130,22 @@ void RouteEditorGLWidget::timerEvent(QTimerEvent * event) {
         //qDebug() << "new second" << timeNow;
         if(Game::serverClient != NULL){
             Game::serverClient->updatePointerPosition((int) camera->pozT[0], (int) camera->pozT[1], aktPointerPos[0], aktPointerPos[1], aktPointerPos[2]);
+        
         }
+        
+        
     }
     if (timeNow % 250 < lastTime % 250) {    
         
         gluu->setMatrixUniforms();
+
+       //// This is a fake signal mechanism using a Game value 
+       if(Game::resetTools == true)
+       {    
+           // qDebug() << " fake signal ";
+            emit enableTool("selectTool");
+            Game::resetTools = false;
+       }
         
         /// try to send camera status every half second or so?
         if (Game::lockCamera) emit updStatus(QString("camera"), QString("Camera Locked")); else emit updStatus(QString("camera"), QString("Camera Unlocked"));
@@ -180,6 +208,8 @@ bool RouteEditorGLWidget::initRoute(){
     engLib = new EngLib();
     Game::currentEngLib = engLib;
     timeSaved = QDateTime::currentMSecsSinceEpoch();
+    
+
     // Init Route
     if(Game::serverClient != NULL){
         if(Game::debugOutput) qDebug() << "RouteClient";
@@ -193,8 +223,13 @@ bool RouteEditorGLWidget::initRoute(){
         if (!route->loaded){ 
             return false;
         }  
+        
+
         qDebug() << "Initializing 3D viewer";
         initRoute2();
+        
+
+        
         return true;
     }  
     return false;
@@ -213,7 +248,9 @@ void RouteEditorGLWidget::initRoute2(){
         playInit();
     }
     emit routeLoaded(route);
-    emit showWindow();
+    emit showWindow();     
+    emit preloadTexturesSignal();
+    
     return;
 }
 
@@ -1001,7 +1038,7 @@ void RouteEditorGLWidget::keyPressEvent(QKeyEvent * event) {
         
         /// EFO Added to 
         case Qt::Key_E:        
-              //    enableTool("selectTool");
+              enableTool("selectTool");
               resizeTool = false;
               translateTool = false;
               rotateTool = false;                          
@@ -1304,10 +1341,12 @@ void RouteEditorGLWidget::mousePressEvent(QMouseEvent *event) {
                         route->addToTDBIfNotExist((WorldObj*) selectedObj);  // if(Game::debugOutput) qDebug() << "REGLW 1284";
             }
             Undo::StateBeginIfNotExist();
+            
+            if(Game::deepUnderground) aktPointerPos[1] = std::max(aktPointerPos[1],Game::deepUnderground);
             lastNewObjPosT[0] = camera->pozT[0];
             lastNewObjPosT[1] = camera->pozT[1];
             lastNewObjPos[0] = aktPointerPos[0];
-            lastNewObjPos[1] = aktPointerPos[1];
+            lastNewObjPos[1] = aktPointerPos[1];  
              lastNewObjPos[2] = aktPointerPos[2];
             float *q = Quat::create();
             Quat::copy(q, this->placeRot);
@@ -1353,10 +1392,10 @@ void RouteEditorGLWidget::mousePressEvent(QMouseEvent *event) {
                         ((WorldObj*) selectedObj)->setMartix();
                     }
                 }
+                if(Game::deepUnderground) aktPointerPos[1] = std::max(aktPointerPos[1],Game::deepUnderground);                
                 lastPointerPos[0] = aktPointerPos[0];
-                lastPointerPos[1] = aktPointerPos[1];
+                lastPointerPos[1] = aktPointerPos[1]; 
                 lastPointerPos[2] = aktPointerPos[2];
-
             }
         }
         if (toolEnabled == "signalLinkTool") {
@@ -1550,6 +1589,7 @@ void RouteEditorGLWidget::mouseMoveEvent(QMouseEvent *event) {
                 if (!translateTool && !rotateTool && !resizeTool) {
                 long long int ntime = QDateTime::currentMSecsSinceEpoch();
                 if (ntime - lastMousePressTime > 200) {
+                        if(Game::deepUnderground) aktPointerPos[1] = std::max(aktPointerPos[1],Game::deepUnderground);
                         Undo::PushGameObjData(selectedObj);
                         if (keyShiftEnabled) {
                             float val = mousex - m_lastPos.x();
@@ -1581,6 +1621,7 @@ void RouteEditorGLWidget::mouseMoveEvent(QMouseEvent *event) {
             if (selectedObj != NULL && mouseLPressed) {
                 long long int ntime = QDateTime::currentMSecsSinceEpoch();
                 if (ntime - lastMousePressTime > 200) {
+                    if(Game::deepUnderground) aktPointerPos[1] = std::max(aktPointerPos[1],Game::deepUnderground);                
                     Undo::PushGameObjData(selectedObj);
                     if (keyShiftEnabled) {
                         float val = mousex - m_lastPos.x();
@@ -1858,13 +1899,6 @@ void RouteEditorGLWidget::showTrkEditr() {
         route->showTrkEditr();
 }
 
-/// EFO hail mary
-void RouteEditorGLWidget::rebuildTDB() {
-    if(Game::debugOutput) qDebug() << "REGLW-TDBRebuild1";
-    if (route != NULL)
-        if(Game::debugOutput) qDebug() << "REGLW-TDBRebuild2";
-        route->rebuildTDB();
-}
 
 
 
@@ -1914,6 +1948,8 @@ void RouteEditorGLWidget::pickObjRotForPlacement(){
 
 void RouteEditorGLWidget::pickObjRotForCamera(){
     double spinval = (M_PI );
+
+    /*
     if (selectedObj != NULL) {
         if(selectedObj->typeObj == GameObj::worldobj){
             int camobjtx = ((WorldObj*)selectedObj)->x;
@@ -1936,6 +1972,68 @@ void RouteEditorGLWidget::pickObjRotForCamera(){
             
          }
     }
+    else
+    {
+     * */        
+            qDebug() << "trying repos cam to nearest object";
+
+        ////if(CamObj == NULL)
+            ////{ 
+            CamObj = NULL;
+            float campos[3];
+            campos[0] = aktPointerPos[0];
+            campos[1] = aktPointerPos[1];
+            campos[2] = aktPointerPos[2];
+            
+            CamObj = route->findNearestObj((int)camera->pozT[0] , (int) camera->pozT[1],campos );
+            //qDebug() << "CamObj:        " << CamObj->fileName;
+            //qDebug() << "aktPointerPos: " << camera->pozT[0] << " " << camera->pozT[1] << " " <<  aktPointerPos[0] << " " <<  aktPointerPos[1] << " " <<  -aktPointerPos[2];
+            ////}
+            if(CamObj == NULL)
+            {   qDebug() << "camObj still null";
+                return;
+            }
+            int camobjtx = CamObj->x;
+            int camobjty = CamObj->y;
+            
+            double camobjx = CamObj->position[0];
+            double camobjy = CamObj->position[1]+10;
+            double camobjz = CamObj->position[2];            
+            double currcam = camera->getRotX();
+                                    
+            camera->setPozT(camobjtx,camobjty);
+            camera->setPos(camobjx,camobjy,camobjz);
+            
+            double camrotw = CamObj->qDirection[1];
+            double camrotz = CamObj->qDirection[3];
+            double camrot = (2.0 * std::atan2(camrotw, camrotz));           
+            
+            while (camrot > 2.0 * M_PI)
+                camrot -= 2.0 * M_PI;
+            while (camrot < 0)
+                camrot += 2.0 * M_PI;
+            
+            while (currcam > 2.0 * M_PI)
+                currcam -= 2.0 * M_PI;
+            while (currcam < 0)
+                currcam += 2.0 * M_PI;
+            
+            
+            if((currcam - camrot) > (M_PI/2)) camrot = camrot - M_PI;
+            if((currcam - camrot) < (-M_PI/2)) camrot = camrot + M_PI;
+            
+            while (camrot > 2.0 * M_PI)
+                camrot -= 2.0 * M_PI;
+            while (camrot < 0)
+                camrot += 2.0 * M_PI;
+            
+            qDebug() << "starting = " << currcam << " camrot = " << camrot;
+            
+            camera->setPlayerRot(camrot,NULL);
+            CamObj = NULL;
+            return;
+  //      }
+//    }
 }
 
 void RouteEditorGLWidget::pickObjRotForCameraFlip(){
@@ -2438,9 +2536,9 @@ void RouteEditorGLWidget::showContextMenu(const QPoint & point) {
 
     // EFO new Camera menu
     menu.addSection("Camera");
-    if(selectedObj != NULL){
+    //if(selectedObj != NULL){
         menu.addAction(defaultMenuActions["pickObjRotCam"]);    
-    }
+    //}
     menu.addAction(defaultMenuActions["pickObjRotCamFlip"]);
     
     menuCamera.setTitle("Reset Camera");

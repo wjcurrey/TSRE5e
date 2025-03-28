@@ -25,6 +25,7 @@
 
 TrackItemObj* TRitem::pointer3d = NULL;
 
+
 TRitem* TRitem::newPlatformItem(int trItemId, float metry) {
     TRitem* trit = new TRitem(trItemId);
     if (!trit->init("platformitem")) return NULL;
@@ -92,7 +93,7 @@ TRitem* TRitem::newSoundRegionItem(int trItemId, float metry) {
 
 TRitem* TRitem::newHazardItem(int trItemId, float metry) {
     TRitem* trit = new TRitem(trItemId);
-    if (!trit->init("hazzarditem")) return NULL;
+    if (!trit->init("hazarditem")) return NULL;   /// was hazzard
     trit->trItemSData1 = metry;
     trit->trItemSData2 = 6;
     return trit;
@@ -332,6 +333,7 @@ bool TRitem::init(QString sh) {
     if (sh == "sidingitem") return true;
     if (sh == "carspawneritem") return true;
     if (sh == "emptyitem") return true;
+    if (sh == "hazarditem") return true;    
     if (sh == "hazzarditem") return true;
     if (sh == "pickupitem") return true;
     return false;
@@ -872,31 +874,49 @@ void TRitem::render(TDB *tdb, GLUU *gluu, float* playerT, float playerRot, int s
         return;
     }
 
-    gluu->mvPushMatrix();
-    //if(pos == NULL) return;
-    Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, drawPosition[0] + 2048 * (drawPosition[5] - playerT[0]), drawPosition[1] + 2 + offy, -drawPosition[2] + 2048 * (-drawPosition[6] - playerT[1]));
-    Mat4::rotateY(gluu->mvMatrix, gluu->mvMatrix, drawPosition[3]);
-    //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 2048*(this->trItemRData[3] - playerT[0] ), this->trItemRData[1]+2, -this->trItemRData[2] + 2048*(-this->trItemRData[4] - playerT[1]));
-    //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 0, this->trItemRData[1]+0, -this->trItemRData[2] + 0);
-    gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
-    if (pointer3d == NULL) {
-        pointer3d = new TrackItemObj(1);
-    }
     
-    if (tdb->isRoad())
-        if(!selected)
-            pointer3d->setMaterial(0.5, 0.5, 0.5);
+        gluu->mvPushMatrix();
+        //if(pos == NULL) return;
+        Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, drawPosition[0] + 2048 * (drawPosition[5] - playerT[0]), drawPosition[1] + 2 + offy, -drawPosition[2] + 2048 * (-drawPosition[6] - playerT[1]));
+        Mat4::rotateY(gluu->mvMatrix, gluu->mvMatrix, drawPosition[3]);
+        //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 2048*(this->trItemRData[3] - playerT[0] ), this->trItemRData[1]+2, -this->trItemRData[2] + 2048*(-this->trItemRData[4] - playerT[1]));
+        //Mat4::translate(gluu->mvMatrix, gluu->mvMatrix, this->trItemRData[0] + 0, this->trItemRData[1]+0, -this->trItemRData[2] + 0);
+        gluu->currentShader->setUniformValue(gluu->currentShader->mvMatrixUniform, *reinterpret_cast<float(*)[4][4]> (gluu->mvMatrix));
+        if (pointer3d == NULL) {
+            pointer3d = new TrackItemObj(6);
+        }
+
+        if (tdb->isRoad())
+            if(!selected)
+                pointer3d->setMaterial(0.5, 0.5, 0.5);
+            else
+                pointer3d->setMaterial(0.7, 0.7, 0.7);
         else
-            pointer3d->setMaterial(0.7, 0.7, 0.7);
-    else
-        if(!selected)
-            pointer3d->setMaterial(0.0, 0.0, 0.0);
-        else
-            pointer3d->setMaterial(0.2, 0.2, 0.2);
-    if(selectionColor != 0)
-        selectionColor |= trItemId;
-    pointer3d->render(selectionColor);
-    gluu->mvPopMatrix();
+            if(!selected)
+                pointer3d->setMaterial(0.0, 0.0, 0.0);
+            else
+                pointer3d->setMaterial(0.2, 0.2, 0.2);
+        if(selectionColor != 0)
+            selectionColor |= trItemId;
+
+        pointer3d->render(selectionColor);
+
+    /// EFO Add show the TRitem ID above the TRitem    
+        trRef = "TR:" + QString::number(this->trItemId);
+
+        TextObj* txt;  /// EFO
+        TextObj* txt2;  /// EFO
+        txt = new TextObj(trRef, 4);    
+        txt2 = new TextObj(trRef, 4);    
+        txt->setHeight(2);
+        txt2->setHeight(2);
+    //    txt->setColor(200,55,200);
+        txt->render();
+        txt2->render(M_PI);
+        
+        gluu->mvPopMatrix();
+        trRef.clear();
+     
 }
 
 void TRitem::save(QTextStream* out) {
@@ -944,8 +964,11 @@ void TRitem::save(QTextStream* out, bool tit) {
         *(out) << woff + "	CarSpawnerItem (\n";
     if (type == "emptyitem")
         *(out) << woff + "	EmptyItem (\n";
+    if (type == "hazarditem")
+        *(out) << woff + "	HazardItem (\n";
+    //// EFO  Fixing a 20 year old typo.... 
     if (type == "hazzarditem")
-        *(out) << woff + "	HazzardItem (\n";
+        *(out) << woff + "	HazardItem (\n";
     if (type == "pickupitem")
         *(out) << woff + "	PickupItem (\n";
 

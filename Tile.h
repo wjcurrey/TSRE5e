@@ -79,6 +79,7 @@ public:
     //void renderWS(float *  playerT, float* playerW, float* target, float fov, int renderMode);
     void save();
     void saveToStream(QTextStream &out);
+    WorldObj* CheckObj;
     
 private:
     int maxUiD = 0;
@@ -87,6 +88,8 @@ private:
     QString* viewDbSphereRaw = NULL;
     void wczytajObiekty();
     void saveWS();
+    Route* route = NULL;
+
 };
 
 #endif	/* TILE_H */

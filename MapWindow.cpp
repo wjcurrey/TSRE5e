@@ -43,6 +43,7 @@ MapWindow::MapWindow() : QDialog() {
     // EFO hide if no provider
     if(provider.length() > 1)
     {
+
     mapServicesCombo.addItem(provider + " Images Z17", 1);
     mapServices.push_back(new MapDataUrlImage(17));
     mapServicesCombo.addItem(provider + " Images Z18", 2);
