@@ -3,7 +3,7 @@ TEMPLATE = app
 PKGCONFIG +=
 QT += core gui widgets network opengl websockets
 
-TARGET = TSRE5f
+TARGET = TSRE5-G
 
 
 SOURCES += \
